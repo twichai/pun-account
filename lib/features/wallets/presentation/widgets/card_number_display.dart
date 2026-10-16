@@ -67,16 +67,6 @@ class CardNumberDisplay extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            Text(
-              '•••• $last4',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 6),

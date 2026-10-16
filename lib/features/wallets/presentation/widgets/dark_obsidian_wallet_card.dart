@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 
 import '../../domain/models/wallet.dart';
 import 'aurora_mesh_background.dart';
@@ -45,7 +44,7 @@ class DarkObsidianWalletCard extends StatelessWidget {
           // The Card itself with Aurora Mesh Background
           AuroraMeshBackground(
             wallet: wallet,
-            height: 205,
+            height: 235,
             borderRadius: 24,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
@@ -77,66 +76,7 @@ class DarkObsidianWalletCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Optional Quick Control Action Bar (Frosted buttons below card)
-          if (showActions) ...[
-            const SizedBox(height: 10),
-            _buildActionBar(context),
-          ],
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionBar(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildActionPill(
-          icon: shadcn.LucideIcons.creditCard,
-          label: 'Card Details',
-          onTap: onShowDetails,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionPill({
-    required IconData icon,
-    required String label,
-    required VoidCallback? onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.12),
-              width: 1,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: Colors.white70),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

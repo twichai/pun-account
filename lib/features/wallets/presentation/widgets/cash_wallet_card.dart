@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart' as shadcn;
 
 import '../../domain/models/wallet.dart';
 import 'aurora_mesh_background.dart';
@@ -28,7 +27,7 @@ class CashWalletCard extends StatelessWidget {
         children: [
           AuroraMeshBackground(
             wallet: wallet.copyWith(auroraAccent: 'emerald'),
-            height: 205,
+            height: 225,
             borderRadius: 24,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
@@ -197,56 +196,6 @@ class CashWalletCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // Actions
-          if (showActions) ...[
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onShowDetails,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.12),
-                          width: 1,
-                        ),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            shadcn.LucideIcons.info,
-                            size: 14,
-                            color: Colors.white70,
-                          ),
-                          SizedBox(width: 6),
-                          Text(
-                            'Wallet Details',
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
