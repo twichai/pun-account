@@ -18,5 +18,17 @@ abstract class Wallet with _$Wallet {
     String? businessId,
   }) = _Wallet;
 
-  factory Wallet.fromJson(Map<String, dynamic> json) => _$WalletFromJson(json);
+  factory Wallet.fromJson(Map<String, dynamic> json) {
+    final Map<String, dynamic> normalized = Map<String, dynamic>.from(json);
+    if (json['ui'] is Map<String, dynamic>) {
+      final ui = json['ui'] as Map<String, dynamic>;
+      normalized['auroraAccent'] ??= ui['aurora_accent'] ?? ui['auroraAccent'];
+      normalized['cardHolder'] ??= ui['card_holder'] ?? ui['cardHolder'];
+      normalized['last4'] ??= ui['last4'];
+      normalized['cardBrand'] ??= ui['card_brand'] ?? ui['cardBrand'];
+    }
+    normalized['businessId'] ??= json['business_id'];
+    normalized['isActive'] ??= json['is_active'];
+    return _$WalletFromJson(normalized);
+  }
 }

@@ -1,6 +1,9 @@
 package models
 
 import (
+	"database/sql/driver"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -47,6 +50,45 @@ const (
 	WalletTypeOther      = "other"
 )
 
+// WalletUI represents UI presentation and card styling attributes.
+// Designed to store frontend visual configurations (such as Aurora Mesh gradients,
+// card numbers, cardholder names, and brand badges from Flutter's Wallet model).
+type WalletUI struct {
+	AuroraAccent string  `json:"aurora_accent,omitempty"` // e.g. "emerald", "cyan", "violet", "slate", "amber", "rose"
+	CardHolder   *string `json:"card_holder,omitempty"`   // e.g. "PAVLO D."
+	Last4        *string `json:"last4,omitempty"`         // e.g. "7642"
+	CardBrand    *string `json:"card_brand,omitempty"`    // e.g. "visa", "mastercard"
+	ColorHex     *string `json:"color_hex,omitempty"`     // custom accent hex color
+	Icon         *string `json:"icon,omitempty"`          // icon name or identifier
+}
+
+// Value implements driver.Valuer for database/sql and GORM JSON serialization.
+func (u WalletUI) Value() (driver.Value, error) {
+	return json.Marshal(u)
+}
+
+// Scan implements sql.Scanner for database/sql and GORM JSON deserialization.
+func (u *WalletUI) Scan(value any) error {
+	if value == nil {
+		*u = WalletUI{}
+		return nil
+	}
+	var bytes []byte
+	switch v := value.(type) {
+	case []byte:
+		bytes = v
+	case string:
+		bytes = []byte(v)
+	default:
+		return fmt.Errorf("failed to scan WalletUI: incompatible type %T", value)
+	}
+	if len(bytes) == 0 {
+		*u = WalletUI{}
+		return nil
+	}
+	return json.Unmarshal(bytes, u)
+}
+
 // Wallet represents a store of money (Cash, KBank, Credit Card, etc.).
 // Note: Balance is a cached field; transactions are the true source of truth.
 type Wallet struct {
@@ -54,7 +96,9 @@ type Wallet struct {
 	BusinessID uuid.UUID      `gorm:"type:uuid;not null;index" json:"business_id"`
 	Name       string         `gorm:"type:varchar(255);not null" json:"name"`
 	Type       string         `gorm:"type:varchar(50);not null" json:"type"`
+	Currency   string         `gorm:"type:varchar(10);default:'THB';not null" json:"currency"`
 	Balance    float64        `gorm:"type:numeric(15,2);default:0.00;not null" json:"balance"`
+	UI         WalletUI       `gorm:"type:jsonb;serializer:json;default:'{}';not null" json:"ui"`
 	IsActive   bool           `gorm:"default:true;not null" json:"is_active"`
 	CreatedAt  time.Time      `gorm:"autoCreateTime" json:"created_at"`
 	UpdatedAt  time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
