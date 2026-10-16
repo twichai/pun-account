@@ -29,7 +29,20 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   // Default to Tab 1 (Home)
+  late final PageController _pageController;
   Key? _selected = const ValueKey(1);
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 1);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   void _onOpenSendModal() {
     SendRequestModal.show(context, mode: TransferMode.send);
@@ -39,45 +52,23 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     QuickAddModal.show(context);
   }
 
-  Widget _buildContent() {
-    final selectedInt = _selected is ValueKey<int>
-        ? (_selected as ValueKey<int>).value
-        : 1;
-
-    switch (selectedInt) {
-      case 0:
-        return const ServicesScreen();
-      case 1:
-        return OverviewScreen(
-          onNavigateToWallets: () {
-            setState(() {
-              _selected = const ValueKey(2);
-            });
-          },
-          onNavigateToServices: () {
-            setState(() {
-              _selected = const ValueKey(0);
-            });
-          },
-          onAddTransaction: _onOpenAddTransaction,
-        );
-      case 2:
-        return WalletsScreen(onAddTransaction: _onOpenAddTransaction);
-      default:
-        return OverviewScreen(
-          onNavigateToWallets: () {
-            setState(() {
-              _selected = const ValueKey(2);
-            });
-          },
-          onNavigateToServices: () {
-            setState(() {
-              _selected = const ValueKey(0);
-            });
-          },
-          onAddTransaction: _onOpenAddTransaction,
-        );
+  void _goToPage(int index) {
+    setState(() {
+      _selected = ValueKey(index);
+    });
+    if (_pageController.hasClients) {
+      _pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOutCubic,
+      );
     }
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      _selected = ValueKey(index);
+    });
   }
 
   @override
@@ -132,8 +123,26 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       ],
       child: Stack(
         children: [
-          // Screen Content
-          Positioned.fill(child: _buildContent()),
+          // Screen Content with Swipeable PageView
+          Positioned.fill(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              children: [
+                const ServicesScreen(key: PageStorageKey('services_screen')),
+                OverviewScreen(
+                  key: const PageStorageKey('overview_screen'),
+                  onNavigateToWallets: () => _goToPage(2),
+                  onNavigateToServices: () => _goToPage(0),
+                  onAddTransaction: _onOpenAddTransaction,
+                ),
+                WalletsScreen(
+                  key: const PageStorageKey('wallets_screen'),
+                  onAddTransaction: _onOpenAddTransaction,
+                ),
+              ],
+            ),
+          ),
 
           // Floating Bottom Navigation Bar
           Positioned(
@@ -143,9 +152,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             child: PunNavigationBar(
               selectedKey: _selected,
               onSelected: (key) {
-                setState(() {
-                  _selected = key;
-                });
+                if (key is ValueKey<int>) {
+                  _goToPage(key.value);
+                }
               },
               onAddPressed: _onOpenSendModal,
             ),
