@@ -1,4 +1,5 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+
 import '../../transactions/presentation/send_request_modal.dart';
 
 class TransactionItem {
@@ -183,7 +184,8 @@ class OverviewScreen extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFFA1A1AA).withValues(alpha: 0.8),
+                                color: const Color(0xFFA1A1AA)
+                                    .withValues(alpha: 0.8),
                               ),
                             ),
                           ],
@@ -213,11 +215,15 @@ class OverviewScreen extends StatelessWidget {
                                     right: Radius.circular(4),
                                   ),
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF38BDF8), Color(0xFF0284C7)],
+                                    colors: [
+                                      Color(0xFF38BDF8),
+                                      Color(0xFF0284C7),
+                                    ],
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: const Color(0xFF0284C7).withValues(alpha: 0.3),
+                                      color: const Color(0xFF0284C7)
+                                          .withValues(alpha: 0.3),
                                       blurRadius: 8,
                                     ),
                                   ],
@@ -237,7 +243,10 @@ class OverviewScreen extends StatelessWidget {
                                     right: Radius.circular(4),
                                   ),
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFF2DD4BF), Color(0xFF0D9488)],
+                                    colors: [
+                                      Color(0xFF2DD4BF),
+                                      Color(0xFF0D9488),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -255,7 +264,10 @@ class OverviewScreen extends StatelessWidget {
                                     right: Radius.circular(4),
                                   ),
                                   gradient: const LinearGradient(
-                                    colors: [Color(0xFFFFE033), Color(0xFFF59E0B)],
+                                    colors: [
+                                      Color(0xFFFFE033),
+                                      Color(0xFFF59E0B),
+                                    ],
                                   ),
                                 ),
                               ),
@@ -275,12 +287,19 @@ class OverviewScreen extends StatelessWidget {
                     GestureDetector(
                       onTap: () => _onOpenSendModal(context, TransferMode.send),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                          color: isDark
+                              ? const Color(0xFF27272A)
+                              : const Color(0xFFF4F4F5),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                            color: isDark
+                                ? const Color(0xFF3F3F46)
+                                : const Color(0xFFE4E4E7),
                           ),
                         ),
                         child: Row(
@@ -290,19 +309,26 @@ class OverviewScreen extends StatelessWidget {
                               height: 20,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: isDark ? Colors.white : const Color(0xFF09090B),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF09090B),
                               ),
                               alignment: Alignment.center,
                               child: Icon(
                                 LucideIcons.arrowLeft,
                                 size: 12,
-                                color: isDark ? const Color(0xFF09090B) : Colors.white,
+                                color: isDark
+                                    ? const Color(0xFF09090B)
+                                    : Colors.white,
                               ),
                             ),
                             const SizedBox(width: 8),
                             const Text(
                               'Send',
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
                             ),
                           ],
                         ),
@@ -312,19 +338,30 @@ class OverviewScreen extends StatelessWidget {
 
                     // Request Button
                     GestureDetector(
-                      onTap: () => _onOpenSendModal(context, TransferMode.request),
+                      onTap: () =>
+                          _onOpenSendModal(context, TransferMode.request),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 10,
+                        ),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                          color: isDark
+                              ? const Color(0xFF27272A)
+                              : const Color(0xFFF4F4F5),
                           borderRadius: BorderRadius.circular(24),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                            color: isDark
+                                ? const Color(0xFF3F3F46)
+                                : const Color(0xFFE4E4E7),
                           ),
                         ),
                         child: const Text(
                           'Request',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     ),
@@ -336,12 +373,19 @@ class OverviewScreen extends StatelessWidget {
                 GestureDetector(
                   onTap: onNavigateToServices,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 18,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF18181B) : const Color(0xFFFAFAFA),
+                      color: isDark
+                          ? const Color(0xFF18181B)
+                          : const Color(0xFFFAFAFA),
                       borderRadius: BorderRadius.circular(24),
                       border: Border.all(
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                        color: isDark
+                            ? const Color(0xFF27272A)
+                            : const Color(0xFFE4E4E7),
                       ),
                     ),
                     child: Row(
@@ -384,17 +428,24 @@ class OverviewScreen extends StatelessWidget {
                                   width: 32,
                                   height: 32,
                                   decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                                    color: isDark
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFE4E4E7),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                                      color: isDark
+                                          ? const Color(0xFF18181B)
+                                          : Colors.white,
                                       width: 2,
                                     ),
                                   ),
                                   alignment: Alignment.center,
                                   child: const Text(
                                     '+2',
-                                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -453,7 +504,9 @@ class OverviewScreen extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF18181B) : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.15),
@@ -472,7 +525,9 @@ class OverviewScreen extends StatelessWidget {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                      color: isDark
+                          ? const Color(0xFF3F3F46)
+                          : const Color(0xFFE4E4E7),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -488,7 +543,9 @@ class OverviewScreen extends StatelessWidget {
                       icon: Icon(
                         LucideIcons.slidersHorizontal,
                         size: 18,
-                        color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                        color: isDark
+                            ? const Color(0xFFA1A1AA)
+                            : const Color(0xFF71717A),
                       ),
                       onPressed: () {},
                     ),
@@ -504,7 +561,9 @@ class OverviewScreen extends StatelessWidget {
                       icon: Icon(
                         LucideIcons.search,
                         size: 18,
-                        color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                        color: isDark
+                            ? const Color(0xFFA1A1AA)
+                            : const Color(0xFF71717A),
                       ),
                       onPressed: () {},
                     ),
@@ -517,7 +576,8 @@ class OverviewScreen extends StatelessWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _transactions.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 14),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 14),
                   itemBuilder: (context, index) {
                     final item = _transactions[index];
                     return _buildTransactionRow(item, isDark);
@@ -566,7 +626,9 @@ class OverviewScreen extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                  color: isDark
+                      ? const Color(0xFF27272A)
+                      : const Color(0xFFF4F4F5),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,

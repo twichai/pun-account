@@ -45,7 +45,11 @@ class PunNavigationBar extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 24),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF18181B) : const Color(0xFF18181B), // Sleek dark pill capsule in both themes
+          color: isDark
+              ? const Color(0xFF18181B)
+              : const Color(
+                  0xFF18181B,
+                ), // Sleek dark pill capsule in both themes
           borderRadius: BorderRadius.circular(32),
           border: Border.all(
             color: isDark ? const Color(0xFF27272A) : const Color(0xFF3F3F46),

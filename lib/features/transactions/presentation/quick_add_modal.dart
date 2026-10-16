@@ -143,7 +143,9 @@ class _QuickAddModalState extends State<QuickAddModal> {
               const SizedBox(height: 6),
               TextField(
                 controller: _amountController,
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 placeholder: const Text('฿ 0.00'),
               ),
               const SizedBox(height: 16),
@@ -165,10 +167,7 @@ class _QuickAddModalState extends State<QuickAddModal> {
                   items: SelectItemList(
                     children: [
                       for (final wallet in _wallets)
-                        SelectItemButton(
-                          value: wallet,
-                          child: Text(wallet),
-                        ),
+                        SelectItemButton(value: wallet, child: Text(wallet)),
                     ],
                   ),
                 ).call,
@@ -193,10 +192,7 @@ class _QuickAddModalState extends State<QuickAddModal> {
                     items: SelectItemList(
                       children: [
                         for (final cat in categories)
-                          SelectItemButton(
-                            value: cat,
-                            child: Text(cat),
-                          ),
+                          SelectItemButton(value: cat, child: Text(cat)),
                       ],
                     ),
                   ).call,

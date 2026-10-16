@@ -3,22 +3,20 @@ import 'package:pun_account/features/navigation/presentation/widgets/pun_navigat
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 void main() {
-  testWidgets('PunNavigationBar renders 3 items and responds to selection', (tester) async {
+  testWidgets('PunNavigationBar renders 3 items and responds to selection', (
+    tester,
+  ) async {
     Key? selected = const ValueKey(1);
 
     await tester.pumpWidget(
       ShadcnApp(
-        theme: ThemeData(
-          colorScheme: ColorSchemes.lightSlate.yellow,
-        ),
+        theme: ThemeData(colorScheme: ColorSchemes.lightSlate.yellow),
         home: StatefulBuilder(
           builder: (context, setState) {
             return Scaffold(
               child: Stack(
                 children: [
-                  Center(
-                    child: Text('Selected: $selected'),
-                  ),
+                  Center(child: Text('Selected: $selected')),
                   Positioned(
                     bottom: 0,
                     left: 0,

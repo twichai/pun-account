@@ -26,10 +26,7 @@ class DigitalCardData {
 
 /// Cards screen redesign matching Screenshot 1 using shadcn_flutter aesthetics.
 class WalletsScreen extends StatefulWidget {
-  const WalletsScreen({
-    super.key,
-    this.onAddTransaction,
-  });
+  const WalletsScreen({super.key, this.onAddTransaction});
 
   final VoidCallback? onAddTransaction;
 
@@ -161,7 +158,10 @@ class _WalletsScreenState extends State<WalletsScreen> {
                       cardHolder: 'PAVLO D.',
                       expiry: '10/30',
                       cvv: '912',
-                      gradientColors: [const Color(0xFFA855F7), const Color(0xFF7C3AED)],
+                      gradientColors: [
+                        const Color(0xFFA855F7),
+                        const Color(0xFF7C3AED),
+                      ],
                       textColor: Colors.white,
                     ),
                   );
@@ -188,7 +188,10 @@ class _WalletsScreenState extends State<WalletsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text('Cards', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
+              const Text(
+                'Cards',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
               PrimaryButton(
                 density: ButtonDensity.compact,
                 onPressed: _showOrderCardModal,
@@ -252,7 +255,10 @@ class _WalletsScreenState extends State<WalletsScreen> {
 
               // Card Content
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 20,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -289,7 +295,9 @@ class _WalletsScreenState extends State<WalletsScreen> {
                         Row(
                           children: [
                             _buildFrostedButton(
-                              icon: card.isFrozen ? LucideIcons.lock : LucideIcons.snowflake,
+                              icon: card.isFrozen
+                                  ? LucideIcons.lock
+                                  : LucideIcons.snowflake,
                               isActive: card.isFrozen,
                               textColor: card.textColor,
                               onTap: () {
@@ -329,7 +337,9 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                       height: 24,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: card.textColor.withValues(alpha: 0.25),
+                                        color: card.textColor.withValues(
+                                          alpha: 0.25,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -340,7 +350,9 @@ class _WalletsScreenState extends State<WalletsScreen> {
                                       height: 24,
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
-                                        color: card.textColor.withValues(alpha: 0.35),
+                                        color: card.textColor.withValues(
+                                          alpha: 0.35,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -393,11 +405,7 @@ class _WalletsScreenState extends State<WalletsScreen> {
           ),
         ),
         alignment: Alignment.center,
-        child: Icon(
-          icon,
-          size: 16,
-          color: isActive ? Colors.white : textColor,
-        ),
+        child: Icon(icon, size: 16, color: isActive ? Colors.white : textColor),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+
 import '../../transactions/presentation/send_request_modal.dart';
 
 class ServiceCategoryItem {
@@ -26,10 +27,7 @@ class ServiceCategoryItem {
 /// Services and Categories screen matching Screenshot 4 with category/service icons
 /// instead of human portraits as requested by user.
 class ServicesScreen extends StatefulWidget {
-  const ServicesScreen({
-    super.key,
-    this.onAddCategory,
-  });
+  const ServicesScreen({super.key, this.onAddCategory});
 
   final VoidCallback? onAddCategory;
 
@@ -227,7 +225,10 @@ class _ServicesScreenState extends State<ServicesScreen> {
                       onPressed: _showAddServiceModal,
                       child: const Text(
                         'Add',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -259,7 +260,9 @@ class _ServicesScreenState extends State<ServicesScreen> {
           Container(
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF18181B) : Colors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(32),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.15),
@@ -278,7 +281,9 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     width: 36,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF3F3F46) : const Color(0xFFE4E4E7),
+                      color: isDark
+                          ? const Color(0xFF3F3F46)
+                          : const Color(0xFFE4E4E7),
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -301,7 +306,9 @@ class _ServicesScreenState extends State<ServicesScreen> {
                       icon: Icon(
                         LucideIcons.search,
                         size: 18,
-                        color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                        color: isDark
+                            ? const Color(0xFFA1A1AA)
+                            : const Color(0xFF71717A),
                       ),
                       onPressed: () {},
                     ),
@@ -314,7 +321,8 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _allAccounts.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: 12),
                   itemBuilder: (context, index) {
                     final item = _allAccounts[index];
                     return _buildAccountTile(item, isDark);
@@ -361,11 +369,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
-                    service.icon,
-                    size: 28,
-                    color: Colors.white,
-                  ),
+                  child: Icon(service.icon, size: 28, color: Colors.white),
                 ),
                 Positioned(
                   right: -2,
@@ -388,20 +392,14 @@ class _ServicesScreenState extends State<ServicesScreen> {
             const SizedBox(height: 8),
             Text(
               service.name,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
             Text(
               service.handle,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFFA1A1AA),
-              ),
+              style: const TextStyle(fontSize: 12, color: Color(0xFFA1A1AA)),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -443,10 +441,14 @@ class _ServicesScreenState extends State<ServicesScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF27272A).withValues(alpha: 0.5) : const Color(0xFFFAFAFA),
+          color: isDark
+              ? const Color(0xFF27272A).withValues(alpha: 0.5)
+              : const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDark ? const Color(0xFF3F3F46).withValues(alpha: 0.4) : const Color(0xFFF4F4F5),
+            color: isDark
+                ? const Color(0xFF3F3F46).withValues(alpha: 0.4)
+                : const Color(0xFFF4F4F5),
           ),
         ),
         child: Row(
@@ -503,9 +505,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 ),
                 if (item.badge != null) ...[
                   const SizedBox(height: 2),
-                  SecondaryBadge(
-                    child: Text(item.badge!),
-                  ),
+                  SecondaryBadge(child: Text(item.badge!)),
                 ],
               ],
             ),

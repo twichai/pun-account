@@ -2,10 +2,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 /// ธุรกิจ (Business Profile & Settings screen) for solopreneurs.
 class BusinessScreen extends StatelessWidget {
-  const BusinessScreen({
-    super.key,
-    this.onToggleTheme,
-  });
+  const BusinessScreen({super.key, this.onToggleTheme});
 
   final VoidCallback? onToggleTheme;
 
@@ -33,7 +30,10 @@ class BusinessScreen extends StatelessWidget {
               OutlineButton(
                 density: ButtonDensity.icon,
                 onPressed: onToggleTheme,
-                child: Icon(isDark ? LucideIcons.sun : LucideIcons.moon, size: 18),
+                child: Icon(
+                  isDark ? LucideIcons.sun : LucideIcons.moon,
+                  size: 18,
+                ),
               ),
             ],
           ),
@@ -64,13 +64,13 @@ class BusinessScreen extends StatelessWidget {
                           children: [
                             const Text('ปั้น สตูดิโอ').h4(),
                             const SizedBox(width: 8),
-                            const PrimaryBadge(
-                              child: Text('Solopreneur'),
-                            ),
+                            const PrimaryBadge(child: Text('Solopreneur')),
                           ],
                         ),
                         const SizedBox(height: 4),
-                        const Text('ผู้ประกอบการเดี่ยว • ให้คำปรึกษา & พัฒนาซอฟต์แวร์').muted().small(),
+                        const Text(
+                          'ผู้ประกอบการเดี่ยว • ให้คำปรึกษา & พัฒนาซอฟต์แวร์',
+                        ).muted().small(),
                       ],
                     ),
                   ),
@@ -96,19 +96,17 @@ class BusinessScreen extends StatelessWidget {
                         children: [
                           const Text('เกณฑ์ภาษีมูลค่าเพิ่ม (VAT)').semiBold(),
                           const SizedBox(height: 2),
-                          const Text('รายรับสะสมปีนี้ ฿ 645,000 / ฿ 1,800,000').muted().small(),
+                          const Text('รายรับสะสมปีนี้ ฿ 645,000 / ฿ 1,800,000')
+                              .muted()
+                              .small(),
                         ],
                       ),
-                      const SecondaryBadge(
-                        child: Text('ไม่ต้องจด VAT'),
-                      ),
+                      const SecondaryBadge(child: Text('ไม่ต้องจด VAT')),
                     ],
                   ),
                   const SizedBox(height: 14),
                   // Shadcn Progress bar
-                  const Progress(
-                    progress: 645000 / 1800000,
-                  ),
+                  const Progress(progress: 645000 / 1800000),
                   const SizedBox(height: 14),
                   const Divider(),
                   const SizedBox(height: 10),

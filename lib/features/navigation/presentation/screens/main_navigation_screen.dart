@@ -1,4 +1,5 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+
 import '../../../../features/categories/presentation/services_screen.dart';
 import '../../../../features/dashboard/presentation/overview_screen.dart';
 import '../../../../features/transactions/presentation/quick_add_modal.dart';
@@ -61,9 +62,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           onAddTransaction: _onOpenAddTransaction,
         );
       case 2:
-        return WalletsScreen(
-          onAddTransaction: _onOpenAddTransaction,
-        );
+        return WalletsScreen(onAddTransaction: _onOpenAddTransaction);
       default:
         return OverviewScreen(
           onNavigateToWallets: () {
@@ -101,7 +100,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                     const SizedBox(width: 8),
                     Text(
                       widget.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
                     ),
                   ],
                 ),
@@ -131,9 +133,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       child: Stack(
         children: [
           // Screen Content
-          Positioned.fill(
-            child: _buildContent(),
-          ),
+          Positioned.fill(child: _buildContent()),
 
           // Floating Bottom Navigation Bar
           Positioned(

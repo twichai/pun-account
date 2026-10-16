@@ -27,10 +27,8 @@ class SendRequestModal extends StatefulWidget {
         position: OverlayPosition.bottom,
         showDragHandle: true,
       ),
-      builder: (context) => SendRequestModal(
-        initialMode: mode,
-        recipientName: recipientName,
-      ),
+      builder: (context) =>
+          SendRequestModal(initialMode: mode, recipientName: recipientName),
     ).future;
   }
 
@@ -66,7 +64,10 @@ class _SendRequestModalState extends State<SendRequestModal> {
           _amountStr = '$_amountStr.';
         }
       } else {
-        if (_amountStr == '0' || _amountStr == '1' && widget.initialAmount == '1' && _amountStr.length == 1) {
+        if (_amountStr == '0' ||
+            _amountStr == '1' &&
+                widget.initialAmount == '1' &&
+                _amountStr.length == 1) {
           _amountStr = key;
         } else {
           // Limit to 2 decimals if decimal exists
@@ -128,7 +129,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
     }
     _firstOperand = null;
     _operator = null;
-    _amountStr = result % 1 == 0 ? result.toInt().toString() : result.toStringAsFixed(2);
+    _amountStr = result % 1 == 0
+        ? result.toInt().toString()
+        : result.toStringAsFixed(2);
   }
 
   @override
@@ -149,7 +152,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                    color: isDark
+                        ? const Color(0xFF27272A)
+                        : const Color(0xFFF4F4F5),
                     borderRadius: BorderRadius.circular(24),
                   ),
                   child: Row(
@@ -169,7 +174,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
                     item,
                     style: TextStyle(
                       fontSize: 13,
-                      color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                      color: isDark
+                          ? const Color(0xFFA1A1AA)
+                          : const Color(0xFF71717A),
                     ),
                   ),
                   onChanged: (val) {
@@ -181,10 +188,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
                     items: SelectItemList(
                       children: [
                         for (final acc in _accounts)
-                          SelectItemButton(
-                            value: acc,
-                            child: Text(acc),
-                          ),
+                          SelectItemButton(value: acc, child: Text(acc)),
                       ],
                     ),
                   ).call,
@@ -192,9 +196,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
 
                 if (widget.recipientName != null) ...[
                   const SizedBox(height: 6),
-                  SecondaryBadge(
-                    child: Text('To: ${widget.recipientName}'),
-                  ),
+                  SecondaryBadge(child: Text('To: ${widget.recipientName}')),
                 ],
 
                 const SizedBox(height: 16),
@@ -210,7 +212,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
                       style: TextStyle(
                         fontSize: 38,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? const Color(0xFF71717A) : const Color(0xFFA1A1AA),
+                        color: isDark
+                            ? const Color(0xFF71717A)
+                            : const Color(0xFFA1A1AA),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -302,7 +306,10 @@ class _SendRequestModalState extends State<SendRequestModal> {
                       _mode == TransferMode.send
                           ? 'Send \$$_amountStr'
                           : 'Request \$$_amountStr',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -332,7 +339,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
                     color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
-                  )
+                  ),
                 ]
               : null,
         ),
