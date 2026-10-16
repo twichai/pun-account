@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
@@ -28,21 +29,23 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ShadcnApp(
-      title: 'Pun Account',
-      theme: ThemeData(
-        colorScheme: ColorSchemes.lightSlate.yellow,
-        radius: 0.75,
-      ),
-      darkTheme: ThemeData.dark(
-        colorScheme: ColorSchemes.darkSlate.yellow,
-        radius: 0.75,
-      ),
-      themeMode: _themeMode,
-      home: MainNavigationScreen(
+    return ProviderScope(
+      child: ShadcnApp(
         title: 'Pun Account',
+        theme: ThemeData(
+          colorScheme: ColorSchemes.lightSlate.yellow,
+          radius: 0.75,
+        ),
+        darkTheme: ThemeData.dark(
+          colorScheme: ColorSchemes.darkSlate.yellow,
+          radius: 0.75,
+        ),
         themeMode: _themeMode,
-        onToggleTheme: _toggleTheme,
+        home: MainNavigationScreen(
+          title: 'Pun Account',
+          themeMode: _themeMode,
+          onToggleTheme: _toggleTheme,
+        ),
       ),
     );
   }
