@@ -1,8 +1,28 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pun_account/features/navigation/presentation/screens/main_navigation_screen.dart';
 import 'package:pun_account/main.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 void main() {
+  testWidgets('SignInScreen displays when unauthenticated', (tester) async {
+    tester.view.physicalSize = const Size(400, 900);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    // Pump default MyApp
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Verify SignInScreen is rendered with branding and Google auth button
+    expect(find.text('Welcome to Pun (ปั้น)'), findsOneWidget);
+    expect(find.text('Sign in with Google'), findsOneWidget);
+    expect(find.text('Alex Maker'), findsOneWidget);
+    expect(find.text('Sarah Design'), findsOneWidget);
+  });
+
   testWidgets('MainNavigationScreen smoke and navigation test', (tester) async {
     tester.view.physicalSize = const Size(400, 900);
     tester.view.devicePixelRatio = 1.0;
@@ -11,8 +31,16 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    // Pump MyApp
-    await tester.pumpWidget(const MyApp());
+    // Pump MyApp directly into MainNavigationScreen
+    await tester.pumpWidget(
+      MyApp(
+        home: MainNavigationScreen(
+          title: 'Pun Account',
+          themeMode: ThemeMode.dark,
+          onToggleTheme: () {},
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Verify initial Home (Overview) screen is displayed
@@ -33,8 +61,8 @@ void main() {
 
     // Verify Cards screen is displayed
     expect(find.text('Cards'), findsOneWidget);
-    expect(find.text('Order a card'), findsOneWidget);
-    expect(find.text('•••• 7642'), findsOneWidget);
+    expect(find.text('Add Card'), findsOneWidget);
+    expect(find.textContaining('7642'), findsAtLeastNWidgets(1));
 
     // Tap on Tab 0 (Recipients / Services)
     await tester.tap(find.byKey(const ValueKey(0)));

@@ -8,7 +8,16 @@ DB_URL ?= $(DATABASE_URL)
 NAME ?= migration
 name ?= $(NAME)
 
-.PHONY: migrate-status migrate-up migrate-down migrate-reset migrate-create
+.PHONY: run dev test migrate-status migrate-up migrate-down migrate-reset migrate-create
+
+run:
+	go run cmd/api/main.go
+
+dev:
+	air -c .air.toml
+
+test:
+	go test -v ./...
 
 migrate-status:
 	goose -dir $(MIGRATION_DIR) $(DRIVER) "$(DB_URL)" status

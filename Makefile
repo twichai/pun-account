@@ -1,7 +1,16 @@
 NAME ?= migration
 name ?= $(NAME)
 
-.PHONY: migrate-status migrate-up migrate-down migrate-reset migrate-create
+.PHONY: backend-run backend-dev backend-test migrate-status migrate-up migrate-down migrate-reset migrate-create
+
+backend-run:
+	@$(MAKE) -C back-end run
+
+backend-dev:
+	@$(MAKE) -C back-end dev
+
+backend-test:
+	@$(MAKE) -C back-end test
 
 migrate-status:
 	@$(MAKE) -C back-end migrate-status
