@@ -77,6 +77,44 @@ class ApiClient {
     }
   }
 
+  Future<dynamic> put(
+    String path, {
+    dynamic body,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      final response = await _dio.put(
+        path,
+        data: body,
+        queryParameters: queryParameters,
+        options: headers != null ? Options(headers: headers) : null,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  Future<dynamic> delete(
+    String path, {
+    dynamic body,
+    Map<String, dynamic>? queryParameters,
+    Map<String, dynamic>? headers,
+  }) async {
+    try {
+      final response = await _dio.delete(
+        path,
+        data: body,
+        queryParameters: queryParameters,
+        options: headers != null ? Options(headers: headers) : null,
+      );
+      return response.data;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
   ApiException _handleDioError(DioException error) {
     final statusCode = error.response?.statusCode ?? 500;
     final responseData = error.response?.data;
