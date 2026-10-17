@@ -96,6 +96,7 @@ void main() {
     // Tap on 'Save $5' to submit and close modal
     await tester.tap(find.text('Save \$5'));
     await tester.pump(const Duration(milliseconds: 700));
+    await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
     expect(find.text('Available \$7,854.43'), findsNothing);
   });

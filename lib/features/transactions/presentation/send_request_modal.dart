@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
@@ -67,6 +68,22 @@ class _SendRequestModalState extends State<SendRequestModal> {
   double? _firstOperand;
   late String _selectedTask;
   bool _isSaving = false;
+  bool _isSuccess = false;
+  Timer? _autoCloseTimer;
+
+  @override
+  void dispose() {
+    _autoCloseTimer?.cancel();
+    super.dispose();
+  }
+
+  void _closeModal() {
+    _autoCloseTimer?.cancel();
+    _autoCloseTimer = null;
+    if (mounted) {
+      closeOverlay(context);
+    }
+  }
 
   static final Map<String, _TaskServiceInfo> _taskDb = {
     'AWS Cloud': const _TaskServiceInfo(
@@ -304,15 +321,22 @@ class _SendRequestModalState extends State<SendRequestModal> {
         padding: const EdgeInsets.only(top: 20),
         child: Builder(
           builder: (modalContext) {
-            return Container(
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
               height: screenHeight * 0.95,
               width: double.infinity,
               decoration: BoxDecoration(
-                color: modalBg,
+                color: _isSuccess ? const Color(0xFF059669) : modalBg,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(24),
                 ),
-                border: Border(top: BorderSide(color: modalBorder, width: 0.5)),
+                border: Border(
+                  top: BorderSide(
+                    color: _isSuccess ? Colors.transparent : modalBorder,
+                    width: 0.5,
+                  ),
+                ),
               ),
               child: SafeArea(
                 top: false,
@@ -327,9 +351,11 @@ class _SendRequestModalState extends State<SendRequestModal> {
                         20,
                         max(16.0, bottomPadding + 8),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
+                      child: _isSuccess
+                          ? _buildSuccessView()
+                          : Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
                           // Drag Handle
                           Center(
                             child: Container(
@@ -539,7 +565,14 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                         const Duration(milliseconds: 600),
                                       );
                                       if (!context.mounted) return;
-                                      closeOverlay(context);
+                                      setState(() {
+                                        _isSaving = false;
+                                        _isSuccess = true;
+                                      });
+                                      _autoCloseTimer = Timer(
+                                        const Duration(seconds: 3),
+                                        _closeModal,
+                                      );
                                     },
                               child: _isSaving
                                   ? const Row(
@@ -583,6 +616,188 @@ class _SendRequestModalState extends State<SendRequestModal> {
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildSuccessView() {
+    return Column(
+      key: const ValueKey('success_view'),
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // Top row with close button (X)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            GestureDetector(
+              onTap: _closeModal,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  LucideIcons.x,
+                  size: 20,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        // Main content centered
+        Expanded(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Success checkmark icon badge
+              Container(
+                width: 84,
+                height: 84,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.15),
+                      blurRadius: 24,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  LucideIcons.check,
+                  size: 46,
+                  color: Color(0xFF059669),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Title
+              const Text(
+                'บันทึกสำเร็จ',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Large amount in the center
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    r'$',
+                    style: TextStyle(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _amountStr,
+                    style: const TextStyle(
+                      fontSize: 58,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                      letterSpacing: -1.5,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Details pill
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      _taskDb[_selectedTask]?.name ?? _selectedTask,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _selectedAccount,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.white.withValues(alpha: 0.85),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom section with countdown & close button
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'ปิดอัตโนมัติใน 3 วินาที...',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withValues(alpha: 0.85),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: GestureDetector(
+                onTap: _closeModal,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: const Text(
+                    'ปิด',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF047857),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

@@ -47,9 +47,36 @@ void main() {
       await tester.pump();
       expect(find.text('Saving...'), findsOneWidget);
 
-      // Allow saving delay and toast timer to complete
+      // Allow saving delay to transition to green success page
       await tester.pump(const Duration(milliseconds: 700));
+      expect(find.text('บันทึกสำเร็จ'), findsOneWidget);
+      expect(find.text('345.50'), findsOneWidget);
+      expect(find.text('ปิด'), findsOneWidget);
+
+      // Test 3s auto-redirect
       await tester.pump(const Duration(seconds: 4));
+    });
+
+    testWidgets('success page close button triggers immediate redirect', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(const Size(450, 900));
+      await tester.pumpWidget(createTestWidget());
+      await tester.pumpAndSettle();
+
+      // Tap Save $1
+      await tester.tap(find.text('Save \$1'));
+      await tester.pump();
+      expect(find.text('Saving...'), findsOneWidget);
+
+      // Transition to success page
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(find.text('บันทึกสำเร็จ'), findsOneWidget);
+      expect(find.text('1'), findsOneWidget);
+
+      // Tap Close button for immediate redirect
+      await tester.tap(find.text('ปิด'));
+      await tester.pumpAndSettle();
     });
 
     testWidgets(
