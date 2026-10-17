@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 enum TransferMode { send, request }
@@ -21,11 +23,17 @@ class SendRequestModal extends StatefulWidget {
     TransferMode mode = TransferMode.send,
     String? recipientName,
   }) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
     return showOverlay(
       context,
-      const DrawerConfiguration(
+      DrawerConfiguration(
         position: OverlayPosition.bottom,
-        showDragHandle: true,
+        showDragHandle: false,
+        surfaceOpacity: 0,
+        constraints: BoxConstraints(
+          minHeight: screenHeight * 0.95,
+          maxHeight: screenHeight * 0.95,
+        ),
       ),
       builder: (context) =>
           SendRequestModal(initialMode: mode, recipientName: recipientName),
@@ -139,181 +147,313 @@ class _SendRequestModalState extends State<SendRequestModal> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 440),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Mode Switcher (Send / Request)
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? const Color(0xFF27272A)
-                        : const Color(0xFFF4F4F5),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildModeTab('Send', TransferMode.send, isDark),
-                      _buildModeTab('Request', TransferMode.request, isDark),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
+    // Convert background to foreground code, and foreground to bg
+    final Color modalBg = theme.colorScheme.foreground;
+    final Color modalFg = theme.colorScheme.background;
+    final Color modalMutedBg = isDark
+        ? const Color(0xFFF4F4F5)
+        : const Color(0xFF27272A);
+    final Color modalMutedFg = isDark
+        ? const Color(0xFF71717A)
+        : const Color(0xFFA1A1AA);
+    final Color modalBorder = isDark
+        ? const Color(0xFFE4E4E7)
+        : const Color(0xFF3F3F46);
 
-                // Account Selector dropdown
-                Select<String>(
-                  value: _selectedAccount,
-                  itemBuilder: (context, item) => Text(
-                    item,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: isDark
-                          ? const Color(0xFFA1A1AA)
-                          : const Color(0xFF71717A),
-                    ),
-                  ),
-                  onChanged: (val) {
-                    if (val != null) {
-                      setState(() => _selectedAccount = val);
-                    }
-                  },
-                  popup: SelectPopup(
-                    items: SelectItemList(
-                      children: [
-                        for (final acc in _accounts)
-                          SelectItemButton(value: acc, child: Text(acc)),
-                      ],
-                    ),
-                  ).call,
-                ),
+    final invertedColorScheme = isDark
+        ? ColorSchemes.lightSlate.yellow
+        : ColorSchemes.darkSlate.yellow;
+    final modalTheme = isDark
+        ? ThemeData(
+            colorScheme: invertedColorScheme,
+            radius: theme.radius,
+            typography: theme.typography,
+          )
+        : ThemeData.dark(
+            colorScheme: invertedColorScheme,
+            radius: theme.radius,
+            typography: theme.typography,
+          );
 
-                if (widget.recipientName != null) ...[
-                  const SizedBox(height: 6),
-                  SecondaryBadge(child: Text('To: ${widget.recipientName}')),
-                ],
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
-                const SizedBox(height: 16),
+    return Theme(
+      data: modalTheme,
+      child: Container(
+        height: screenHeight * 0.95,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: modalBg,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          border: Border(top: BorderSide(color: modalBorder, width: 0.5)),
+        ),
+        child: SafeArea(
+          top: false,
+          bottom: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            20,
+                            10,
+                            20,
+                            max(16.0, bottomPadding + 8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // Drag Handle
+                              Center(
+                                child: Container(
+                                  width: 40,
+                                  height: 4,
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  decoration: BoxDecoration(
+                                    color: modalMutedFg.withValues(alpha: 0.35),
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
 
-                // Amount Display
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(
-                      r'$',
-                      style: TextStyle(
-                        fontSize: 38,
-                        fontWeight: FontWeight.bold,
-                        color: isDark
-                            ? const Color(0xFF71717A)
-                            : const Color(0xFFA1A1AA),
+                              // Mode Switcher (Send / Request)
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: modalMutedBg,
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _buildModeTab(
+                                      'Send',
+                                      TransferMode.send,
+                                      modalBg,
+                                      modalFg,
+                                      modalMutedFg,
+                                    ),
+                                    _buildModeTab(
+                                      'Request',
+                                      TransferMode.request,
+                                      modalBg,
+                                      modalFg,
+                                      modalMutedFg,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Account Selector dropdown
+                              Select<String>(
+                                value: _selectedAccount,
+                                itemBuilder: (context, item) => Text(
+                                  item,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: modalFg,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() => _selectedAccount = val);
+                                  }
+                                },
+                                popup: SelectPopup(
+                                  items: SelectItemList(
+                                    children: [
+                                      for (final acc in _accounts)
+                                        SelectItemButton(
+                                          value: acc,
+                                          child: Text(acc),
+                                        ),
+                                    ],
+                                  ),
+                                ).call,
+                              ),
+
+                              if (widget.recipientName != null) ...[
+                                const SizedBox(height: 6),
+                                SecondaryBadge(
+                                  child: Text('To: ${widget.recipientName}'),
+                                ),
+                              ],
+
+                              const SizedBox(height: 16),
+
+                              // Amount Display
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.baseline,
+                                textBaseline: TextBaseline.alphabetic,
+                                children: [
+                                  Text(
+                                    r'$',
+                                    style: TextStyle(
+                                      fontSize: 36,
+                                      fontWeight: FontWeight.bold,
+                                      color: modalMutedFg,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _amountStr,
+                                    style: TextStyle(
+                                      fontSize: 52,
+                                      fontWeight: FontWeight.w800,
+                                      color: modalFg,
+                                      letterSpacing: -1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Available \$7,854.43',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: modalMutedFg,
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Spacer pushes Send button to the very bottom neatly
+                              const Spacer(),
+                              // Math Operators Row (+, -, ×, ÷)
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _buildOperatorButton(
+                                    '+',
+                                    modalBg,
+                                    modalFg,
+                                    modalMutedBg,
+                                    modalMutedFg,
+                                    modalBorder,
+                                  ),
+                                  _buildOperatorButton(
+                                    '-',
+                                    modalBg,
+                                    modalFg,
+                                    modalMutedBg,
+                                    modalMutedFg,
+                                    modalBorder,
+                                  ),
+                                  _buildOperatorButton(
+                                    '×',
+                                    modalBg,
+                                    modalFg,
+                                    modalMutedBg,
+                                    modalMutedFg,
+                                    modalBorder,
+                                  ),
+                                  _buildOperatorButton(
+                                    '÷',
+                                    modalBg,
+                                    modalFg,
+                                    modalMutedBg,
+                                    modalMutedFg,
+                                    modalBorder,
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              // Keypad Grid
+                              Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _buildKeypadButton('1', modalFg),
+                                      _buildKeypadButton('2', modalFg),
+                                      _buildKeypadButton('3', modalFg),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _buildKeypadButton('4', modalFg),
+                                      _buildKeypadButton('5', modalFg),
+                                      _buildKeypadButton('6', modalFg),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _buildKeypadButton('7', modalFg),
+                                      _buildKeypadButton('8', modalFg),
+                                      _buildKeypadButton('9', modalFg),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      _buildKeypadButton('.', modalFg),
+                                      _buildKeypadButton('0', modalFg),
+                                      _buildBackspaceButton(modalFg),
+                                    ],
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 12),
+
+                              // Action Button pinned at the very bottom
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: PrimaryButton(
+                                  onPressed: () {
+                                    if (_operator != null &&
+                                        _firstOperand != null) {
+                                      _calculate();
+                                      return;
+                                    }
+                                    closeOverlay(context);
+                                  },
+                                  child: Text(
+                                    _mode == TransferMode.send
+                                        ? 'Send \$$_amountStr'
+                                        : 'Request \$$_amountStr',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 4),
-                    Text(
-                      _amountStr,
-                      style: TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF09090B),
-                        letterSpacing: -1,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                const Text('Available \$7,854.43').muted().small(),
-
-                const SizedBox(height: 20),
-
-                // Math Operators Row (+, -, ×, ÷)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildOperatorButton('+', isDark),
-                    _buildOperatorButton('-', isDark),
-                    _buildOperatorButton('×', isDark),
-                    _buildOperatorButton('÷', isDark),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-
-                // Keypad Grid
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildKeypadButton('1', isDark),
-                        _buildKeypadButton('2', isDark),
-                        _buildKeypadButton('3', isDark),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildKeypadButton('4', isDark),
-                        _buildKeypadButton('5', isDark),
-                        _buildKeypadButton('6', isDark),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildKeypadButton('7', isDark),
-                        _buildKeypadButton('8', isDark),
-                        _buildKeypadButton('9', isDark),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildKeypadButton('.', isDark),
-                        _buildKeypadButton('0', isDark),
-                        _buildBackspaceButton(isDark),
-                      ],
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 18),
-
-                // Action Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 46,
-                  child: PrimaryButton(
-                    onPressed: () {
-                      if (_operator != null && _firstOperand != null) {
-                        _calculate();
-                        return;
-                      }
-                      closeOverlay(context);
-                    },
-                    child: Text(
-                      _mode == TransferMode.send
-                          ? 'Send \$$_amountStr'
-                          : 'Request \$$_amountStr',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -321,22 +461,26 @@ class _SendRequestModalState extends State<SendRequestModal> {
     );
   }
 
-  Widget _buildModeTab(String label, TransferMode mode, bool isDark) {
+  Widget _buildModeTab(
+    String label,
+    TransferMode mode,
+    Color modalBg,
+    Color modalFg,
+    Color modalMutedFg,
+  ) {
     final isSelected = _mode == mode;
     return GestureDetector(
       onTap: () => setState(() => _mode = mode),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected
-              ? (isDark ? const Color(0xFF3F3F46) : Colors.white)
-              : Colors.transparent,
+          color: isSelected ? modalBg : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -348,47 +492,53 @@ class _SendRequestModalState extends State<SendRequestModal> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-            color: isSelected
-                ? (isDark ? Colors.white : const Color(0xFF09090B))
-                : (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A)),
+            color: isSelected ? modalFg : modalMutedFg,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildOperatorButton(String op, bool isDark) {
+  Widget _buildOperatorButton(
+    String op,
+    Color modalBg,
+    Color modalFg,
+    Color modalMutedBg,
+    Color modalMutedFg,
+    Color modalBorder,
+  ) {
     final isActive = _operator == op;
     return GestureDetector(
       onTap: () => _onOperator(op),
-      child: Container(
-        width: 44,
-        height: 36,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: 48,
+        height: 38,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: isActive
-              ? (isDark ? Colors.white : const Color(0xFF09090B))
-              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+          color: isActive ? modalFg : modalMutedBg,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? modalFg : modalBorder,
+            width: 0.5,
+          ),
         ),
         child: Text(
           op,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: isActive
-                ? (isDark ? const Color(0xFF09090B) : Colors.white)
-                : (isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A)),
+            color: isActive ? modalBg : modalMutedFg,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildKeypadButton(String label, bool isDark) {
+  Widget _buildKeypadButton(String label, Color modalFg) {
     return SizedBox(
-      width: 72,
-      height: 52,
+      width: 76,
+      height: 56,
       child: Button(
         style: ButtonStyle.ghost(
           density: ButtonDensity.compact,
@@ -398,30 +548,26 @@ class _SendRequestModalState extends State<SendRequestModal> {
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 22,
+            fontSize: 24,
             fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : const Color(0xFF09090B),
+            color: modalFg,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildBackspaceButton(bool isDark) {
+  Widget _buildBackspaceButton(Color modalFg) {
     return SizedBox(
-      width: 72,
-      height: 52,
+      width: 76,
+      height: 56,
       child: Button(
         style: ButtonStyle.ghost(
           density: ButtonDensity.compact,
           shape: ButtonShape.circle,
         ),
         onPressed: _onBackspace,
-        child: Icon(
-          LucideIcons.delete,
-          size: 20,
-          color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
-        ),
+        child: Icon(LucideIcons.delete, size: 22, color: modalFg),
       ),
     );
   }
