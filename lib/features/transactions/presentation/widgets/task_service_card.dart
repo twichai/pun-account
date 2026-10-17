@@ -4,6 +4,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 /// Information about a subscription or cloud service payee.
 class TaskServiceInfo {
+  final String? id;
   final String name;
   final String category;
   final String subtitle;
@@ -13,6 +14,7 @@ class TaskServiceInfo {
   final String? imageUrl;
 
   const TaskServiceInfo({
+    this.id,
     required this.name,
     required this.category,
     required this.subtitle,
@@ -26,6 +28,7 @@ class TaskServiceInfo {
 /// In-memory preset of services with past payment costs.
 final Map<String, TaskServiceInfo> taskServicesDb = {
   'AWS Cloud': const TaskServiceInfo(
+    id: '01927600-0201-7000-8000-000000000001',
     name: 'AWS Cloud',
     category: 'Cloud Infrastructure',
     subtitle: 'Cloud Infrastructure • @aws.billing',
@@ -35,6 +38,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
   ),
   'AWS Infrastructure': const TaskServiceInfo(
+    id: '01927600-0201-7000-8000-000000000001',
     name: 'AWS Infrastructure',
     category: 'Cloud Infrastructure',
     subtitle: 'Cloud Infrastructure • @aws.billing',
@@ -44,6 +48,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
   ),
   'OpenAI': const TaskServiceInfo(
+    id: '01927600-0105-7000-8000-000000000001',
     name: 'OpenAI API & ChatGPT',
     category: 'AI Services',
     subtitle: 'AI & Intelligence • @openai.api',
@@ -53,6 +58,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
   ),
   'OpenAI API & ChatGPT': const TaskServiceInfo(
+    id: '01927600-0105-7000-8000-000000000001',
     name: 'OpenAI API & ChatGPT',
     category: 'AI Services',
     subtitle: 'AI & Intelligence • @openai.api',
@@ -61,7 +67,58 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     color: Color(0xFF10B981),
     imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
   ),
+  'Canva Pro': const TaskServiceInfo(
+    id: '01927600-0101-7000-8000-000000000001',
+    name: 'Canva Pro',
+    category: 'Design & Visual',
+    subtitle: 'Design Suite • @canva.pro',
+    lastCost: '12.99',
+    icon: LucideIcons.palette,
+    color: Color(0xFF00C4CC),
+    imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
+  ),
+  'Adobe Creative Cloud': const TaskServiceInfo(
+    id: '01927600-0102-7000-8000-000000000002',
+    name: 'Adobe Creative Cloud',
+    category: 'Design & Media',
+    subtitle: 'Media Suite • @adobe.cc',
+    lastCost: '54.99',
+    icon: LucideIcons.palette,
+    color: Color(0xFFED2224),
+    imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
+  ),
+  'CapCut Pro': const TaskServiceInfo(
+    id: '01927600-0103-7000-8000-000000000003',
+    name: 'CapCut Pro',
+    category: 'Video Editing',
+    subtitle: 'Video Suite • @capcut.pro',
+    lastCost: '9.99',
+    icon: LucideIcons.video,
+    color: Color(0xFF111827),
+    imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
+  ),
+  'Midjourney': const TaskServiceInfo(
+    id: '01927600-0104-7000-8000-000000000004',
+    name: 'Midjourney',
+    category: 'AI Art',
+    subtitle: 'Image Generation • @midjourney.ai',
+    lastCost: '30.00',
+    icon: LucideIcons.sparkles,
+    color: Color(0xFF18181B),
+    imageUrl: 'https://avatars.githubusercontent.com/u/1342004?s=200&v=4',
+  ),
   'Figma': const TaskServiceInfo(
+    id: '01927600-0301-7000-8000-000000000001',
+    name: 'Figma Enterprise',
+    category: 'Design Tools',
+    subtitle: 'UI/UX Design Platform • @figma.team',
+    lastCost: '45.00',
+    icon: LucideIcons.palette,
+    color: Color(0xFFA855F7),
+    imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
+  ),
+  'Figma Enterprise': const TaskServiceInfo(
+    id: '01927600-0301-7000-8000-000000000001',
     name: 'Figma Enterprise',
     category: 'Design Tools',
     subtitle: 'UI/UX Design Platform • @figma.team',
@@ -71,25 +128,38 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
   ),
   'Apple': const TaskServiceInfo(
+    id: '01927600-0205-7000-8000-000000000001',
     name: 'Apple Developer Account',
     category: 'Developer Services',
     subtitle: 'Services & Subscriptions • @apple.services',
-    lastCost: '60.00',
+    lastCost: '99.00',
     icon: LucideIcons.laptop,
     color: Color(0xFF0EA5E9),
     imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
   ),
-  'Google Cloud': const TaskServiceInfo(
-    name: 'Google Cloud Platform',
-    category: 'Cloud Hosting',
-    subtitle: 'Hosting & Compute • @google.cloud',
-    lastCost: '89.00',
-    icon: LucideIcons.globe,
-    color: Color(0xFFEF4444),
-    imageUrl: 'https://avatars.githubusercontent.com/u/1342004?s=200&v=4',
+  'Apple Developer Account': const TaskServiceInfo(
+    id: '01927600-0205-7000-8000-000000000001',
+    name: 'Apple Developer Account',
+    category: 'Developer Services',
+    subtitle: 'Services & Subscriptions • @apple.services',
+    lastCost: '99.00',
+    icon: LucideIcons.laptop,
+    color: Color(0xFF0EA5E9),
+    imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
   ),
   'GitHub': const TaskServiceInfo(
-    name: 'GitHub Enterprise',
+    id: '01927600-0202-7000-8000-000000000001',
+    name: 'GitHub Copilot',
+    category: 'Developer Tools',
+    subtitle: 'Code & CI/CD • @github.dev',
+    lastCost: '21.00',
+    icon: LucideIcons.code,
+    color: Color(0xFF6366F1),
+    imageUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4',
+  ),
+  'GitHub Copilot': const TaskServiceInfo(
+    id: '01927600-0202-7000-8000-000000000001',
+    name: 'GitHub Copilot',
     category: 'Developer Tools',
     subtitle: 'Code & CI/CD • @github.dev',
     lastCost: '21.00',
@@ -98,6 +168,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4',
   ),
   'Supabase Database': const TaskServiceInfo(
+    id: '01927600-0203-7000-8000-000000000001',
     name: 'Supabase Database',
     category: 'Backend & DB',
     subtitle: 'Managed PostgreSQL • @supabase.io',
@@ -107,6 +178,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/54469796?s=200&v=4',
   ),
   'Vercel Pro': const TaskServiceInfo(
+    id: '01927600-0204-7000-8000-000000000001',
     name: 'Vercel Pro',
     category: 'Deployment & CDN',
     subtitle: 'Edge Network • @vercel.app',
@@ -116,6 +188,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     imageUrl: 'https://avatars.githubusercontent.com/u/14985020?s=200&v=4',
   ),
   'New Service': const TaskServiceInfo(
+    id: '01927600-0201-7000-8000-000000000001',
     name: 'New Service (No History)',
     category: 'Custom Service',
     subtitle: 'No previous payments in database',
@@ -138,6 +211,7 @@ TaskServiceInfo resolveTaskService(String taskName) {
     }
   }
   return TaskServiceInfo(
+    id: '01927600-0201-7000-8000-000000000001',
     name: taskName,
     category: 'Service / Payee',
     subtitle: 'Custom payee • @${taskName.toLowerCase().replaceAll(' ', '')}',

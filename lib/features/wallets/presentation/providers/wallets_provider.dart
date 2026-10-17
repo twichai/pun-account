@@ -23,6 +23,7 @@ class WalletsState {
       type: 'cash',
       balance: 18500.00,
       currency: 'THB',
+      cardHolder: 'เงินสดในมือ',
       auroraAccent: 'emerald',
     ),
     // 2. Visa Business Card

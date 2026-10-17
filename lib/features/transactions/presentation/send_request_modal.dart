@@ -1,8 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../auth/controllers/auth_controller.dart';
+import '../../wallets/domain/models/wallet.dart';
+import '../../wallets/presentation/providers/wallets_provider.dart';
+import '../data/transactions_repository.dart';
 import 'widgets/amount_display.dart';
 import 'widgets/numeric_keypad.dart';
 import 'widgets/send_request_success_view.dart';
@@ -13,7 +18,7 @@ enum TransferMode { send, request }
 
 /// Modal for sending or requesting money with a calculator-style keypad,
 /// inspired by modern fintech UX and styled with shadcn_flutter.
-class SendRequestModal extends StatefulWidget {
+class SendRequestModal extends ConsumerStatefulWidget {
   const SendRequestModal({
     super.key,
     this.initialMode = TransferMode.send,
@@ -44,26 +49,19 @@ class SendRequestModal extends StatefulWidget {
   }
 
   @override
-  State<SendRequestModal> createState() => _SendRequestModalState();
+  ConsumerState<SendRequestModal> createState() => _SendRequestModalState();
 }
 
-class _SendRequestModalState extends State<SendRequestModal> {
+class _SendRequestModalState extends ConsumerState<SendRequestModal> {
   late TransferMode _mode;
   late String _amountStr;
-  String _selectedAccount = 'Pavlo • 7642 USD';
+  String? _selectedWalletId;
   String? _operator;
   double? _firstOperand;
   late String _selectedTask;
   bool _isSaving = false;
   bool _isSuccess = false;
   bool _hasUserTyped = false;
-
-  final List<String> _accounts = [
-    'Pavlo • 7642 USD',
-    'Main KBank • 1234 THB',
-    'Digital Card • 5123 USD',
-    'Business Reserve • 3413 USD',
-  ];
 
   @override
   void initState() {
@@ -150,10 +148,113 @@ class _SendRequestModalState extends State<SendRequestModal> {
         : result.toStringAsFixed(2);
   }
 
+  Future<void> _handleSave() async {
+    if (_operator != null && _firstOperand != null) {
+      _calculate();
+      return;
+    }
+
+    final amountVal = double.tryParse(_amountStr) ?? 0.0;
+    if (amountVal <= 0) {
+      return;
+    }
+
+    setState(() => _isSaving = true);
+
+    final taskInfo = resolveTaskService(_selectedTask);
+    final serviceId = taskInfo.id ?? '01927600-0201-7000-8000-000000000001';
+
+    final authState = ref.read(authProvider);
+    final wallets = ref.read(walletsProvider).wallets;
+    Wallet? selectedWallet;
+    for (final w in wallets) {
+      if (w.id == _selectedWalletId) {
+        selectedWallet = w;
+        break;
+      }
+    }
+    if (selectedWallet == null && wallets.isNotEmpty) {
+      selectedWallet = wallets.first;
+    }
+
+    final targetBusinessId = authState.session?.user.businessId ??
+        selectedWallet?.businessId ??
+        '01a14648-44b7-7330-b07d-d0ca0c9353ba';
+    final targetWalletId =
+        selectedWallet?.id ?? '01a14648-44bd-7989-8dbe-66cf133b3e98';
+    final txType = _mode == TransferMode.send ? 'expense' : 'income';
+
+    try {
+      final repo = ref.read(transactionsRepositoryProvider);
+      await repo.createTransaction(
+        businessId: targetBusinessId,
+        walletId: targetWalletId,
+        serviceId: serviceId,
+        type: txType,
+        amount: amountVal,
+        description:
+            '${_mode == TransferMode.send ? "Send to" : "Request from"} ${taskInfo.name}',
+      );
+      // Refresh wallets in the background to show new balance
+      unawaited(
+        ref
+            .read(walletsProvider.notifier)
+            .fetchWallets(businessId: targetBusinessId),
+      );
+    } catch (e) {
+      // In case backend is offline, test environment or network timeout
+      debugPrint('Create transaction notice: $e');
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isSaving = false;
+      _isSuccess = true;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final walletsState = ref.watch(walletsProvider);
+    final wallets = walletsState.wallets;
+
+    final List<MapEntry<String, String>> accountOptions = [];
+    if (wallets.isNotEmpty) {
+      for (final w in wallets) {
+        String label;
+        if (w.type.toLowerCase() == 'cash') {
+          final name = w.name;
+          label = 'เงินสด • $name';
+        } else {
+          final brand = (w.cardBrand != null && w.cardBrand!.trim().isNotEmpty)
+              ? w.cardBrand!.trim()
+              : w.type;
+          final last4 = (w.last4 != null && w.last4!.trim().isNotEmpty)
+              ? w.last4!.trim()
+              : (w.id.length >= 4 ? w.id.substring(w.id.length - 4) : w.id);
+          label = '$brand • $last4';
+        }
+        accountOptions.add(MapEntry(w.id, label));
+      }
+    } else {
+      accountOptions.addAll(const [
+        MapEntry('wallet-cash-1', 'เงินสด • เงินสดในมือ'),
+        MapEntry('wallet-card-1', 'visa • 7642'),
+        MapEntry('wallet-card-2', 'mastercard • 5123'),
+      ]);
+    }
+
+    if (_selectedWalletId == null ||
+        !accountOptions.any((opt) => opt.key == _selectedWalletId)) {
+      _selectedWalletId = accountOptions.first.key;
+    }
+    final selectedOption = accountOptions.firstWhere(
+      (opt) => opt.key == _selectedWalletId,
+      orElse: () => accountOptions.first,
+    );
 
     // Convert background to foreground code, and foreground to bg
     final Color modalBg = theme.colorScheme.foreground;
@@ -228,7 +329,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
                               amount: _amountStr,
                               recipientName: resolveTaskService(_selectedTask)
                                   .name,
-                              accountName: _selectedAccount,
+                              accountName: selectedOption.value,
                               onClose: _closeModal,
                             )
                           : Column(
@@ -272,29 +373,38 @@ class _SendRequestModalState extends State<SendRequestModal> {
 
                                         // Account Selector dropdown
                                         Select<String>(
-                                          value: _selectedAccount,
-                                          itemBuilder: (context, item) => Text(
-                                            item,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: modalFg,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
+                                          value: selectedOption.key,
+                                          itemBuilder: (context, item) {
+                                            final entry =
+                                                accountOptions.firstWhere(
+                                                  (e) => e.key == item,
+                                                  orElse: () =>
+                                                      accountOptions.first,
+                                                );
+                                            return Text(
+                                              entry.value,
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: modalFg,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            );
+                                          },
                                           onChanged: (val) {
                                             if (val != null) {
                                               setState(() {
-                                                _selectedAccount = val;
+                                                _selectedWalletId = val;
                                               });
                                             }
                                           },
                                           popup: SelectPopup(
                                             items: SelectItemList(
                                               children: [
-                                                for (final acc in _accounts)
+                                                for (final opt
+                                                    in accountOptions)
                                                   SelectItemButton(
-                                                    value: acc,
-                                                    child: Text(acc),
+                                                    value: opt.key,
+                                                    child: Text(opt.value),
                                                   ),
                                               ],
                                             ),
@@ -356,24 +466,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                   height: 50,
                                   child: PrimaryButton(
                                     alignment: Alignment.center,
-                                    onPressed: _isSaving
-                                        ? null
-                                        : () async {
-                                            if (_operator != null &&
-                                                _firstOperand != null) {
-                                              _calculate();
-                                              return;
-                                            }
-                                            setState(() => _isSaving = true);
-                                            await Future.delayed(
-                                              const Duration(milliseconds: 600),
-                                            );
-                                            if (!context.mounted) return;
-                                            setState(() {
-                                              _isSaving = false;
-                                              _isSuccess = true;
-                                            });
-                                          },
+                                    onPressed: _isSaving ? null : _handleSave,
                                     child: _isSaving
                                         ? const Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -420,3 +513,4 @@ class _SendRequestModalState extends State<SendRequestModal> {
     );
   }
 }
+

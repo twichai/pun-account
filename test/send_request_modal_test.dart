@@ -1,16 +1,19 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:pun_account/features/transactions/presentation/send_request_modal.dart';
 
 void main() {
   Widget createTestWidget({String? recipientName}) {
-    return ShadcnApp(
-      theme: ThemeData(
-        colorScheme: ColorSchemes.lightSlate,
-      ),
-      home: Scaffold(
-        child: SendRequestModal(
-          recipientName: recipientName,
+    return ProviderScope(
+      child: ShadcnApp(
+        theme: ThemeData(
+          colorScheme: ColorSchemes.lightSlate,
+        ),
+        home: Scaffold(
+          child: SendRequestModal(
+            recipientName: recipientName,
+          ),
         ),
       ),
     );
@@ -99,6 +102,36 @@ void main() {
 
         // Drain toast timer
         await tester.pump(const Duration(seconds: 4));
+      },
+    );
+
+    testWidgets(
+      'renders correct account selector labels for cash (เงินสด • :name) and cards (:card_brand • :last4)',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(450, 900));
+        await tester.pumpWidget(createTestWidget());
+        await tester.pumpAndSettle();
+
+        // Default selected wallet is the first wallet (cash): 'เงินสด • เงินสดในมือ'
+        expect(find.text('เงินสด • เงินสดในมือ'), findsOneWidget);
+
+        // Open account selector dropdown
+        await tester.tap(find.text('เงินสด • เงินสดในมือ'));
+        await tester.pumpAndSettle();
+
+        // Check options inside popup:
+        // 1. Cash: 'เงินสด • เงินสดในมือ'
+        // 2. Visa: 'visa • 7642'
+        // 3. Mastercard: 'mastercard • 5123'
+        expect(find.text('visa • 7642'), findsOneWidget);
+        expect(find.text('mastercard • 5123'), findsOneWidget);
+
+        // Select the visa card
+        await tester.tap(find.text('visa • 7642'));
+        await tester.pumpAndSettle();
+
+        // The selected value should now display 'visa • 7642'
+        expect(find.text('visa • 7642'), findsOneWidget);
       },
     );
   });

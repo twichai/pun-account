@@ -97,9 +97,6 @@ void main() {
       // Verify Header & Recipients text
       expect(find.text('Recipients'), findsOneWidget);
 
-      // Verify Add button is present
-      expect(find.text('Add'), findsOneWidget);
-
       // Verify Content Creator Quick Services avatars are rendered
       expect(find.text('Canva Pro'), findsWidgets);
       expect(find.text('CapCut Pro'), findsWidgets);

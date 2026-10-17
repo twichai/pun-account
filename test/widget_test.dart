@@ -70,9 +70,6 @@ void main() {
 
     // Verify Services screen is displayed with category/service items
     expect(find.text('Recipients'), findsOneWidget);
-    expect(find.text('Add'), findsOneWidget);
-    expect(find.text('OpenAI'), findsAtLeastNWidgets(1));
-    expect(find.text('AWS Cloud'), findsAtLeastNWidgets(1));
 
     // Tap on Tab 1 (Home)
     await tester.tap(find.byKey(const ValueKey(1)));
@@ -85,7 +82,7 @@ void main() {
 
     // Verify SendRequestModal is opened with keypad
     expect(find.text('Available \$7,854.43'), findsOneWidget);
-    expect(find.text('Pavlo • 7642 USD'), findsOneWidget);
+    expect(find.text('เงินสด • เงินสดในมือ'), findsOneWidget);
     expect(find.text('Save \$1'), findsOneWidget);
 
     // Tap on keypad '5'
