@@ -33,13 +33,23 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
-    final success = await ref.read(authProvider.notifier).signInWithGoogle(
-          idToken: _tokenController.text.trim().isNotEmpty ? _tokenController.text.trim() : null,
-          email: _emailController.text.trim().isNotEmpty ? _emailController.text.trim() : 'solopreneur@pun.io',
-          name: _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : 'Solopreneur',
-          googleId: 'g-${DateTime.now().millisecondsSinceEpoch}',
-        );
+    // If the developer opened custom simulator and typed specific credentials, use simulator
+    if (_showCustomDevInputs && _emailController.text.trim().isNotEmpty) {
+      final success = await ref.read(authProvider.notifier).signInWithGoogle(
+            idToken: _tokenController.text.trim().isNotEmpty ? _tokenController.text.trim() : null,
+            email: _emailController.text.trim(),
+            name: _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : 'Solopreneur',
+            googleId: 'g-${DateTime.now().millisecondsSinceEpoch}',
+          );
 
+      if (success && mounted) {
+        widget.onSignInSuccess?.call();
+      }
+      return;
+    }
+
+    // Standard flow: Opens the real native Google account selector dialog (Choose Gmail)
+    final success = await ref.read(authProvider.notifier).signInWithGoogleAccount();
     if (success && mounted) {
       widget.onSignInSuccess?.call();
     }

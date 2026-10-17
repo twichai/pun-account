@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/auth_repository.dart';
+import '../data/google_auth_service.dart';
 import '../models/user_model.dart';
 
 enum AuthStatus {
@@ -44,6 +45,45 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
     return const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Real Google Account Picker (Native dialog allowing user to choose their Gmail)
+  Future<bool> signInWithGoogleAccount() async {
+    state = state.copyWith(status: AuthStatus.authenticating, errorMessage: null);
+
+    try {
+      final googleAuth = ref.read(googleAuthServiceProvider);
+      final account = await googleAuth.signIn();
+
+      if (account == null) {
+        // User cancelled account selection popup
+        state = state.copyWith(status: AuthStatus.unauthenticated);
+        return false;
+      }
+
+      final authTokens = await account.authentication;
+
+      final repo = ref.read(authRepositoryProvider);
+      final session = await repo.signInWithGoogle(
+        idToken: authTokens.idToken,
+        email: account.email,
+        name: account.displayName,
+        avatarUrl: account.photoUrl,
+        googleId: account.id,
+      );
+
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        session: session,
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: AuthStatus.error,
+        errorMessage: e.toString().replaceFirst('ApiException: ', ''),
+      );
+      return false;
+    }
   }
 
   Future<bool> signInWithGoogle({
@@ -98,7 +138,10 @@ class AuthNotifier extends Notifier<AuthState> {
     );
   }
 
-  void signOut() {
+  Future<void> signOut() async {
+    try {
+      await ref.read(googleAuthServiceProvider).signOut();
+    } catch (_) {}
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 }
