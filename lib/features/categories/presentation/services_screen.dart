@@ -347,37 +347,27 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: service.imageUrl != null &&
-                          service.imageUrl!.isNotEmpty
+                  child:
+                      service.imageUrl != null && service.imageUrl!.isNotEmpty
                       ? ClipOval(
                           child: CachedNetworkImage(
                             imageUrl: service.imageUrl!,
                             width: 64,
                             height: 64,
                             fit: BoxFit.cover,
-                            placeholder: (context, url) =>
-                                Icon(service.icon, size: 28, color: Colors.white),
-                            errorWidget: (context, url, error) =>
-                                Icon(service.icon, size: 28, color: Colors.white),
+                            placeholder: (context, url) => Icon(
+                              service.icon,
+                              size: 28,
+                              color: Colors.white,
+                            ),
+                            errorWidget: (context, url, error) => Icon(
+                              service.icon,
+                              size: 28,
+                              color: Colors.white,
+                            ),
                           ),
                         )
                       : Icon(service.icon, size: 28, color: Colors.white),
-                ),
-                Positioned(
-                  right: -2,
-                  bottom: 0,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: const Color(0xFF111315),
-                        width: 2.5,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             ),
