@@ -13,6 +13,9 @@ abstract class ServiceCategoryItem with _$ServiceCategoryItem {
     required Color color,
     String? badge,
     String? imageUrl,
+    String? serviceCategoryId,
+    String? categoryTrack,
     @Default(false) bool isMyAccount,
+    @Default(false) bool isQuick,
   }) = _ServiceCategoryItem;
 }

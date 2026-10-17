@@ -84,7 +84,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final servicesState = ref.watch(servicesProvider);
-    final quickServices = servicesState.quickServices;
+    final quickServices = servicesState.trackQuickServices;
     final filteredAccounts = servicesState.filteredAccounts;
     final selectedFilterIndex = servicesState.selectedFilterIndex;
 

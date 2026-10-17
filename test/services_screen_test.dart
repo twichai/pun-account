@@ -26,9 +26,9 @@ void main() {
       // Verify Add button is present
       expect(find.text('Add'), findsOneWidget);
 
-      // Verify Quick Services avatars are rendered
-      expect(find.text('OpenAI'), findsWidgets);
-      expect(find.text('AWS Cloud'), findsOneWidget);
+      // Verify Content Creator Quick Services avatars are rendered
+      expect(find.text('Canva Pro'), findsWidgets);
+      expect(find.text('CapCut Pro'), findsWidgets);
 
       // Verify filter tabs in DraggableScrollableSheet
       expect(find.text('All'), findsOneWidget);

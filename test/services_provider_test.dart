@@ -16,13 +16,24 @@ void main() {
       container.dispose();
     });
 
-    test('initial state has default quick services and accounts', () {
+    test('initial state defaults to content_creator track and services', () {
       final state = container.read(servicesProvider);
+      expect(state.selectedTrackKey, 'content_creator');
+      expect(state.tracks.isNotEmpty, isTrue);
       expect(state.quickServices.isNotEmpty, isTrue);
-      expect(state.allAccounts.isNotEmpty, isTrue);
+      expect(state.trackQuickServices.every((s) => s.serviceCategoryId == 'content_creator'), isTrue);
       expect(state.selectedFilterIndex, 0);
       expect(state.searchQuery, '');
-      expect(state.filteredAccounts.length, state.allAccounts.length);
+    });
+
+    test('switching track updates filtered accounts and quick services', () {
+      final notifier = container.read(servicesProvider.notifier);
+      notifier.setTrack('developer');
+
+      final state = container.read(servicesProvider);
+      expect(state.selectedTrackKey, 'developer');
+      expect(state.trackQuickServices.every((s) => s.serviceCategoryId == 'developer'), isTrue);
+      expect(state.filteredAccounts.every((s) => s.serviceCategoryId == 'developer'), isTrue);
     });
 
     test('filtering by My Accounts returns only isMyAccount items', () {
@@ -36,6 +47,7 @@ void main() {
 
     test('search query filters accounts by name case-insensitively', () {
       final notifier = container.read(servicesProvider.notifier);
+      notifier.setTrack('all');
       notifier.setSearchQuery('openai');
 
       final state = container.read(servicesProvider);
@@ -51,6 +63,7 @@ void main() {
         accountNumber: 'Test 1234',
         icon: LucideIcons.cloud,
         color: Color(0xFF10B981),
+        serviceCategoryId: 'content_creator',
         isMyAccount: true,
       );
 
@@ -64,12 +77,13 @@ void main() {
     test('removeService removes account properly', () {
       final notifier = container.read(servicesProvider.notifier);
       final initialCount = container.read(servicesProvider).allAccounts.length;
+      final targetId = container.read(servicesProvider).allAccounts.first.id;
 
-      notifier.removeService('1');
+      notifier.removeService(targetId);
 
       final state = container.read(servicesProvider);
       expect(state.allAccounts.length, initialCount - 1);
-      expect(state.allAccounts.any((s) => s.id == '1'), isFalse);
+      expect(state.allAccounts.any((s) => s.id == targetId), isFalse);
     });
   });
 }
