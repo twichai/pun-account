@@ -89,7 +89,6 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     final selectedTrackKey = servicesState.selectedTrackKey;
     final quickServices = servicesState.trackQuickServices;
     final filteredAccounts = servicesState.filteredAccounts;
-    final selectedFilterIndex = servicesState.selectedFilterIndex;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -129,11 +128,11 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                           .fetchCategoriesAndServices();
                     },
                   ),
-                  const SizedBox(width: 8),
-                  PrimaryButton(
-                    onPressed: _showAddServiceModal,
-                    child: const Text('Add'),
-                  ),
+                  // const SizedBox(width: 8),
+                  // PrimaryButton(
+                  //   onPressed: _showAddServiceModal,
+                  //   child: const Text('Add'),
+                  // ),
                 ],
               ),
             ],
@@ -161,7 +160,11 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                           for (int i = 0; i < 6; i++)
                             _buildSkeletonAvatar(itemWidth, isDark)
                         else
-                          for (int i = 0; i < quickServices.length; i++)
+                          for (
+                            int i = 0;
+                            i < quickServices.length && i < 6;
+                            i++
+                          )
                             GridWaveAnimation.indexed(
                               index: i,
                               crossAxisCount: crossAxisCount,
@@ -203,61 +206,41 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       controller: scrollController,
                       padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
                       children: [
-                        // 1. Profession / Job Categories Tracks Switcher
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          physics: const BouncingScrollPhysics(),
-                          child: Row(
-                            children: [
-                              for (final track in tracks) ...[
-                                _buildTrackPill(
-                                  title: track.name,
-                                  icon: track.icon,
-                                  color: track.color,
-                                  isSelected: selectedTrackKey == track.key,
-                                  onTap: () => ref
-                                      .read(servicesProvider.notifier)
-                                      .setTrack(track.key),
-                                  isDark: isDark,
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              _buildTrackPill(
-                                title: 'All Tracks',
-                                icon: LucideIcons.layers,
-                                color: const Color(0xFF71717A),
-                                isSelected: selectedTrackKey == 'all',
-                                onTap: () => ref
-                                    .read(servicesProvider.notifier)
-                                    .setTrack('all'),
-                                isDark: isDark,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-
-                        // 2. Filter tabs (All / My accounts) + Search button
+                        // Category filter tabs + Search button
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                _buildFilterPill(
-                                  'All',
-                                  0,
-                                  isDark,
-                                  selectedFilterIndex,
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                physics: const BouncingScrollPhysics(),
+                                child: Row(
+                                  children: [
+                                    _buildFilterPill(
+                                      title: 'All',
+                                      isSelected: selectedTrackKey == 'all',
+                                      onTap: () => ref
+                                          .read(servicesProvider.notifier)
+                                          .setTrack('all'),
+                                      isDark: isDark,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    for (final track in tracks) ...[
+                                      _buildFilterPill(
+                                        title: track.name,
+                                        isSelected:
+                                            selectedTrackKey == track.key,
+                                        onTap: () => ref
+                                            .read(servicesProvider.notifier)
+                                            .setTrack(track.key),
+                                        isDark: isDark,
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                _buildFilterPill(
-                                  'My accounts',
-                                  1,
-                                  isDark,
-                                  selectedFilterIndex,
-                                ),
-                              ],
+                              ),
                             ),
+                            const SizedBox(width: 8),
                             IconButton.ghost(
                               density: ButtonDensity.icon,
                               icon: Icon(
@@ -289,8 +272,9 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                           TextField(
                             controller: _searchController,
                             autofocus: true,
-                            placeholder:
-                                const Text('Search recipients & accounts...'),
+                            placeholder: const Text(
+                              'Search recipients & accounts...',
+                            ),
                             onChanged: (val) {
                               ref
                                   .read(servicesProvider.notifier)
@@ -335,60 +319,6 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTrackPill({
-    required String title,
-    required IconData icon,
-    required Color color,
-    required bool isSelected,
-    required VoidCallback onTap,
-    required bool isDark,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? color.withValues(alpha: isDark ? 0.25 : 0.15)
-              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected
-                  ? color
-                  : (isDark
-                      ? const Color(0xFFA1A1AA)
-                      : const Color(0xFF71717A)),
-            ),
-            const SizedBox(width: 6),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                color: isSelected
-                    ? (isDark ? Colors.white : const Color(0xFF09090B))
-                    : (isDark
-                        ? const Color(0xFFA1A1AA)
-                        : const Color(0xFF71717A)),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -491,15 +421,14 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     );
   }
 
-  Widget _buildFilterPill(
-    String title,
-    int index,
-    bool isDark,
-    int selectedFilterIndex,
-  ) {
-    final isSelected = selectedFilterIndex == index;
+  Widget _buildFilterPill({
+    required String title,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
     return GestureDetector(
-      onTap: () => ref.read(servicesProvider.notifier).setFilterIndex(index),
+      onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -590,27 +519,6 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                 ],
               ),
             ),
-
-            if (item.badge != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF3F3F46).withValues(alpha: 0.5)
-                      : const Color(0xFFE4E4E7),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  item.badge!,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: isDark
-                        ? const Color(0xFFA1A1AA)
-                        : const Color(0xFF52525B),
-                  ),
-                ),
-              ),
           ],
         ),
       ),

@@ -106,7 +106,8 @@ void main() {
 
       // Verify filter tabs in DraggableScrollableSheet
       expect(find.text('All'), findsOneWidget);
-      expect(find.text('My accounts'), findsOneWidget);
+      expect(find.text('Content Creator'), findsWidgets);
+      expect(find.text('Developer'), findsWidgets);
     });
   });
 }
