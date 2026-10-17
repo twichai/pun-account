@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/services.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -9,6 +10,7 @@ class TaskServiceInfo {
   final String? lastCost;
   final IconData icon;
   final Color color;
+  final String? imageUrl;
 
   const TaskServiceInfo({
     required this.name,
@@ -17,6 +19,7 @@ class TaskServiceInfo {
     this.lastCost,
     required this.icon,
     required this.color,
+    this.imageUrl,
   });
 }
 
@@ -29,6 +32,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '345.50',
     icon: LucideIcons.cloud,
     color: Color(0xFFF59E0B),
+    imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
   ),
   'AWS Infrastructure': const TaskServiceInfo(
     name: 'AWS Infrastructure',
@@ -37,6 +41,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '345.50',
     icon: LucideIcons.cloud,
     color: Color(0xFFF59E0B),
+    imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
   ),
   'OpenAI': const TaskServiceInfo(
     name: 'OpenAI API & ChatGPT',
@@ -45,6 +50,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '120.00',
     icon: LucideIcons.sparkles,
     color: Color(0xFF10B981),
+    imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
   ),
   'OpenAI API & ChatGPT': const TaskServiceInfo(
     name: 'OpenAI API & ChatGPT',
@@ -53,6 +59,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '120.00',
     icon: LucideIcons.sparkles,
     color: Color(0xFF10B981),
+    imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
   ),
   'Figma': const TaskServiceInfo(
     name: 'Figma Enterprise',
@@ -61,6 +68,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '45.00',
     icon: LucideIcons.palette,
     color: Color(0xFFA855F7),
+    imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
   ),
   'Apple': const TaskServiceInfo(
     name: 'Apple Developer Account',
@@ -69,6 +77,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '60.00',
     icon: LucideIcons.laptop,
     color: Color(0xFF0EA5E9),
+    imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
   ),
   'Google Cloud': const TaskServiceInfo(
     name: 'Google Cloud Platform',
@@ -77,6 +86,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '89.00',
     icon: LucideIcons.globe,
     color: Color(0xFFEF4444),
+    imageUrl: 'https://avatars.githubusercontent.com/u/1342004?s=200&v=4',
   ),
   'GitHub': const TaskServiceInfo(
     name: 'GitHub Enterprise',
@@ -85,6 +95,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '21.00',
     icon: LucideIcons.code,
     color: Color(0xFF6366F1),
+    imageUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4',
   ),
   'Supabase Database': const TaskServiceInfo(
     name: 'Supabase Database',
@@ -93,6 +104,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '25.00',
     icon: LucideIcons.database,
     color: Color(0xFF22C55E),
+    imageUrl: 'https://avatars.githubusercontent.com/u/54469796?s=200&v=4',
   ),
   'Vercel Pro': const TaskServiceInfo(
     name: 'Vercel Pro',
@@ -101,6 +113,7 @@ final Map<String, TaskServiceInfo> taskServicesDb = {
     lastCost: '20.00',
     icon: LucideIcons.triangle,
     color: Color(0xFF64748B),
+    imageUrl: 'https://avatars.githubusercontent.com/u/14985020?s=200&v=4',
   ),
   'New Service': const TaskServiceInfo(
     name: 'New Service (No History)',
@@ -222,7 +235,7 @@ class TaskServiceCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          // Icon badge
+          // Image / Icon badge
           Container(
             width: 40,
             height: 40,
@@ -245,7 +258,21 @@ class TaskServiceCard extends StatelessWidget {
               ],
             ),
             alignment: Alignment.center,
-            child: Icon(taskInfo.icon, size: 20, color: Colors.white),
+            child: taskInfo.imageUrl != null && taskInfo.imageUrl!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: taskInfo.imageUrl!,
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) =>
+                          Icon(taskInfo.icon, size: 20, color: Colors.white),
+                      errorWidget: (context, url, error) =>
+                          Icon(taskInfo.icon, size: 20, color: Colors.white),
+                    ),
+                  )
+                : Icon(taskInfo.icon, size: 20, color: Colors.white),
           ),
           const SizedBox(width: 12),
 

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../../core/animations/grid_wave_animation.dart';
@@ -7,22 +8,20 @@ class ServiceCategoryItem {
   const ServiceCategoryItem({
     required this.id,
     required this.name,
-    required this.handle,
     required this.accountNumber,
-    required this.amountInfo,
     required this.icon,
     required this.color,
     this.badge,
+    this.imageUrl,
   });
 
   final String id;
   final String name;
-  final String handle;
   final String accountNumber;
-  final String amountInfo;
   final IconData icon;
   final Color color;
   final String? badge;
+  final String? imageUrl;
 }
 
 /// Services and Categories screen matching Screenshot 4 with category/service icons
@@ -43,56 +42,50 @@ class _ServicesScreenState extends State<ServicesScreen> {
     ServiceCategoryItem(
       id: '1',
       name: 'OpenAI',
-      handle: '@openai.api',
       accountNumber: 'Chase 2983',
-      amountInfo: '\$120 / mo',
       icon: LucideIcons.sparkles,
       color: Color(0xFF10B981),
+      imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '2',
       name: 'AWS Cloud',
-      handle: '@aws.billing',
       accountNumber: 'Mastercard 9283',
-      amountInfo: '\$345.50 / mo',
       icon: LucideIcons.cloud,
       color: Color(0xFFF59E0B),
+      imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '3',
       name: 'Figma',
-      handle: '@figma.team',
       accountNumber: 'KBank 1234',
-      amountInfo: '\$45 / mo',
       icon: LucideIcons.palette,
       color: Color(0xFFA855F7),
+      imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '4',
       name: 'Apple',
-      handle: '@apple.services',
       accountNumber: 'Chase 2983',
-      amountInfo: '\$60 / mo',
       icon: LucideIcons.laptop,
       color: Color(0xFF0EA5E9),
+      imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '5',
       name: 'Google Cloud',
-      handle: '@google.cloud',
       accountNumber: 'Mastercard 9283',
-      amountInfo: '\$89 / mo',
       icon: LucideIcons.globe,
       color: Color(0xFFEF4444),
+      imageUrl: 'https://avatars.githubusercontent.com/u/1342004?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '6',
       name: 'GitHub',
-      handle: '@github.dev',
       accountNumber: 'Chase 2983',
-      amountInfo: '\$21 / mo',
       icon: LucideIcons.code,
       color: Color(0xFF6366F1),
+      imageUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4',
     ),
   ];
 
@@ -100,62 +93,56 @@ class _ServicesScreenState extends State<ServicesScreen> {
     ServiceCategoryItem(
       id: '1',
       name: 'OpenAI API & ChatGPT',
-      handle: '@openai.api',
       accountNumber: 'Chase 2983',
-      amountInfo: '-\$120.00',
       icon: LucideIcons.sparkles,
       color: Color(0xFF10B981),
       badge: 'Active',
+      imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '2',
       name: 'AWS Infrastructure',
-      handle: '@aws.billing',
       accountNumber: 'Mastercard 9283',
-      amountInfo: '-\$345.50',
       icon: LucideIcons.cloud,
       color: Color(0xFFF59E0B),
       badge: 'Active',
+      imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '3',
       name: 'Figma Enterprise',
-      handle: '@figma.team',
       accountNumber: 'KBank 1234',
-      amountInfo: '-\$45.00',
       icon: LucideIcons.palette,
       color: Color(0xFFA855F7),
       badge: 'Active',
+      imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '4',
       name: 'Apple Developer Account',
-      handle: '@apple.services',
       accountNumber: 'Chase 2983',
-      amountInfo: '-\$99.00',
       icon: LucideIcons.laptop,
       color: Color(0xFF0EA5E9),
       badge: 'Annual',
+      imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '5',
       name: 'Supabase Database',
-      handle: '@supabase.io',
       accountNumber: 'KBank 1234',
-      amountInfo: '-\$25.00',
       icon: LucideIcons.database,
       color: Color(0xFF22C55E),
       badge: 'Active',
+      imageUrl: 'https://avatars.githubusercontent.com/u/54469796?s=200&v=4',
     ),
     ServiceCategoryItem(
       id: '6',
       name: 'Vercel Pro',
-      handle: '@vercel.app',
       accountNumber: 'Chase 2983',
-      amountInfo: '-\$20.00',
       icon: LucideIcons.triangle,
       color: Color(0xFF64748B),
       badge: 'Active',
+      imageUrl: 'https://avatars.githubusercontent.com/u/14985020?s=200&v=4',
     ),
   ];
 
@@ -280,21 +267,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
                       controller: scrollController,
                       padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
                       children: [
-                        // Pull handle
-                        Center(
-                          child: Container(
-                            width: 36,
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: isDark
-                                  ? const Color(0xFF3F3F46)
-                                  : const Color(0xFFE4E4E7),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
                         // Filter tabs + Search button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -375,7 +347,21 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: Icon(service.icon, size: 28, color: Colors.white),
+                  child: service.imageUrl != null &&
+                          service.imageUrl!.isNotEmpty
+                      ? ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: service.imageUrl!,
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                Icon(service.icon, size: 28, color: Colors.white),
+                            errorWidget: (context, url, error) =>
+                                Icon(service.icon, size: 28, color: Colors.white),
+                          ),
+                        )
+                      : Icon(service.icon, size: 28, color: Colors.white),
                 ),
                 Positioned(
                   right: -2,
@@ -403,12 +389,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 2),
-            Text(
-              service.handle,
-              style: const TextStyle(fontSize: 12, color: Color(0xFFA1A1AA)),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
           ],
         ),
       ),
@@ -468,7 +448,20 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 color: item.color.withValues(alpha: 0.18),
               ),
               alignment: Alignment.center,
-              child: Icon(item.icon, size: 20, color: item.color),
+              child: item.imageUrl != null && item.imageUrl!.isNotEmpty
+                  ? ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: item.imageUrl!,
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) =>
+                            Icon(item.icon, size: 20, color: item.color),
+                        errorWidget: (context, url, error) =>
+                            Icon(item.icon, size: 20, color: item.color),
+                      ),
+                    )
+                  : Icon(item.icon, size: 20, color: item.color),
             ),
             const SizedBox(width: 14),
 
@@ -495,25 +488,6 @@ class _ServicesScreenState extends State<ServicesScreen> {
                   ),
                 ],
               ),
-            ),
-
-            // Amount / Pay button
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  item.amountInfo,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: isDark ? Colors.white : const Color(0xFF09090B),
-                  ),
-                ),
-                if (item.badge != null) ...[
-                  const SizedBox(height: 2),
-                  SecondaryBadge(child: Text(item.badge!)),
-                ],
-              ],
             ),
           ],
         ),
