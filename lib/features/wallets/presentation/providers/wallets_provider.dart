@@ -192,6 +192,13 @@ class WalletsNotifier extends Notifier<WalletsState> {
     state = state.copyWith(wallets: [...state.wallets, wallet]);
   }
 
+  /// Replace an updated wallet locally
+  void updateWalletItem(Wallet updated) {
+    state = state.copyWith(
+      wallets: state.wallets.map((w) => w.id == updated.id ? updated : w).toList(),
+    );
+  }
+
   /// Delete a card/wallet locally
   void removeWallet(String id) {
     state = state.copyWith(

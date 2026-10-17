@@ -1,22 +1,33 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../domain/models/wallet.dart';
 import '../providers/add_card_form_provider.dart';
 import 'dark_obsidian_wallet_card.dart';
 
-/// Bottom Drawer Form for adding a new digital Obsidian card
+/// Bottom Drawer Form for adding or editing a digital Obsidian card / cash wallet
 class AddCardDrawer extends ConsumerStatefulWidget {
-  const AddCardDrawer({super.key});
+  const AddCardDrawer({super.key, this.wallet});
 
-  /// Opens the Add Card Drawer from the bottom
-  static Future<void> show(BuildContext context) {
+  final Wallet? wallet;
+
+  /// Opens the Add or Edit Card Drawer from the bottom
+  static Future<void> show(BuildContext context, {Wallet? wallet}) {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final notifier = container.read(addCardFormProvider.notifier);
+    if (wallet != null) {
+      notifier.initForEdit(wallet);
+    } else {
+      notifier.initForCreate();
+    }
+
     return showOverlay(
       context,
       const DrawerConfiguration(
         position: OverlayPosition.bottom,
         showDragHandle: true,
       ),
-      builder: (context) => const AddCardDrawer(),
+      builder: (context) => AddCardDrawer(wallet: wallet),
     ).future;
   }
 
@@ -74,11 +85,52 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
     }
   }
 
+  void _confirmDelete(BuildContext drawerContext) {
+    showOverlay(
+      drawerContext,
+      const DialogConfiguration(),
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Delete Wallet'),
+          content: const Text(
+            'Are you sure you want to remove this card/wallet? This action cannot be undone.',
+          ),
+          actions: [
+            OutlineButton(
+              onPressed: () => closeOverlay(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            DestructiveButton(
+              onPressed: () async {
+                closeOverlay(dialogContext);
+                final success = await ref
+                    .read(addCardFormProvider.notifier)
+                    .deleteCurrentWallet();
+                if (success && drawerContext.mounted) {
+                  closeOverlay(drawerContext);
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(addCardFormProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final titleText = formState.isEdit
+        ? (formState.isCashWallet ? 'Edit Cash Wallet' : 'Edit Digital Card')
+        : 'Add Digital Card';
+
+    final subtitleText = formState.isEdit
+        ? 'Update and configure wallet settings'
+        : 'Issue and configure a new obsidian business card';
 
     return Center(
       child: ConstrainedBox(
@@ -95,7 +147,7 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header with title, subtitle & close button
+                // Header with title, subtitle & actions (delete/close)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,16 +155,30 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Add Digital Card').h4(),
+                        Text(titleText).h4(),
                         const SizedBox(height: 2),
-                        const Text(
-                          'Issue and configure a new obsidian business card',
-                        ).small().muted(),
+                        Text(subtitleText).small().muted(),
                       ],
                     ),
-                    IconButton.ghost(
-                      icon: const Icon(LucideIcons.x, size: 18),
-                      onPressed: () => closeOverlay(context),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (formState.isEdit) ...[
+                          IconButton.ghost(
+                            icon: const Icon(
+                              LucideIcons.trash2,
+                              size: 18,
+                              color: Colors.red,
+                            ),
+                            onPressed: () => _confirmDelete(context),
+                          ),
+                          const SizedBox(width: 4),
+                        ],
+                        IconButton.ghost(
+                          icon: const Icon(LucideIcons.x, size: 18),
+                          onPressed: () => closeOverlay(context),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -163,145 +229,153 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                   const SizedBox(height: 14),
                 ],
 
-                // Cardholder Name Field
-                const Text('Cardholder Name').small().semiBold(),
+                // Name / Cardholder Field
+                Text(
+                  formState.isCashWallet ? 'Wallet Name' : 'Cardholder Name',
+                ).small().semiBold(),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _cardHolderController,
-                  placeholder: const Text('e.g. PAVLO D.'),
+                  placeholder: Text(
+                    formState.isCashWallet
+                        ? 'e.g. Petty Cash / เงินสดในมือ'
+                        : 'e.g. PAVLO D.',
+                  ),
                   onChanged: (val) {
                     ref.read(addCardFormProvider.notifier).updateCardHolder(val);
                   },
                 ),
                 const SizedBox(height: 14),
 
-                // Card Number Field
-                const Text('Card Number / Digits').small().semiBold(),
-                const SizedBox(height: 6),
-                TextField(
-                  controller: _cardNumberController,
-                  placeholder: const Text('4532 •••• •••• 7642'),
-                  keyboardType: TextInputType.number,
-                  onChanged: (val) {
-                    ref.read(addCardFormProvider.notifier).updateCardNumber(val);
-                  },
-                ),
-                const SizedBox(height: 14),
+                // Card Number Field (only for digital cards)
+                if (!formState.isCashWallet) ...[
+                  const Text('Card Number / Digits').small().semiBold(),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _cardNumberController,
+                    placeholder: const Text('4532 •••• •••• 7642'),
+                    keyboardType: TextInputType.number,
+                    onChanged: (val) {
+                      ref.read(addCardFormProvider.notifier).updateCardNumber(val);
+                    },
+                  ),
+                  const SizedBox(height: 14),
 
-                // Card Brand Selection (Visa / Mastercard)
-                const Text('Card Network / Brand').small().semiBold(),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onBrandChanged('visa'),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: formState.cardBrand == 'visa'
-                                ? (isDark
-                                    ? const Color(0xFF27272A)
-                                    : const Color(0xFFF4F4F5))
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
+                  // Card Brand Selection (Visa / Mastercard)
+                  const Text('Card Network / Brand').small().semiBold(),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onBrandChanged('visa'),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
                               color: formState.cardBrand == 'visa'
-                                  ? theme.colorScheme.primary
-                                  : (isDark
-                                      ? const Color(0xFF3F3F46)
-                                      : const Color(0xFFE4E4E7)),
-                              width: formState.cardBrand == 'visa' ? 1.5 : 1.0,
+                                  ? (isDark
+                                      ? const Color(0xFF27272A)
+                                      : const Color(0xFFF4F4F5))
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: formState.cardBrand == 'visa'
+                                    ? theme.colorScheme.primary
+                                    : (isDark
+                                        ? const Color(0xFF3F3F46)
+                                        : const Color(0xFFE4E4E7)),
+                                width: formState.cardBrand == 'visa' ? 1.5 : 1.0,
+                              ),
                             ),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'VISA',
-                              style: TextStyle(
-                                fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                                letterSpacing: 1.5,
+                            child: const Center(
+                              child: Text(
+                                'VISA',
+                                style: TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 16,
+                                  letterSpacing: 1.5,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: () => _onBrandChanged('mastercard'),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                            color: formState.cardBrand == 'mastercard'
-                                ? (isDark
-                                    ? const Color(0xFF27272A)
-                                    : const Color(0xFFF4F4F5))
-                                : Colors.transparent,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => _onBrandChanged('mastercard'),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
                               color: formState.cardBrand == 'mastercard'
-                                  ? theme.colorScheme.primary
-                                  : (isDark
-                                      ? const Color(0xFF3F3F46)
-                                      : const Color(0xFFE4E4E7)),
-                              width:
-                                  formState.cardBrand == 'mastercard' ? 1.5 : 1.0,
+                                  ? (isDark
+                                      ? const Color(0xFF27272A)
+                                      : const Color(0xFFF4F4F5))
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: formState.cardBrand == 'mastercard'
+                                    ? theme.colorScheme.primary
+                                    : (isDark
+                                        ? const Color(0xFF3F3F46)
+                                        : const Color(0xFFE4E4E7)),
+                                width:
+                                    formState.cardBrand == 'mastercard' ? 1.5 : 1.0,
+                              ),
                             ),
-                          ),
-                          child: Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(
-                                  width: 24,
-                                  height: 16,
-                                  child: Stack(
-                                    children: [
-                                      Container(
-                                        width: 16,
-                                        height: 16,
-                                        decoration: const BoxDecoration(
-                                          color: Color(0xFFEB001B),
-                                          shape: BoxShape.circle,
-                                        ),
-                                      ),
-                                      Positioned(
-                                        right: 0,
-                                        child: Container(
+                            child: Center(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    width: 24,
+                                    height: 16,
+                                    child: Stack(
+                                      children: [
+                                        Container(
                                           width: 16,
                                           height: 16,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFF79E1B)
-                                                .withValues(alpha: 0.9),
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFEB001B),
                                             shape: BoxShape.circle,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        Positioned(
+                                          right: 0,
+                                          child: Container(
+                                            width: 16,
+                                            height: 16,
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFF79E1B)
+                                                  .withValues(alpha: 0.9),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 6),
-                                const Text(
-                                  'Mastercard',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 13,
+                                  const SizedBox(width: 6),
+                                  const Text(
+                                    'Mastercard',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                ],
 
                 // Aurora Mesh Theme Selector
                 const Text('Aurora Glow Accent').small().semiBold(),
@@ -372,8 +446,14 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                 ),
                 const SizedBox(height: 16),
 
-                // Initial Balance / Credit Limit Field
-                const Text('Initial Limit / Balance (THB)').small().semiBold(),
+                // Balance / Limit Field
+                Text(
+                  formState.isCashWallet
+                      ? 'Current Balance (THB)'
+                      : (formState.isEdit
+                          ? 'Current Limit / Balance (THB)'
+                          : 'Initial Limit / Balance (THB)'),
+                ).small().semiBold(),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _balanceController,
@@ -386,7 +466,7 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                 ),
                 const SizedBox(height: 24),
 
-                // Action Buttons: Cancel and Add Card
+                // Action Buttons: Cancel and Submit
                 Row(
                   children: [
                     Expanded(
@@ -406,14 +486,23 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                                 height: 16,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Row(
+                            : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(LucideIcons.plus, size: 16),
-                                  SizedBox(width: 6),
+                                  Icon(
+                                    formState.isEdit
+                                        ? LucideIcons.check
+                                        : LucideIcons.plus,
+                                    size: 16,
+                                  ),
+                                  const SizedBox(width: 6),
                                   Text(
-                                    'Add Card',
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    formState.isEdit
+                                        ? 'Save Changes'
+                                        : 'Add Card',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),

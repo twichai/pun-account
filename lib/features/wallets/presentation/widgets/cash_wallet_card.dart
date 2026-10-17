@@ -26,7 +26,7 @@ class CashWalletCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AuroraMeshBackground(
-            wallet: wallet.copyWith(auroraAccent: 'emerald'),
+            wallet: wallet,
             height: 225,
             borderRadius: 24,
             child: Padding(

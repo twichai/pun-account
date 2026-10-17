@@ -163,6 +163,106 @@ void main() {
       expect(state.errorMessage, isNotNull);
       expect(state.errorMessage, contains('Network unreachable'));
     });
+
+    test('initForEdit correctly populates state from an existing wallet', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      const existingWallet = Wallet(
+        id: 'test-wallet-id',
+        type: 'credit_card',
+        cardHolder: 'SARAH CONNOR',
+        last4: '8888',
+        cardBrand: 'mastercard',
+        auroraAccent: 'emerald',
+        balance: 75000.0,
+        currency: 'THB',
+      );
+
+      final notifier = container.read(addCardFormProvider.notifier);
+      notifier.initForEdit(existingWallet);
+
+      final state = container.read(addCardFormProvider);
+      expect(state.isEdit, isTrue);
+      expect(state.walletId, 'test-wallet-id');
+      expect(state.cardHolder, 'SARAH CONNOR');
+      expect(state.last4, '8888');
+      expect(state.cardBrand, 'mastercard');
+      expect(state.auroraAccent, 'emerald');
+      expect(state.balance, 75000.0);
+    });
+
+    test('edit mode submit updates existing wallet in walletsProvider', () async {
+      final fakeRepo = FakeWalletsRepository();
+      const existingWallet = Wallet(
+        id: 'wallet-card-1',
+        type: 'credit_card',
+        balance: 145250.00,
+        currency: 'THB',
+        cardHolder: 'PAVLO D.',
+        last4: '7642',
+        cardBrand: 'visa',
+        auroraAccent: 'cyan',
+      );
+      fakeRepo.items = [existingWallet];
+
+      final container = ProviderContainer(
+        overrides: [
+          walletsRepositoryProvider.overrideWithValue(fakeRepo),
+          updateWalletUseCaseProvider
+              .overrideWithValue(UpdateWalletUseCase(fakeRepo)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(addCardFormProvider.notifier);
+      notifier.initForEdit(existingWallet);
+      notifier.updateCardHolder('PAVLO UPDATED');
+      notifier.updateBalance(200000.0);
+
+      final success = await notifier.submit();
+      expect(success, isTrue);
+
+      final updated = container
+          .read(walletsProvider)
+          .wallets
+          .firstWhere((w) => w.id == 'wallet-card-1');
+      expect(updated.cardHolder, 'PAVLO UPDATED');
+      expect(updated.balance, 200000.0);
+    });
+
+    test('deleteCurrentWallet removes wallet from walletsProvider', () async {
+      final fakeRepo = FakeWalletsRepository();
+      const existingWallet = Wallet(
+        id: 'wallet-card-1',
+        type: 'credit_card',
+        balance: 145250.00,
+        currency: 'THB',
+        cardHolder: 'PAVLO D.',
+        last4: '7642',
+        cardBrand: 'visa',
+        auroraAccent: 'cyan',
+      );
+      fakeRepo.items = [existingWallet];
+
+      final container = ProviderContainer(
+        overrides: [
+          walletsRepositoryProvider.overrideWithValue(fakeRepo),
+          deleteWalletUseCaseProvider
+              .overrideWithValue(DeleteWalletUseCase(fakeRepo)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(addCardFormProvider.notifier);
+      notifier.initForEdit(existingWallet);
+
+      final success = await notifier.deleteCurrentWallet();
+      expect(success, isTrue);
+
+      final wallets = container.read(walletsProvider).wallets;
+      expect(wallets.any((w) => w.id == 'wallet-card-1'), isFalse);
+    });
   });
 
   group('AddCardDrawer Widget Tests', () {
@@ -194,6 +294,64 @@ void main() {
       expect(find.text('Card Number / Digits'), findsOneWidget);
       expect(find.text('Aurora Glow Accent'), findsOneWidget);
       expect(find.text('Cancel'), findsOneWidget);
+    });
+
+    testWidgets('Tapping a digital card on WalletsScreen opens edit drawer form', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: ShadcnApp(
+            home: Scaffold(
+              child: WalletsScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find the cardholder name on the digital card
+      final cardholderText = find.text('PAVLO D.').first;
+      expect(cardholderText, findsOneWidget);
+
+      // Tap on the card
+      await tester.tap(cardholderText);
+      await tester.pumpAndSettle();
+
+      // Edit drawer should now be visible with 'Edit Digital Card' and 'Save Changes'
+      expect(find.text('Edit Digital Card'), findsOneWidget);
+      expect(find.text('Save Changes'), findsOneWidget);
+      expect(find.text('Cardholder Name'), findsOneWidget);
+      expect(find.text('Cancel'), findsOneWidget);
+    });
+
+    testWidgets('Tapping Cash Wallet on WalletsScreen opens edit cash drawer form', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: ShadcnApp(
+            home: Scaffold(
+              child: WalletsScreen(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Find cash wallet card
+      final cashCardText = find.text('CASH WALLET');
+      expect(cashCardText, findsOneWidget);
+
+      // Tap on cash wallet card
+      await tester.tap(cashCardText);
+      await tester.pumpAndSettle();
+
+      // Edit drawer should open with 'Edit Cash Wallet'
+      expect(find.text('Edit Cash Wallet'), findsOneWidget);
+      expect(find.text('Save Changes'), findsOneWidget);
+      expect(find.text('Wallet Name'), findsOneWidget);
+      expect(find.text('Current Balance (THB)'), findsOneWidget);
     });
   });
 }
