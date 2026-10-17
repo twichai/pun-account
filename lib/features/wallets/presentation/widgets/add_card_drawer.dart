@@ -57,11 +57,16 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
     final formState = ref.read(addCardFormProvider);
     _cardHolderController = TextEditingController(text: formState.cardHolder);
     _cardNumberController = TextEditingController(text: formState.cardNumber);
-    _balanceController = TextEditingController(
-      text: formState.balance > 0
-          ? formState.balance.toStringAsFixed(0)
-          : '25000',
-    );
+    final initialBalanceText = formState.isEdit
+        ? (formState.balance % 1 == 0
+            ? formState.balance.toInt().toString()
+            : formState.balance.toString())
+        : (formState.balance > 0
+            ? (formState.balance % 1 == 0
+                ? formState.balance.toInt().toString()
+                : formState.balance.toString())
+            : '25000');
+    _balanceController = TextEditingController(text: initialBalanceText);
   }
 
   @override
@@ -82,8 +87,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
 
   Future<void> _submit() async {
     final notifier = ref.read(addCardFormProvider.notifier);
-    final balanceVal =
-        double.tryParse(_balanceController.text.trim()) ?? 25000.0;
+    final text = _balanceController.text.trim();
+    final balanceVal = double.tryParse(text) ??
+        (widget.wallet != null ? widget.wallet!.balance : 25000.0);
     notifier.updateBalance(balanceVal);
 
     final success = await notifier.submit();
@@ -396,10 +402,13 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                 TextField(
                   controller: _balanceController,
                   placeholder: const Text('25000'),
-                  keyboardType: TextInputType.number,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
                   onChanged: (val) {
-                    final d = double.tryParse(val) ?? 0.0;
-                    ref.read(addCardFormProvider.notifier).updateBalance(d);
+                    final d = double.tryParse(val.trim());
+                    if (d != null) {
+                      ref.read(addCardFormProvider.notifier).updateBalance(d);
+                    }
                   },
                 ),
                 const SizedBox(height: 24),

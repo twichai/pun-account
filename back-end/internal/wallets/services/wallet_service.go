@@ -32,6 +32,7 @@ type UpdateWalletInput struct {
 	Name     *string          `json:"name"`
 	Type     *string          `json:"type"`
 	Currency *string          `json:"currency"`
+	Balance  *float64         `json:"balance"`
 	IsActive *bool            `json:"is_active"`
 	UI       *models.WalletUI `json:"ui"`
 }
@@ -161,6 +162,10 @@ func (s *walletService) UpdateWallet(ctx context.Context, id uuid.UUID, input Up
 		if trimmed != "" {
 			wallet.Currency = trimmed
 		}
+	}
+
+	if input.Balance != nil {
+		wallet.Balance = *input.Balance
 	}
 
 	if input.IsActive != nil {

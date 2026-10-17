@@ -94,6 +94,7 @@ class ApiWalletsRepository implements WalletsRepository {
       'name': ?name,
       'type': wallet.type,
       'currency': wallet.currency,
+      'balance': wallet.balance,
       'is_active': wallet.isActive,
       'ui': {
         'aurora_accent': wallet.auroraAccent,

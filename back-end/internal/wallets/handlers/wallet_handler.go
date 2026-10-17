@@ -132,6 +132,7 @@ type updateWalletRequest struct {
 	Name     *string          `json:"name"`
 	Type     *string          `json:"type"`
 	Currency *string          `json:"currency"`
+	Balance  *float64         `json:"balance"`
 	IsActive *bool            `json:"is_active"`
 	UI       *models.WalletUI `json:"ui"`
 }
@@ -153,6 +154,7 @@ func (h *WalletHandler) UpdateWallet(c *fiber.Ctx) error {
 		Name:     req.Name,
 		Type:     req.Type,
 		Currency: req.Currency,
+		Balance:  req.Balance,
 		IsActive: req.IsActive,
 		UI:       req.UI,
 	})

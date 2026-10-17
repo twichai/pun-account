@@ -113,11 +113,13 @@ func TestWalletService_CRUDLifecycle(t *testing.T) {
 		t.Fatalf("expected 1 wallet, got %d", len(list))
 	}
 
-	// 4. Update Wallet UI & Name
+	// 4. Update Wallet UI & Name & Balance
 	newName := "Visa Corporate Gold"
 	newAccent := "violet"
+	newBalance := 45000.50
 	updated, err := svc.UpdateWallet(ctx, created.ID, services.UpdateWalletInput{
-		Name: &newName,
+		Name:    &newName,
+		Balance: &newBalance,
 		UI: &models.WalletUI{
 			AuroraAccent: newAccent,
 			CardHolder:   &cardHolder,
@@ -130,6 +132,9 @@ func TestWalletService_CRUDLifecycle(t *testing.T) {
 	}
 	if updated.Name != "Visa Corporate Gold" {
 		t.Errorf("expected updated name 'Visa Corporate Gold', got %s", updated.Name)
+	}
+	if updated.Balance != 45000.50 {
+		t.Errorf("expected updated balance 45000.50, got %f", updated.Balance)
 	}
 	if updated.UI.AuroraAccent != "violet" {
 		t.Errorf("expected updated accent 'violet', got %s", updated.UI.AuroraAccent)

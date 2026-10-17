@@ -69,6 +69,9 @@ func (s *stubWalletService) UpdateWallet(ctx context.Context, id uuid.UUID, inpu
 	if input.Name != nil {
 		w.Name = *input.Name
 	}
+	if input.Balance != nil {
+		w.Balance = *input.Balance
+	}
 	if input.UI != nil {
 		w.UI = *input.UI
 	}
@@ -142,7 +145,8 @@ func TestWalletHandler_EndToEndEndpoints(t *testing.T) {
 
 	// 4. PUT /api/v1/wallets/:id
 	updatePayload := map[string]interface{}{
-		"name": "Updated Cash Wallet",
+		"name":    "Updated Cash Wallet",
+		"balance": 18500.25,
 		"ui": map[string]interface{}{
 			"aurora_accent": "amber",
 		},
@@ -153,6 +157,15 @@ func TestWalletHandler_EndToEndEndpoints(t *testing.T) {
 	respPut, err := app.Test(reqPut)
 	if err != nil || respPut.StatusCode != http.StatusOK {
 		t.Fatalf("failed PUT /wallets/:id, status: %d", respPut.StatusCode)
+	}
+
+	putBody, _ := io.ReadAll(respPut.Body)
+	var updated models.Wallet
+	if err := json.Unmarshal(putBody, &updated); err != nil {
+		t.Fatalf("failed to parse updated response: %v", err)
+	}
+	if updated.Balance != 18500.25 {
+		t.Errorf("expected updated balance 18500.25, got %f", updated.Balance)
 	}
 
 	// 5. DELETE /api/v1/wallets/:id

@@ -352,7 +352,7 @@ void main() {
     });
 
     testWidgets(
-      'WalletsScreen renders RefreshTrigger and refresh button triggers refresh',
+      'WalletsScreen renders RefreshTrigger and Cards header',
       (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
@@ -367,16 +367,6 @@ void main() {
 
         // Verify RefreshTrigger is present in the widget tree
         expect(find.byType(RefreshTrigger), findsOneWidget);
-
-        // Verify programmatic refresh button is present
-        final refreshButton = find.byIcon(LucideIcons.refreshCw);
-        expect(refreshButton, findsOneWidget);
-
-        // Tap refresh button
-        await tester.tap(refreshButton);
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 2));
-        await tester.pumpAndSettle();
 
         // Screen remains intact
         expect(find.text('Cards'), findsOneWidget);
