@@ -211,10 +211,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
             children: [
               const Text(
                 'Recipients',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               PrimaryButton(
                 onPressed: _showAddServiceModal,
@@ -259,11 +256,11 @@ class _ServicesScreenState extends State<ServicesScreen> {
               // Bottom Sheet: DraggableScrollableSheet
               // maxChildSize = 1.0 reaches exactly to the top of Expanded (right under the Header)
               DraggableScrollableSheet(
-                initialChildSize: 0.52,
-                minChildSize: 0.35,
+                initialChildSize: 0.60,
+                minChildSize: 0.60,
                 maxChildSize: 1.0,
                 snap: true,
-                snapSizes: const [0.35, 0.52, 1.0],
+                snapSizes: const [0.60, 1.0],
                 builder: (context, scrollController) {
                   return Container(
                     decoration: BoxDecoration(
@@ -325,9 +322,11 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         const SizedBox(height: 16),
 
                         // List of items
-                        for (int index = 0;
-                            index < _allAccounts.length;
-                            index++) ...[
+                        for (
+                          int index = 0;
+                          index < _allAccounts.length;
+                          index++
+                        ) ...[
                           if (index > 0) const SizedBox(height: 12),
                           _buildAccountTile(_allAccounts[index], isDark),
                         ],

@@ -35,7 +35,7 @@ class SendRequestModal extends StatefulWidget {
       context,
       DrawerConfiguration(
         position: OverlayPosition.bottom,
-        showDragHandle: true,
+        showDragHandle: false,
         constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
       ),
       builder: (context) =>
@@ -226,8 +226,8 @@ class _SendRequestModalState extends State<SendRequestModal> {
                       child: _isSuccess
                           ? SendRequestSuccessView(
                               amount: _amountStr,
-                              recipientName:
-                                  resolveTaskService(_selectedTask).name,
+                              recipientName: resolveTaskService(_selectedTask)
+                                  .name,
                               accountName: _selectedAccount,
                               onClose: _closeModal,
                             )
@@ -241,8 +241,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                     height: 4,
                                     margin: const EdgeInsets.only(bottom: 12),
                                     decoration: BoxDecoration(
-                                      color:
-                                          modalMutedFg.withValues(alpha: 0.35),
+                                      color: modalMutedFg.withValues(
+                                        alpha: 0.35,
+                                      ),
                                       borderRadius: BorderRadius.circular(2),
                                     ),
                                   ),
@@ -384,8 +385,8 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                                 height: 16,
                                                 child:
                                                     CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                ),
+                                                      strokeWidth: 2,
+                                                    ),
                                               ),
                                               SizedBox(width: 8),
                                               Text(
