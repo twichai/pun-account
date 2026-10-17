@@ -1,3 +1,4 @@
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -36,16 +37,22 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final thaiTypography = Typography.geist(
+      sans: GoogleFonts.notoSansThai(),
+    );
+
     return ProviderScope(
       child: ShadcnApp(
         title: 'Pun Account',
         theme: ThemeData(
           colorScheme: ColorSchemes.lightSlate.yellow,
           radius: 0.75,
+          typography: thaiTypography,
         ),
         darkTheme: ThemeData.dark(
           colorScheme: ColorSchemes.darkSlate.yellow,
           radius: 0.75,
+          typography: thaiTypography,
         ),
         themeMode: _themeMode,
         home: widget.home ??
