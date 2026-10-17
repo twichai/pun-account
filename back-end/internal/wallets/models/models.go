@@ -152,6 +152,7 @@ type Transaction struct {
 	BusinessID      uuid.UUID      `gorm:"type:uuid;not null;index" json:"business_id"`
 	WalletID        uuid.UUID      `gorm:"type:uuid;not null;index" json:"wallet_id"`
 	CategoryID      *uuid.UUID     `gorm:"type:uuid;index" json:"category_id,omitempty"`
+	ServiceID       uuid.UUID      `gorm:"type:uuid;not null;index" json:"service_id"`
 	Type            string         `gorm:"type:varchar(50);not null" json:"type"`
 	Amount          float64        `gorm:"type:numeric(15,2);not null" json:"amount"`
 	TransactionDate time.Time      `gorm:"type:timestamptz;not null;default:CURRENT_TIMESTAMP;index" json:"transaction_date"`
@@ -163,6 +164,7 @@ type Transaction struct {
 	Business    *Business    `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
 	Wallet      *Wallet      `gorm:"foreignKey:WalletID" json:"wallet,omitempty"`
 	Category    *Category    `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
+	Service     *Service     `gorm:"foreignKey:ServiceID" json:"service,omitempty"`
 	Attachments []Attachment `gorm:"foreignKey:TransactionID;constraint:OnDelete:CASCADE" json:"attachments,omitempty"`
 }
 
@@ -254,4 +256,5 @@ type Service struct {
 
 	Business        *Business        `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
 	ServiceCategory *ServiceCategory `gorm:"foreignKey:ServiceCategoryID" json:"service_category,omitempty"`
+	Transactions    []Transaction    `gorm:"foreignKey:ServiceID" json:"transactions,omitempty"`
 }
