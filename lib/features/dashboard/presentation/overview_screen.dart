@@ -1,33 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../transactions/presentation/providers/transactions_provider.dart';
 import '../../transactions/presentation/send_request_modal.dart';
+import '../../wallets/presentation/providers/wallets_provider.dart';
 
-class TransactionItem {
-  const TransactionItem({
-    required this.id,
-    required this.title,
-    required this.category,
-    required this.amount,
-    required this.isPositive,
-    required this.icon,
-    required this.iconColor,
-    required this.statusColor,
-    required this.date,
-  });
-
-  final String id;
-  final String title;
-  final String category;
-  final String amount;
-  final bool isPositive;
-  final IconData icon;
-  final Color iconColor;
-  final Color statusColor;
-  final String date;
-}
-
-/// Redesigned Home Overview screen matching Screenshot 3 using shadcn_flutter.
-class OverviewScreen extends StatelessWidget {
+/// Redesigned Home Overview screen connected to real Wallets & Transactions
+class OverviewScreen extends ConsumerWidget {
   const OverviewScreen({
     super.key,
     this.onNavigateToWallets,
@@ -39,72 +19,115 @@ class OverviewScreen extends StatelessWidget {
   final VoidCallback? onNavigateToServices;
   final VoidCallback? onAddTransaction;
 
-  final List<TransactionItem> _transactions = const [
-    TransactionItem(
-      id: '1',
-      title: 'Apple',
-      category: 'Subscription',
-      amount: '-60 \$',
-      isPositive: false,
-      icon: LucideIcons.laptop,
-      iconColor: Color(0xFF0F172A),
-      statusColor: Color(0xFF10B981), // Emerald
-      date: 'Today 13:45',
-    ),
-    TransactionItem(
-      id: '2',
-      title: 'Threads',
-      category: 'Marketing Ads',
-      amount: '-300 \$',
-      isPositive: false,
-      icon: LucideIcons.atSign,
-      iconColor: Color(0xFF0F172A),
-      statusColor: Color(0xFFF59E0B), // Yellow
-      date: 'Today 11:20',
-    ),
-    TransactionItem(
-      id: '3',
-      title: 'Apple',
-      category: 'Client Consulting',
-      amount: '2 000 \$',
-      isPositive: true,
-      icon: LucideIcons.laptop,
-      iconColor: Color(0xFF0F172A),
-      statusColor: Color(0xFF38BDF8), // Blue
-      date: 'Yesterday',
-    ),
-    TransactionItem(
-      id: '4',
-      title: 'Exoplan',
-      category: 'Cloud Hosting',
-      amount: '-20 \$',
-      isPositive: false,
-      icon: LucideIcons.calendar,
-      iconColor: Color(0xFF10B981),
-      statusColor: Color(0xFF2DD4BF),
-      date: '14 Oct',
-    ),
-    TransactionItem(
-      id: '5',
-      title: 'Circuit',
-      category: 'SaaS Software',
-      amount: '-140 \$',
-      isPositive: false,
-      icon: LucideIcons.disc,
-      iconColor: Color(0xFFF97316),
-      statusColor: Color(0xFF2DD4BF),
-      date: '12 Oct',
-    ),
-  ];
-
   void _onOpenSendModal(BuildContext context, TransferMode mode) {
     SendRequestModal.show(context, mode: mode);
   }
 
+  IconData _resolveIcon(String? iconName) {
+    switch (iconName) {
+      case 'cloud':
+        return LucideIcons.cloud;
+      case 'sparkles':
+        return LucideIcons.sparkles;
+      case 'video':
+        return LucideIcons.video;
+      case 'palette':
+        return LucideIcons.palette;
+      case 'laptop':
+        return LucideIcons.laptop;
+      case 'code':
+        return LucideIcons.code;
+      case 'database':
+        return LucideIcons.database;
+      case 'triangle':
+        return LucideIcons.triangle;
+      case 'music':
+        return LucideIcons.music;
+      case 'play-circle':
+        return LucideIcons.play;
+      case 'book-open':
+        return LucideIcons.bookOpen;
+      case 'layers':
+        return LucideIcons.layers;
+      default:
+        return LucideIcons.receipt;
+    }
+  }
+
+  Color _resolveColor(String? hexString) {
+    if (hexString == null || hexString.isEmpty) {
+      return const Color(0xFF6366F1);
+    }
+    final hex = hexString.replaceAll('#', '');
+    if (hex.length == 6) {
+      return Color(int.parse('FF$hex', radix: 16));
+    } else if (hex.length == 8) {
+      return Color(int.parse(hex, radix: 16));
+    }
+    return const Color(0xFF6366F1);
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date);
+    if (diff.inDays == 0 && now.day == date.day) {
+      final hour = date.hour.toString().padLeft(2, '0');
+      final minute = date.minute.toString().padLeft(2, '0');
+      return 'Today $hour:$minute';
+    } else if (diff.inDays == 1 ||
+        (diff.inHours < 48 && now.day - date.day == 1)) {
+      return 'Yesterday';
+    }
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final m = months[(date.month - 1).clamp(0, 11)];
+    return '${date.day} $m';
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final walletsState = ref.watch(walletsProvider);
+    final wallets = walletsState.wallets;
+    final totalBalance = wallets.fold<double>(0.0, (acc, w) => acc + w.balance);
+    final balanceParts = totalBalance.toStringAsFixed(2).split('.');
+    final balanceInt = balanceParts[0].replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]},',
+    );
+    final balanceDec = balanceParts[1];
+
+    final transactionsState = ref.watch(transactionsProvider);
+    final transactions = transactionsState.transactions;
+    final expenses = transactions
+        .where((t) => t.type.toLowerCase() == 'expense')
+        .toList();
+    final totalSpending = expenses.fold<double>(
+      0.0,
+      (acc, t) => acc + t.amount,
+    );
+    final spendingFormatted = totalSpending.toStringAsFixed(2);
+    final spendingInt = spendingFormatted
+        .split('.')[0]
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (match) => '${match[1]},',
+        );
+    final recentExpenses = expenses.take(4).toList();
 
     return SingleChildScrollView(
       child: Column(
@@ -171,16 +194,16 @@ class OverviewScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            const Text(
-                              '\$ 7,854',
-                              style: TextStyle(
+                            Text(
+                              '\$ $balanceInt',
+                              style: const TextStyle(
                                 fontSize: 36,
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.5,
                               ),
                             ),
                             Text(
-                              '.43',
+                              '.$balanceDec',
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
@@ -369,7 +392,7 @@ class OverviewScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 22),
 
-                // "Spending" Card with overlapping brand avatars
+                // "Spending" Card with real transaction amount & icons
                 GestureDetector(
                   onTap: onNavigateToServices,
                   child: Container(
@@ -403,9 +426,9 @@ class OverviewScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            const Text(
-                              '\$1,385',
-                              style: TextStyle(
+                            Text(
+                              '\$$spendingInt.${spendingFormatted.split(".")[1]}',
+                              style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -413,85 +436,40 @@ class OverviewScreen extends StatelessWidget {
                           ],
                         ),
 
-                        // Right: Overlapping circular avatars / logos
-                        SizedBox(
-                          height: 44,
-                          width: 150,
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            alignment: Alignment.centerRight,
-                            children: [
-                              // +2 badge
-                              Positioned(
-                                right: 0,
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: isDark
-                                        ? const Color(0xFF27272A)
-                                        : const Color(0xFFE4E4E7),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isDark
-                                          ? const Color(0xFF18181B)
-                                          : Colors.white,
-                                      width: 2,
+                        // Right: Overlapping circular avatars / logos from real expenses
+                        if (recentExpenses.isNotEmpty)
+                          SizedBox(
+                            height: 44,
+                            width: (recentExpenses.length * 24.0) + 24.0,
+                            child: Stack(
+                              clipBehavior: Clip.none,
+                              alignment: Alignment.centerRight,
+                              children: [
+                                for (
+                                  int i = 0;
+                                  i < recentExpenses.length;
+                                  i++
+                                ) ...[
+                                  Positioned(
+                                    right:
+                                        (recentExpenses.length - 1 - i) * 24.0,
+                                    child: _buildSmallLogoAvatar(
+                                      recentExpenses[i],
+                                      isDark,
                                     ),
                                   ),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    '+2',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              // Avatar 4: Apple
-                              Positioned(
-                                right: 24,
-                                child: _buildSmallLogoAvatar(
-                                  LucideIcons.laptop,
-                                  const Color(0xFF0F172A),
-                                  Colors.white,
-                                  isDark,
-                                ),
-                              ),
-                              // Avatar 3: Threads
-                              Positioned(
-                                right: 48,
-                                child: _buildSmallLogoAvatar(
-                                  LucideIcons.atSign,
-                                  Colors.white,
-                                  const Color(0xFF0F172A),
-                                  isDark,
-                                ),
-                              ),
-                              // Avatar 2: Orange/Chrome
-                              Positioned(
-                                right: 72,
-                                child: _buildSmallLogoAvatar(
-                                  LucideIcons.disc,
-                                  Colors.white,
-                                  const Color(0xFFF97316),
-                                  isDark,
-                                ),
-                              ),
-                              // Avatar 1: Calendar / Exoplan
-                              Positioned(
-                                right: 96,
-                                child: _buildSmallLogoAvatar(
-                                  LucideIcons.calendar,
-                                  Colors.white,
-                                  const Color(0xFF10B981),
-                                  isDark,
-                                ),
-                              ),
-                            ],
+                                ],
+                              ],
+                            ),
+                          )
+                        else
+                          Icon(
+                            LucideIcons.arrowRight,
+                            size: 18,
+                            color: isDark
+                                ? const Color(0xFFA1A1AA)
+                                : const Color(0xFF71717A),
                           ),
-                        ),
                       ],
                     ),
                   ),
@@ -572,17 +550,99 @@ class OverviewScreen extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Transactions List
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _transactions.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 14),
-                  itemBuilder: (context, index) {
-                    final item = _transactions[index];
-                    return _buildTransactionRow(item, isDark);
-                  },
-                ),
+                if (transactionsState.isLoading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 32),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (transactionsState.errorMessage != null)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(vertical: 16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: const Color(0xFFEF4444).withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          LucideIcons.circleAlert,
+                          color: Color(0xFFEF4444),
+                          size: 18,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'ไม่สามารถโหลดรายการได้: ${transactionsState.errorMessage}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFFEF4444),
+                            ),
+                          ),
+                        ),
+                        IconButton.ghost(
+                          density: ButtonDensity.compact,
+                          icon: const Icon(LucideIcons.refreshCw, size: 16),
+                          onPressed: () => ref
+                              .read(transactionsProvider.notifier)
+                              .fetchTransactions(),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (transactions.isEmpty)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 40,
+                      horizontal: 20,
+                    ),
+                    alignment: Alignment.center,
+                    child: Column(
+                      children: [
+                        const Icon(
+                          LucideIcons.receipt,
+                          size: 40,
+                          color: Color(0xFF71717A),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'ยังไม่มีรายการธุรกรรม',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF09090B),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'เริ่มทำรายการได้โดยกดปุ่ม Send หรือ Request ด้านบน',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF71717A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: transactions.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 14),
+                    itemBuilder: (context, index) {
+                      final item = transactions[index];
+                      return _buildTransactionRow(item, isDark);
+                    },
+                  ),
               ],
             ),
           ),
@@ -591,17 +651,15 @@ class OverviewScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSmallLogoAvatar(
-    IconData icon,
-    Color iconColor,
-    Color bgColor,
-    bool isDark,
-  ) {
+  Widget _buildSmallLogoAvatar(TransactionModel item, bool isDark) {
+    final icon = _resolveIcon(item.serviceIcon);
+    final color = _resolveColor(item.serviceColor);
+
     return Container(
       width: 32,
       height: 32,
       decoration: BoxDecoration(
-        color: bgColor,
+        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
         shape: BoxShape.circle,
         border: Border.all(
           color: isDark ? const Color(0xFF18181B) : Colors.white,
@@ -609,11 +667,38 @@ class OverviewScreen extends StatelessWidget {
         ),
       ),
       alignment: Alignment.center,
-      child: Icon(icon, size: 16, color: iconColor),
+      child: item.serviceImageUrl != null && item.serviceImageUrl!.isNotEmpty
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: CachedNetworkImage(
+                imageUrl: item.serviceImageUrl!,
+                width: 32,
+                height: 32,
+                fit: BoxFit.cover,
+                errorWidget: (context, url, err) =>
+                    Icon(icon, size: 16, color: color),
+                placeholder: (context, url) =>
+                    Icon(icon, size: 16, color: color),
+              ),
+            )
+          : Icon(icon, size: 16, color: color),
     );
   }
 
-  Widget _buildTransactionRow(TransactionItem item, bool isDark) {
+  Widget _buildTransactionRow(TransactionModel item, bool isDark) {
+    final isPositive = item.type.toLowerCase() == 'income';
+    final icon = _resolveIcon(item.serviceIcon);
+    final color = _resolveColor(item.serviceColor);
+    final title =
+        item.serviceName ??
+        item.description ??
+        (isPositive ? 'Income' : 'Expense');
+    final subtitle = item.description != null && item.description != title
+        ? '${item.description!} • ${_formatDate(item.transactionDate)}'
+        : '${item.type.toUpperCase()} • ${_formatDate(item.transactionDate)}';
+    final amountText =
+        '${isPositive ? "+" : "-"}\$${item.amount.toStringAsFixed(2)}';
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -632,7 +717,23 @@ class OverviewScreen extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: Icon(item.icon, size: 20, color: item.iconColor),
+                child:
+                    item.serviceImageUrl != null &&
+                        item.serviceImageUrl!.isNotEmpty
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(22),
+                        child: CachedNetworkImage(
+                          imageUrl: item.serviceImageUrl!,
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, err) =>
+                              Icon(icon, size: 20, color: color),
+                          placeholder: (context, url) =>
+                              Icon(icon, size: 20, color: color),
+                        ),
+                      )
+                    : Icon(icon, size: 20, color: color),
               ),
               Positioned(
                 right: 0,
@@ -641,7 +742,9 @@ class OverviewScreen extends StatelessWidget {
                   width: 10,
                   height: 10,
                   decoration: BoxDecoration(
-                    color: item.statusColor,
+                    color: isPositive
+                        ? const Color(0xFF10B981)
+                        : const Color(0xFFEF4444),
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isDark ? const Color(0xFF18181B) : Colors.white,
@@ -660,32 +763,37 @@ class OverviewScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.title,
+                  title,
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: isDark ? Colors.white : const Color(0xFF09090B),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${item.category} • ${item.date}',
+                  subtitle,
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF71717A),
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
+          const SizedBox(width: 8),
 
           // Amount
           Text(
-            item.amount,
+            amountText,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: item.isPositive
+              color: isPositive
                   ? const Color(0xFF10B981) // Emerald Green
                   : (isDark ? Colors.white : const Color(0xFF09090B)),
             ),

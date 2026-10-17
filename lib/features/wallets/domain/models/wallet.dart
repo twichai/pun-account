@@ -27,8 +27,18 @@ abstract class Wallet with _$Wallet {
       normalized['last4'] ??= ui['last4'];
       normalized['cardBrand'] ??= ui['card_brand'] ?? ui['cardBrand'];
     }
+    normalized['cardHolder'] ??= json['name'];
     normalized['businessId'] ??= json['business_id'];
     normalized['isActive'] ??= json['is_active'];
     return _$WalletFromJson(normalized);
+  }
+}
+
+extension WalletX on Wallet {
+  String get name {
+    if (cardHolder != null && cardHolder!.trim().isNotEmpty) {
+      return cardHolder!.trim();
+    }
+    return type.toLowerCase() == 'cash' ? 'เงินสดในมือ' : type;
   }
 }

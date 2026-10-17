@@ -1,5 +1,6 @@
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'core/config/env_config.dart';
@@ -14,9 +15,10 @@ Future<void> main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key, this.home});
+  const MyApp({super.key, this.home, this.overrides = const []});
 
   final Widget? home;
+  final List<Override> overrides;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -40,6 +42,7 @@ class _MyAppState extends State<MyApp> {
     final thaiTypography = Typography.geist(sans: GoogleFonts.notoSansThai());
 
     return ProviderScope(
+      overrides: widget.overrides,
       child: ShadcnApp(
         title: 'Pun Account',
         theme: ThemeData(

@@ -40,6 +40,7 @@ type Business struct {
 	Transactions []Transaction `gorm:"foreignKey:BusinessID;constraint:OnDelete:CASCADE" json:"transactions,omitempty"`
 	Transfers    []Transfer    `gorm:"foreignKey:BusinessID;constraint:OnDelete:CASCADE" json:"transfers,omitempty"`
 	Assets       []Asset       `gorm:"foreignKey:BusinessID;constraint:OnDelete:CASCADE" json:"assets,omitempty"`
+	Services     []Service     `gorm:"foreignKey:BusinessID;constraint:OnDelete:CASCADE" json:"services,omitempty"`
 }
 
 // WalletType enum values
@@ -151,6 +152,7 @@ type Transaction struct {
 	BusinessID      uuid.UUID      `gorm:"type:uuid;not null;index" json:"business_id"`
 	WalletID        uuid.UUID      `gorm:"type:uuid;not null;index" json:"wallet_id"`
 	CategoryID      *uuid.UUID     `gorm:"type:uuid;index" json:"category_id,omitempty"`
+	ServiceID       uuid.UUID      `gorm:"type:uuid;not null;index" json:"service_id"`
 	Type            string         `gorm:"type:varchar(50);not null" json:"type"`
 	Amount          float64        `gorm:"type:numeric(15,2);not null" json:"amount"`
 	TransactionDate time.Time      `gorm:"type:timestamptz;not null;default:CURRENT_TIMESTAMP;index" json:"transaction_date"`
@@ -162,6 +164,7 @@ type Transaction struct {
 	Business    *Business    `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
 	Wallet      *Wallet      `gorm:"foreignKey:WalletID" json:"wallet,omitempty"`
 	Category    *Category    `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
+	Service     *Service     `gorm:"foreignKey:ServiceID" json:"service,omitempty"`
 	Attachments []Attachment `gorm:"foreignKey:TransactionID;constraint:OnDelete:CASCADE" json:"attachments,omitempty"`
 }
 
@@ -211,4 +214,47 @@ type Asset struct {
 	DeletedAt      gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
 	Business *Business `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
+}
+
+// ServiceCategory represents a job track / vertical (e.g., Content Creator, Developer, Designer).
+type ServiceCategory struct {
+	ID          uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid_v7()" json:"id"`
+	BusinessID  *uuid.UUID     `gorm:"type:uuid;index" json:"business_id,omitempty"`
+	Key         string         `gorm:"type:varchar(50);not null;index" json:"key"`
+	Name        string         `gorm:"type:varchar(255);not null" json:"name"`
+	Description *string        `gorm:"type:text" json:"description,omitempty"`
+	Icon        *string        `gorm:"type:varchar(100)" json:"icon,omitempty"`
+	Color       *string        `gorm:"type:varchar(50)" json:"color,omitempty"`
+	IsSystem    bool           `gorm:"default:false;not null;index" json:"is_system"`
+	IsActive    bool           `gorm:"default:true;not null" json:"is_active"`
+	CreatedAt   time.Time      `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt   time.Time      `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+
+	Business *Business `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
+	Services []Service `gorm:"foreignKey:ServiceCategoryID;constraint:OnDelete:SET NULL" json:"services,omitempty"`
+}
+
+// Service represents a SaaS, subscription, cloud tool, or recurring payment recipient.
+type Service struct {
+	ID                uuid.UUID        `gorm:"type:uuid;primaryKey;default:gen_random_uuid_v7()" json:"id"`
+	BusinessID        *uuid.UUID       `gorm:"type:uuid;index" json:"business_id,omitempty"`
+	ServiceCategoryID *uuid.UUID       `gorm:"type:uuid;index" json:"service_category_id,omitempty"`
+	Name              string           `gorm:"type:varchar(255);not null" json:"name"`
+	Provider          *string          `gorm:"type:varchar(100)" json:"provider,omitempty"`
+	AccountNumber     *string          `gorm:"type:varchar(100)" json:"account_number,omitempty"`
+	Icon              *string          `gorm:"type:varchar(100)" json:"icon,omitempty"`
+	Color             *string          `gorm:"type:varchar(50)" json:"color,omitempty"`
+	ImageURL          *string          `gorm:"type:text" json:"image_url,omitempty"`
+	Badge             *string          `gorm:"type:varchar(50)" json:"badge,omitempty"`
+	IsQuick           bool             `gorm:"default:false;not null;index" json:"is_quick"`
+	IsSystem          bool             `gorm:"default:false;not null;index" json:"is_system"`
+	IsActive          bool             `gorm:"default:true;not null" json:"is_active"`
+	CreatedAt         time.Time        `gorm:"autoCreateTime" json:"created_at"`
+	UpdatedAt         time.Time        `gorm:"autoUpdateTime" json:"updated_at"`
+	DeletedAt         gorm.DeletedAt   `gorm:"index" json:"deleted_at,omitempty"`
+
+	Business        *Business        `gorm:"foreignKey:BusinessID" json:"business,omitempty"`
+	ServiceCategory *ServiceCategory `gorm:"foreignKey:ServiceCategoryID" json:"service_category,omitempty"`
+	Transactions    []Transaction    `gorm:"foreignKey:ServiceID" json:"transactions,omitempty"`
 }

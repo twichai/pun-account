@@ -91,10 +91,10 @@ void main() {
       container.dispose();
     });
 
-    test('initial state has default mockup wallets and not loading', () {
+    test('initial state has empty wallets and not loading', () {
       final state = container.read(walletsProvider);
       expect(state.isLoading, isFalse);
-      expect(state.wallets, isNotEmpty);
+      expect(state.wallets, isEmpty);
       expect(state.errorMessage, isNull);
     });
 

@@ -58,6 +58,14 @@ class FailingCreateWalletUseCase extends CreateWalletUseCase {
   }
 }
 
+class FakeWalletsNotifier extends WalletsNotifier {
+  final List<Wallet> initialWallets;
+  FakeWalletsNotifier(this.initialWallets);
+
+  @override
+  WalletsState build() => WalletsState(wallets: initialWallets);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   SharedPreferences.setMockInitialValues({});
@@ -226,6 +234,7 @@ void main() {
         addTearDown(container.dispose);
 
         final notifier = container.read(addCardFormProvider.notifier);
+        container.read(walletsProvider.notifier).addWallet(existingWallet);
         notifier.initForEdit(existingWallet);
         notifier.updateCardHolder('PAVLO UPDATED');
         notifier.updateBalance(200000.0);
@@ -267,6 +276,7 @@ void main() {
       addTearDown(container.dispose);
 
       final notifier = container.read(addCardFormProvider.notifier);
+      container.read(walletsProvider.notifier).addWallet(existingWallet);
       notifier.initForEdit(existingWallet);
 
       final success = await notifier.deleteCurrentWallet();
@@ -278,12 +288,38 @@ void main() {
   });
 
   group('AddCardDrawer Widget Tests', () {
+    const sampleWallets = [
+      Wallet(
+        id: 'wallet-cash-1',
+        type: 'cash',
+        balance: 18500.00,
+        currency: 'THB',
+        cardHolder: 'CASH WALLET',
+        auroraAccent: 'emerald',
+      ),
+      Wallet(
+        id: 'wallet-card-1',
+        type: 'credit_card',
+        balance: 145250.00,
+        currency: 'THB',
+        cardHolder: 'PAVLO D.',
+        last4: '7642',
+        cardBrand: 'visa',
+        auroraAccent: 'cyan',
+      ),
+    ];
+
     testWidgets('Tapping "Add Card" on WalletsScreen opens drawer form', (
       tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
+        ProviderScope(
+          overrides: [
+            walletsProvider.overrideWith(
+              () => FakeWalletsNotifier(sampleWallets),
+            ),
+          ],
+          child: const ShadcnApp(home: Scaffold(child: WalletsScreen())),
         ),
       );
       await tester.pumpAndSettle();
@@ -307,8 +343,13 @@ void main() {
       'Tapping a digital card on WalletsScreen opens edit drawer form',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
+          ProviderScope(
+            overrides: [
+              walletsProvider.overrideWith(
+                () => FakeWalletsNotifier(sampleWallets),
+              ),
+            ],
+            child: const ShadcnApp(home: Scaffold(child: WalletsScreen())),
           ),
         );
         await tester.pumpAndSettle();
@@ -332,8 +373,13 @@ void main() {
       'Tapping Cash Wallet on WalletsScreen opens edit cash drawer form',
       (tester) async {
         await tester.pumpWidget(
-          const ProviderScope(
-            child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
+          ProviderScope(
+            overrides: [
+              walletsProvider.overrideWith(
+                () => FakeWalletsNotifier(sampleWallets),
+              ),
+            ],
+            child: const ShadcnApp(home: Scaffold(child: WalletsScreen())),
           ),
         );
         await tester.pumpAndSettle();
@@ -357,8 +403,13 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
+        ProviderScope(
+          overrides: [
+            walletsProvider.overrideWith(
+              () => FakeWalletsNotifier(sampleWallets),
+            ),
+          ],
+          child: const ShadcnApp(home: Scaffold(child: WalletsScreen())),
         ),
       );
       await tester.pumpAndSettle();
