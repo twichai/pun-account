@@ -13,6 +13,30 @@ class FakeServicesRepository implements ServicesRepository {
       description: 'For creators',
       icon: LucideIcons.video,
       color: Color(0xFFEF4444),
+      services: [
+        ServiceCategoryItem(
+          id: 'svc-1',
+          name: 'Canva Pro',
+          accountNumber: 'KBank 1234',
+          icon: LucideIcons.palette,
+          color: Color(0xFF00C4CC),
+          serviceCategoryId: 'content_creator',
+          categoryTrack: 'Content Creator',
+          isMyAccount: true,
+          isQuick: true,
+        ),
+        ServiceCategoryItem(
+          id: 'svc-2',
+          name: 'ChatGPT Plus',
+          accountNumber: 'Chase 2983',
+          icon: LucideIcons.sparkles,
+          color: Color(0xFF10B981),
+          serviceCategoryId: 'content_creator',
+          categoryTrack: 'Content Creator',
+          isMyAccount: true,
+          isQuick: true,
+        ),
+      ],
     ),
     const ServiceTrack(
       id: 'cat-2',
@@ -21,55 +45,64 @@ class FakeServicesRepository implements ServicesRepository {
       description: 'For devs',
       icon: LucideIcons.code,
       color: Color(0xFF10B981),
-    ),
-  ];
-
-  List<ServiceCategoryItem> fakeServices = [
-    const ServiceCategoryItem(
-      id: 'svc-1',
-      name: 'Canva Pro',
-      accountNumber: 'KBank 1234',
-      icon: LucideIcons.palette,
-      color: Color(0xFF00C4CC),
-      serviceCategoryId: 'content_creator',
-      categoryTrack: 'Content Creator',
-      isMyAccount: true,
-      isQuick: true,
-    ),
-    const ServiceCategoryItem(
-      id: 'svc-2',
-      name: 'ChatGPT Plus',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.sparkles,
-      color: Color(0xFF10B981),
-      serviceCategoryId: 'content_creator',
-      categoryTrack: 'Content Creator',
-      isMyAccount: true,
-      isQuick: true,
-    ),
-    const ServiceCategoryItem(
-      id: 'svc-3',
-      name: 'AWS Cloud',
-      accountNumber: 'Mastercard 9283',
-      icon: LucideIcons.cloud,
-      color: Color(0xFFF59E0B),
-      serviceCategoryId: 'developer',
-      categoryTrack: 'Developer',
-      isMyAccount: false,
-      isQuick: true,
+      services: [
+        ServiceCategoryItem(
+          id: 'svc-3',
+          name: 'AWS Cloud',
+          accountNumber: 'Mastercard 9283',
+          icon: LucideIcons.cloud,
+          color: Color(0xFFF59E0B),
+          serviceCategoryId: 'developer',
+          categoryTrack: 'Developer',
+          isMyAccount: false,
+          isQuick: true,
+        ),
+      ],
     ),
   ];
 
   @override
-  Future<List<ServiceTrack>> getServiceCategories({String? businessId}) async =>
-      fakeTracks;
+  Future<List<ServiceTrack>> getServiceCategories({
+    String? businessId,
+    String? search,
+  }) async {
+    if (search != null && search.isNotEmpty) {
+      final query = search.toLowerCase();
+      return fakeTracks
+          .where((t) =>
+              t.name.toLowerCase().contains(query) ||
+              t.services.any((s) => s.name.toLowerCase().contains(query)))
+          .toList();
+    }
+    return fakeTracks;
+  }
+
+  @override
+  Future<ServiceTrack> getServiceCategoryById(
+    String categoryId, {
+    String? businessId,
+    String? search,
+  }) async {
+    return fakeTracks.firstWhere(
+      (t) => t.id == categoryId || t.key == categoryId,
+    );
+  }
 
   @override
   Future<List<ServiceCategoryItem>> getServices({
     String? businessId,
     String? categoryKey,
-  }) async =>
-      fakeServices;
+    String? search,
+  }) async {
+    var items = fakeTracks.expand((t) => t.services).toList();
+    if (categoryKey != null && categoryKey.isNotEmpty && categoryKey != 'all') {
+      items = items.where((s) => s.serviceCategoryId == categoryKey).toList();
+    }
+    if (search != null && search.isNotEmpty) {
+      items = items.where((s) => s.name.toLowerCase().contains(search.toLowerCase())).toList();
+    }
+    return items;
+  }
 }
 
 void main() {
@@ -90,7 +123,7 @@ void main() {
       container.dispose();
     });
 
-    test('fetchCategoriesAndServices populates real data from repository', () async {
+    test('fetchCategoriesAndServices populates real data from repository with nested services', () async {
       await container
           .read(servicesProvider.notifier)
           .fetchCategoriesAndServices();

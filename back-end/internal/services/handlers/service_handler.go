@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"pun-account-backend/internal/services/services"
@@ -21,6 +22,7 @@ func NewServiceHandler(service services.ServiceService) *ServiceHandler {
 func (h *ServiceHandler) RegisterRoutes(router fiber.Router) {
 	servicesGroup := router.Group("/services")
 	servicesGroup.Get("/categories", h.ListCategories)
+	servicesGroup.Get("/categories/:categories_id", h.GetCategory)
 	servicesGroup.Get("/", h.ListServices)
 	servicesGroup.Post("/", h.CreateService)
 }
@@ -35,7 +37,9 @@ func (h *ServiceHandler) ListCategories(c *fiber.Ctx) error {
 		}
 	}
 
-	categories, err := h.service.ListCategories(c.Context(), businessUUID)
+	search := c.Query("search")
+
+	categories, err := h.service.ListCategories(c.Context(), businessUUID, search)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"error": fiber.Map{
@@ -46,6 +50,49 @@ func (h *ServiceHandler) ListCategories(c *fiber.Ctx) error {
 	}
 
 	return c.Status(http.StatusOK).JSON(categories)
+}
+
+func (h *ServiceHandler) GetCategory(c *fiber.Ctx) error {
+	categoryID := c.Params("categories_id")
+	if categoryID == "" {
+		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
+			"error": fiber.Map{
+				"code":    "INVALID_INPUT",
+				"message": "Category ID or key is required",
+			},
+		})
+	}
+
+	var businessUUID *uuid.UUID
+	businessIDStr := c.Query("business_id")
+	if businessIDStr != "" {
+		parsed, err := uuid.Parse(businessIDStr)
+		if err == nil {
+			businessUUID = &parsed
+		}
+	}
+
+	search := c.Query("search")
+
+	category, err := h.service.GetCategory(c.Context(), categoryID, businessUUID, search)
+	if err != nil {
+		if errors.Is(err, services.ErrNotFound) {
+			return c.Status(http.StatusNotFound).JSON(fiber.Map{
+				"error": fiber.Map{
+					"code":    "NOT_FOUND",
+					"message": "Service category not found",
+				},
+			})
+		}
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"error": fiber.Map{
+				"code":    "INTERNAL_ERROR",
+				"message": "Failed to retrieve service category",
+			},
+		})
+	}
+
+	return c.Status(http.StatusOK).JSON(category)
 }
 
 func (h *ServiceHandler) ListServices(c *fiber.Ctx) error {

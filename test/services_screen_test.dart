@@ -5,7 +5,10 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 class TestServicesRepository implements ServicesRepository {
   @override
-  Future<List<ServiceTrack>> getServiceCategories({String? businessId}) async {
+  Future<List<ServiceTrack>> getServiceCategories({
+    String? businessId,
+    String? search,
+  }) async {
     return const [
       ServiceTrack(
         id: 'cat-1',
@@ -14,6 +17,30 @@ class TestServicesRepository implements ServicesRepository {
         description: 'For creators',
         icon: LucideIcons.video,
         color: Color(0xFFEF4444),
+        services: [
+          ServiceCategoryItem(
+            id: 'svc-1',
+            name: 'Canva Pro',
+            accountNumber: 'KBank 1234',
+            icon: LucideIcons.palette,
+            color: Color(0xFF00C4CC),
+            serviceCategoryId: 'content_creator',
+            categoryTrack: 'Content Creator',
+            isMyAccount: true,
+            isQuick: true,
+          ),
+          ServiceCategoryItem(
+            id: 'svc-2',
+            name: 'CapCut Pro',
+            accountNumber: 'Chase 2983',
+            icon: LucideIcons.video,
+            color: Color(0xFF111827),
+            serviceCategoryId: 'content_creator',
+            categoryTrack: 'Content Creator',
+            isMyAccount: true,
+            isQuick: true,
+          ),
+        ],
       ),
       ServiceTrack(
         id: 'cat-2',
@@ -27,34 +54,23 @@ class TestServicesRepository implements ServicesRepository {
   }
 
   @override
+  Future<ServiceTrack> getServiceCategoryById(
+    String categoryId, {
+    String? businessId,
+    String? search,
+  }) async {
+    final list = await getServiceCategories(businessId: businessId, search: search);
+    return list.first;
+  }
+
+  @override
   Future<List<ServiceCategoryItem>> getServices({
     String? businessId,
     String? categoryKey,
+    String? search,
   }) async {
-    return const [
-      ServiceCategoryItem(
-        id: 'svc-1',
-        name: 'Canva Pro',
-        accountNumber: 'KBank 1234',
-        icon: LucideIcons.palette,
-        color: Color(0xFF00C4CC),
-        serviceCategoryId: 'content_creator',
-        categoryTrack: 'Content Creator',
-        isMyAccount: true,
-        isQuick: true,
-      ),
-      ServiceCategoryItem(
-        id: 'svc-2',
-        name: 'CapCut Pro',
-        accountNumber: 'Chase 2983',
-        icon: LucideIcons.video,
-        color: Color(0xFF111827),
-        serviceCategoryId: 'content_creator',
-        categoryTrack: 'Content Creator',
-        isMyAccount: true,
-        isQuick: true,
-      ),
-    ];
+    final list = await getServiceCategories(businessId: businessId, search: search);
+    return list.expand((t) => t.services).toList();
   }
 }
 

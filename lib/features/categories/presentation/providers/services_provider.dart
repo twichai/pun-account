@@ -110,32 +110,34 @@ class ServicesNotifier extends Notifier<ServicesState> {
     return const ServicesState(isLoading: true);
   }
 
-  /// Fetch categories (tracks) and services from Go backend API
-  Future<void> fetchCategoriesAndServices({String? businessId}) async {
+  /// Fetch categories (tracks) with nested services from Go backend API
+  Future<void> fetchCategoriesAndServices({
+    String? businessId,
+    String? search,
+  }) async {
     state = state.copyWith(isLoading: true, errorMessage: () => null);
     try {
       final repo = ref.read(servicesRepositoryProvider);
-      final categoriesFuture =
-          repo.getServiceCategories(businessId: businessId);
-      final servicesFuture = repo.getServices(businessId: businessId);
+      final categories = await repo.getServiceCategories(
+        businessId: businessId,
+        search: search,
+      );
 
-      final results = await Future.wait([categoriesFuture, servicesFuture]);
-      final fetchedCategories = results[0] as List<ServiceTrack>;
-      final fetchedServices = results[1] as List<ServiceCategoryItem>;
-
-      final quicks = fetchedServices.where((s) => s.isQuick).toList();
+      // Extract all services nested inside categories
+      final allServices = categories.expand((c) => c.services).toList();
+      final quicks = allServices.where((s) => s.isQuick).toList();
 
       // Ensure active track key is valid
       String activeTrack = state.selectedTrackKey;
-      if (fetchedCategories.isNotEmpty &&
-          !fetchedCategories.any((t) => t.key == activeTrack) &&
+      if (categories.isNotEmpty &&
+          !categories.any((t) => t.key == activeTrack) &&
           activeTrack != 'all') {
-        activeTrack = fetchedCategories.first.key;
+        activeTrack = categories.first.key;
       }
 
       state = state.copyWith(
-        tracks: fetchedCategories,
-        allAccounts: fetchedServices,
+        tracks: categories,
+        allAccounts: allServices,
         quickServices: quicks,
         selectedTrackKey: activeTrack,
         isLoading: false,

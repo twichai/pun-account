@@ -17,7 +17,8 @@ var (
 
 // ServiceService defines business logic for services and categories.
 type ServiceService interface {
-	ListCategories(ctx context.Context, businessID *uuid.UUID) ([]models.ServiceCategory, error)
+	ListCategories(ctx context.Context, businessID *uuid.UUID, search string) ([]models.ServiceCategory, error)
+	GetCategory(ctx context.Context, idOrKey string, businessID *uuid.UUID, search string) (*models.ServiceCategory, error)
 	ListServices(ctx context.Context, businessID *uuid.UUID, categoryKey string) ([]models.Service, error)
 	CreateService(ctx context.Context, service *models.Service) (*models.Service, error)
 }
@@ -31,8 +32,19 @@ func NewServiceService(repo repository.ServiceRepository) ServiceService {
 	return &serviceService{repo: repo}
 }
 
-func (s *serviceService) ListCategories(ctx context.Context, businessID *uuid.UUID) ([]models.ServiceCategory, error) {
-	return s.repo.ListServiceCategories(ctx, businessID)
+func (s *serviceService) ListCategories(ctx context.Context, businessID *uuid.UUID, search string) ([]models.ServiceCategory, error) {
+	return s.repo.ListServiceCategories(ctx, businessID, search)
+}
+
+func (s *serviceService) GetCategory(ctx context.Context, idOrKey string, businessID *uuid.UUID, search string) (*models.ServiceCategory, error) {
+	category, err := s.repo.GetServiceCategory(ctx, idOrKey, businessID, search)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, ErrNotFound
+		}
+		return nil, err
+	}
+	return category, nil
 }
 
 func (s *serviceService) ListServices(ctx context.Context, businessID *uuid.UUID, categoryKey string) ([]models.Service, error) {
