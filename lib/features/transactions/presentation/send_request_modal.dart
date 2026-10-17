@@ -56,7 +56,6 @@ class _SendRequestModalState extends State<SendRequestModal> {
   late String _selectedTask;
   bool _isSaving = false;
   bool _isSuccess = false;
-  Timer? _autoCloseTimer;
   bool _hasUserTyped = false;
 
   final List<String> _accounts = [
@@ -74,15 +73,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
     _selectedTask = widget.recipientName ?? 'AWS Cloud';
   }
 
-  @override
-  void dispose() {
-    _autoCloseTimer?.cancel();
-    super.dispose();
-  }
-
   void _closeModal() {
-    _autoCloseTimer?.cancel();
-    _autoCloseTimer = null;
     if (mounted) {
       closeOverlay(context);
     }
@@ -381,10 +372,6 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                               _isSaving = false;
                                               _isSuccess = true;
                                             });
-                                            _autoCloseTimer = Timer(
-                                              const Duration(seconds: 3),
-                                              _closeModal,
-                                            );
                                           },
                                     child: _isSaving
                                         ? const Row(
