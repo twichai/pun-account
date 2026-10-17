@@ -292,7 +292,6 @@ void main() {
       Wallet(
         id: 'wallet-cash-1',
         type: 'cash',
-        name: 'Cash Wallet',
         balance: 18500.00,
         currency: 'THB',
         cardHolder: 'CASH WALLET',

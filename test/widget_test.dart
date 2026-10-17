@@ -1,7 +1,5 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pun_account/features/navigation/presentation/screens/main_navigation_screen.dart';
-import 'package:pun_account/features/transactions/domain/models/transaction.dart';
 import 'package:pun_account/features/transactions/presentation/providers/transactions_provider.dart';
 import 'package:pun_account/features/wallets/domain/models/wallet.dart';
 import 'package:pun_account/features/wallets/presentation/providers/wallets_provider.dart';
@@ -57,7 +55,6 @@ void main() {
       Wallet(
         id: 'wallet-cash-1',
         type: 'cash',
-        name: 'เงินสดในมือ',
         balance: 18500.00,
         currency: 'THB',
         cardHolder: 'เงินสดในมือ',

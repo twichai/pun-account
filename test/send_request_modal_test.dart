@@ -2,8 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pun_account/features/categories/domain/models/service_category_item.dart';
 import 'package:pun_account/features/categories/presentation/providers/services_provider.dart';
-import 'package:pun_account/features/transactions/data/transactions_repository.dart';
-import 'package:pun_account/features/transactions/domain/models/transaction.dart';
 import 'package:pun_account/features/transactions/presentation/providers/transactions_provider.dart';
 import 'package:pun_account/features/transactions/presentation/send_request_modal.dart';
 import 'package:pun_account/features/wallets/domain/models/wallet.dart';
@@ -47,6 +45,7 @@ class FakeTransactionsRepository implements TransactionsRepository {
     DateTime? transactionDate,
     String? description,
   }) async {
+    await Future<void>.delayed(const Duration(milliseconds: 100));
     return TransactionModel(
       id: 'tx-new',
       businessId: businessId,
