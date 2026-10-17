@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
@@ -61,15 +62,13 @@ class _SendRequestSuccessViewState extends State<SendRequestSuccessView>
     );
 
     // Smooth Slide-up for all other content
-    _contentSlideAnim = Tween<Offset>(
-      begin: const Offset(0.0, 0.15),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: const Interval(0.2, 0.85, curve: Curves.easeOutCubic),
-      ),
-    );
+    _contentSlideAnim =
+        Tween<Offset>(begin: const Offset(0.0, 0.15), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animController,
+            curve: const Interval(0.2, 0.85, curve: Curves.easeOutCubic),
+          ),
+        );
 
     _animController.forward();
     HapticFeedback.lightImpact();

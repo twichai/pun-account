@@ -109,10 +109,7 @@ class ApiServicesRepository implements ServicesRepository {
       query['search'] = search.trim();
     }
 
-    final response = await _client.get(
-      '/services/',
-      queryParameters: query,
-    );
+    final response = await _client.get('/services/', queryParameters: query);
 
     if (response is List) {
       return response.map((item) {

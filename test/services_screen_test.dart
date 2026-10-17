@@ -59,7 +59,10 @@ class TestServicesRepository implements ServicesRepository {
     String? businessId,
     String? search,
   }) async {
-    final list = await getServiceCategories(businessId: businessId, search: search);
+    final list = await getServiceCategories(
+      businessId: businessId,
+      search: search,
+    );
     return list.first;
   }
 
@@ -69,7 +72,10 @@ class TestServicesRepository implements ServicesRepository {
     String? categoryKey,
     String? search,
   }) async {
-    final list = await getServiceCategories(businessId: businessId, search: search);
+    final list = await getServiceCategories(
+      businessId: businessId,
+      search: search,
+    );
     return list.expand((t) => t.services).toList();
   }
 }
@@ -78,33 +84,36 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ServicesScreen Widget Tests', () {
-    testWidgets('renders DraggableScrollableSheet, header, and quick services', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            servicesRepositoryProvider.overrideWithValue(TestServicesRepository()),
-          ],
-          child: const ShadcnApp(home: Scaffold(child: ServicesScreen())),
-        ),
-      );
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders DraggableScrollableSheet, header, and quick services',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              servicesRepositoryProvider.overrideWithValue(
+                TestServicesRepository(),
+              ),
+            ],
+            child: const ShadcnApp(home: Scaffold(child: ServicesScreen())),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      // Verify DraggableScrollableSheet is present in the tree
-      expect(find.byType(DraggableScrollableSheet), findsOneWidget);
+        // Verify DraggableScrollableSheet is present in the tree
+        expect(find.byType(DraggableScrollableSheet), findsOneWidget);
 
-      // Verify Header & Recipients text
-      expect(find.text('Recipients'), findsOneWidget);
+        // Verify Header & Recipients text
+        expect(find.text('Recipients'), findsOneWidget);
 
-      // Verify Content Creator Quick Services avatars are rendered
-      expect(find.text('Canva Pro'), findsWidgets);
-      expect(find.text('CapCut Pro'), findsWidgets);
+        // Verify Content Creator Quick Services avatars are rendered
+        expect(find.text('Canva Pro'), findsWidgets);
+        expect(find.text('CapCut Pro'), findsWidgets);
 
-      // Verify filter tabs in DraggableScrollableSheet
-      expect(find.text('All'), findsOneWidget);
-      expect(find.text('Content Creator'), findsWidgets);
-      expect(find.text('Developer'), findsWidgets);
-    });
+        // Verify filter tabs in DraggableScrollableSheet
+        expect(find.text('All'), findsOneWidget);
+        expect(find.text('Content Creator'), findsWidgets);
+        expect(find.text('Developer'), findsWidgets);
+      },
+    );
   });
 }

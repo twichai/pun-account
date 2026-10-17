@@ -149,58 +149,53 @@ void main() {
         ),
       ],
       child: ShadcnApp(
-        theme: ThemeData(
-          colorScheme: ColorSchemes.lightSlate,
-        ),
-        home: Scaffold(
-          child: SendRequestModal(
-            recipientName: recipientName,
-          ),
-        ),
+        theme: ThemeData(colorScheme: ColorSchemes.lightSlate),
+        home: Scaffold(child: SendRequestModal(recipientName: recipientName)),
       ),
     );
   }
 
   group('SendRequestModal Task Card Tests', () {
-    testWidgets('renders AWS Cloud task card by default with last cost button', (
-      tester,
-    ) async {
-      await tester.binding.setSurfaceSize(const Size(450, 900));
-      await tester.pumpWidget(createTestWidget(recipientName: 'AWS Cloud'));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'renders AWS Cloud task card by default with last cost button',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(450, 900));
+        await tester.pumpWidget(createTestWidget(recipientName: 'AWS Cloud'));
+        await tester.pumpAndSettle();
 
-      // Verify AWS Cloud task card elements
-      expect(find.text('AWS Cloud'), findsOneWidget);
-      expect(find.text('Cloud Infrastructure • aws.billing'), findsOneWidget);
-      expect(find.text('Use \$345.50'), findsOneWidget);
+        // Verify AWS Cloud task card elements
+        expect(find.text('AWS Cloud'), findsOneWidget);
+        expect(find.text('Cloud Infrastructure • aws.billing'), findsOneWidget);
+        expect(find.text('Use \$345.50'), findsOneWidget);
 
-      // Verify initial save button amount
-      expect(find.text('Save \$1'), findsOneWidget);
+        // Verify initial save button amount
+        expect(find.text('Save \$1'), findsOneWidget);
 
-      // Tap 'Use $345.50'
-      await tester.tap(find.text('Use \$345.50'));
-      await tester.pump();
+        // Tap 'Use $345.50'
+        await tester.tap(find.text('Use \$345.50'));
+        await tester.pump();
 
-      // Amount should now be updated to 345.50
-      expect(find.text('345.50'), findsOneWidget);
-      expect(find.text('Save \$345.50'), findsOneWidget);
-      // Toast message should appear
-      expect(find.text('ใช้ยอดล่าสุดแล้ว'), findsOneWidget);
+        // Amount should now be updated to 345.50
+        expect(find.text('345.50'), findsOneWidget);
+        expect(find.text('Save \$345.50'), findsOneWidget);
+        // Toast message should appear
+        expect(find.text('ใช้ยอดล่าสุดแล้ว'), findsOneWidget);
 
-      // Tap Save button to verify saving state
-      await tester.tap(find.text('Save \$345.50'));
-      await tester.pump();
-      expect(find.text('Saving...'), findsOneWidget);
+        // Tap Save button to verify saving state
+        await tester.tap(find.text('Save \$345.50'));
+        await tester.pump();
+        expect(find.text('Saving...'), findsOneWidget);
 
-      // Allow saving delay to transition to green success page
-      await tester.pump(const Duration(milliseconds: 700));
-      expect(find.text('บันทึกสำเร็จ'), findsOneWidget);
-      expect(find.text('345.50'), findsOneWidget);
-      expect(find.text('ปิด'), findsOneWidget);
+        // Allow saving delay to transition to green success page
+        await tester.pump(const Duration(milliseconds: 700));
+        expect(find.text('บันทึกสำเร็จ'), findsOneWidget);
+        expect(find.text('345.50'), findsOneWidget);
+        expect(find.text('ปิด'), findsOneWidget);
 
-      // Test auto-redirect
-      await tester.pump(const Duration(seconds: 4));
-    });
+        // Test auto-redirect
+        await tester.pump(const Duration(seconds: 4));
+      },
+    );
 
     testWidgets('success page close button triggers immediate redirect', (
       tester,
@@ -228,7 +223,9 @@ void main() {
       'renders custom recipient with no previous payment and shows not found toast',
       (tester) async {
         await tester.binding.setSurfaceSize(const Size(450, 900));
-        await tester.pumpWidget(createTestWidget(recipientName: 'New Freelancer'));
+        await tester.pumpWidget(
+          createTestWidget(recipientName: 'New Freelancer'),
+        );
         await tester.pumpAndSettle();
 
         // Verify custom task name and button

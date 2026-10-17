@@ -219,10 +219,7 @@ class _GridWaveAnimationState extends State<GridWaveAnimation>
       }
       return Transform.translate(
         offset: Offset(0, widget.startY),
-        child: Transform.scale(
-          scale: widget.startScale,
-          child: widget.child,
-        ),
+        child: Transform.scale(scale: widget.startScale, child: widget.child),
       );
     }
 
@@ -236,10 +233,7 @@ class _GridWaveAnimationState extends State<GridWaveAnimation>
 
         Widget content = Transform.translate(
           offset: Offset(0, currentY),
-          child: Transform.scale(
-            scale: currentScale,
-            child: child,
-          ),
+          child: Transform.scale(scale: currentScale, child: child),
         );
 
         if (widget.fadeIn && opacity < 1.0) {

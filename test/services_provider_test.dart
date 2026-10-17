@@ -69,9 +69,11 @@ class FakeServicesRepository implements ServicesRepository {
     if (search != null && search.isNotEmpty) {
       final query = search.toLowerCase();
       return fakeTracks
-          .where((t) =>
-              t.name.toLowerCase().contains(query) ||
-              t.services.any((s) => s.name.toLowerCase().contains(query)))
+          .where(
+            (t) =>
+                t.name.toLowerCase().contains(query) ||
+                t.services.any((s) => s.name.toLowerCase().contains(query)),
+          )
           .toList();
     }
     return fakeTracks;
@@ -99,7 +101,9 @@ class FakeServicesRepository implements ServicesRepository {
       items = items.where((s) => s.serviceCategoryId == categoryKey).toList();
     }
     if (search != null && search.isNotEmpty) {
-      items = items.where((s) => s.name.toLowerCase().contains(search.toLowerCase())).toList();
+      items = items
+          .where((s) => s.name.toLowerCase().contains(search.toLowerCase()))
+          .toList();
     }
     return items;
   }
@@ -113,9 +117,7 @@ void main() {
     setUp(() {
       fakeRepo = FakeServicesRepository();
       container = ProviderContainer(
-        overrides: [
-          servicesRepositoryProvider.overrideWithValue(fakeRepo),
-        ],
+        overrides: [servicesRepositoryProvider.overrideWithValue(fakeRepo)],
       );
     });
 
@@ -135,26 +137,30 @@ void main() {
       expect(state.selectedTrackKey, 'content_creator');
       expect(state.trackQuickServices.length, 2);
       expect(
-        state.trackQuickServices
-            .every((s) => s.serviceCategoryId == 'content_creator'),
+        state.trackQuickServices.every(
+          (s) => s.serviceCategoryId == 'content_creator',
+        ),
         isTrue,
       );
     });
 
-    test('switching track updates filtered accounts and quick services', () async {
-      await container
-          .read(servicesProvider.notifier)
-          .fetchCategoriesAndServices();
-      final notifier = container.read(servicesProvider.notifier);
-      notifier.setTrack('developer');
+    test(
+      'switching track updates filtered accounts and quick services',
+      () async {
+        await container
+            .read(servicesProvider.notifier)
+            .fetchCategoriesAndServices();
+        final notifier = container.read(servicesProvider.notifier);
+        notifier.setTrack('developer');
 
-      final state = container.read(servicesProvider);
-      expect(state.selectedTrackKey, 'developer');
-      expect(state.trackQuickServices.length, 1);
-      expect(state.trackQuickServices.first.name, 'AWS Cloud');
-      expect(state.filteredAccounts.length, 1);
-      expect(state.filteredAccounts.first.name, 'AWS Cloud');
-    });
+        final state = container.read(servicesProvider);
+        expect(state.selectedTrackKey, 'developer');
+        expect(state.trackQuickServices.length, 1);
+        expect(state.trackQuickServices.first.name, 'AWS Cloud');
+        expect(state.filteredAccounts.length, 1);
+        expect(state.filteredAccounts.first.name, 'AWS Cloud');
+      },
+    );
 
     test('filtering by My Accounts returns only isMyAccount items', () async {
       await container

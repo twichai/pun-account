@@ -74,7 +74,8 @@ class OverviewScreen extends ConsumerWidget {
       final hour = date.hour.toString().padLeft(2, '0');
       final minute = date.minute.toString().padLeft(2, '0');
       return 'Today $hour:$minute';
-    } else if (diff.inDays == 1 || (diff.inHours < 48 && now.day - date.day == 1)) {
+    } else if (diff.inDays == 1 ||
+        (diff.inHours < 48 && now.day - date.day == 1)) {
       return 'Yesterday';
     }
     const months = [
@@ -89,7 +90,7 @@ class OverviewScreen extends ConsumerWidget {
       'Sep',
       'Oct',
       'Nov',
-      'Dec'
+      'Dec',
     ];
     final m = months[(date.month - 1).clamp(0, 11)];
     return '${date.day} $m';
@@ -102,8 +103,7 @@ class OverviewScreen extends ConsumerWidget {
 
     final walletsState = ref.watch(walletsProvider);
     final wallets = walletsState.wallets;
-    final totalBalance =
-        wallets.fold<double>(0.0, (acc, w) => acc + w.balance);
+    final totalBalance = wallets.fold<double>(0.0, (acc, w) => acc + w.balance);
     final balanceParts = totalBalance.toStringAsFixed(2).split('.');
     final balanceInt = balanceParts[0].replaceAllMapped(
       RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
@@ -113,15 +113,20 @@ class OverviewScreen extends ConsumerWidget {
 
     final transactionsState = ref.watch(transactionsProvider);
     final transactions = transactionsState.transactions;
-    final expenses =
-        transactions.where((t) => t.type.toLowerCase() == 'expense').toList();
-    final totalSpending =
-        expenses.fold<double>(0.0, (acc, t) => acc + t.amount);
-    final spendingFormatted = totalSpending.toStringAsFixed(2);
-    final spendingInt = spendingFormatted.split('.')[0].replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]},',
+    final expenses = transactions
+        .where((t) => t.type.toLowerCase() == 'expense')
+        .toList();
+    final totalSpending = expenses.fold<double>(
+      0.0,
+      (acc, t) => acc + t.amount,
     );
+    final spendingFormatted = totalSpending.toStringAsFixed(2);
+    final spendingInt = spendingFormatted
+        .split('.')[0]
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (match) => '${match[1]},',
+        );
     final recentExpenses = expenses.take(4).toList();
 
     return SingleChildScrollView(
@@ -440,12 +445,14 @@ class OverviewScreen extends ConsumerWidget {
                               clipBehavior: Clip.none,
                               alignment: Alignment.centerRight,
                               children: [
-                                for (int i = 0;
-                                    i < recentExpenses.length;
-                                    i++) ...[
+                                for (
+                                  int i = 0;
+                                  i < recentExpenses.length;
+                                  i++
+                                ) ...[
                                   Positioned(
-                                    right: (recentExpenses.length - 1 - i) *
-                                        24.0,
+                                    right:
+                                        (recentExpenses.length - 1 - i) * 24.0,
                                     child: _buildSmallLogoAvatar(
                                       recentExpenses[i],
                                       isDark,
@@ -608,8 +615,9 @@ class OverviewScreen extends ConsumerWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color:
-                                isDark ? Colors.white : const Color(0xFF09090B),
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF09090B),
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -681,7 +689,8 @@ class OverviewScreen extends ConsumerWidget {
     final isPositive = item.type.toLowerCase() == 'income';
     final icon = _resolveIcon(item.serviceIcon);
     final color = _resolveColor(item.serviceColor);
-    final title = item.serviceName ??
+    final title =
+        item.serviceName ??
         item.description ??
         (isPositive ? 'Income' : 'Expense');
     final subtitle = item.description != null && item.description != title
@@ -708,7 +717,8 @@ class OverviewScreen extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: item.serviceImageUrl != null &&
+                child:
+                    item.serviceImageUrl != null &&
                         item.serviceImageUrl!.isNotEmpty
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(22),

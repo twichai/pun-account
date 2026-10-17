@@ -17,34 +17,16 @@ void main() {
       expect(GridWaveMotion.delayFor(0, 0), Duration.zero);
 
       // 1st diagonal wave: (0, 1) and (1, 0)
-      expect(
-        GridWaveMotion.delayFor(0, 1),
-        const Duration(milliseconds: 55),
-      );
-      expect(
-        GridWaveMotion.delayFor(1, 0),
-        const Duration(milliseconds: 55),
-      );
+      expect(GridWaveMotion.delayFor(0, 1), const Duration(milliseconds: 55));
+      expect(GridWaveMotion.delayFor(1, 0), const Duration(milliseconds: 55));
 
       // 2nd diagonal wave: (0, 2) and (1, 1) and (2, 0)
-      expect(
-        GridWaveMotion.delayFor(0, 2),
-        const Duration(milliseconds: 110),
-      );
-      expect(
-        GridWaveMotion.delayFor(1, 1),
-        const Duration(milliseconds: 110),
-      );
-      expect(
-        GridWaveMotion.delayFor(2, 0),
-        const Duration(milliseconds: 110),
-      );
+      expect(GridWaveMotion.delayFor(0, 2), const Duration(milliseconds: 110));
+      expect(GridWaveMotion.delayFor(1, 1), const Duration(milliseconds: 110));
+      expect(GridWaveMotion.delayFor(2, 0), const Duration(milliseconds: 110));
 
       // Bottom-right item for 2x3 grid: (1, 2)
-      expect(
-        GridWaveMotion.delayFor(1, 2),
-        const Duration(milliseconds: 165),
-      );
+      expect(GridWaveMotion.delayFor(1, 2), const Duration(milliseconds: 165));
     });
 
     test('easeOutCubic progression curve characteristics', () {

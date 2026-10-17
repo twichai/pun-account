@@ -33,7 +33,7 @@ abstract class TransactionsRepository {
 
 class ApiTransactionsRepository implements TransactionsRepository {
   ApiTransactionsRepository({ApiClient? client})
-      : _client = client ?? ApiClient();
+    : _client = client ?? ApiClient();
 
   final ApiClient _client;
 
@@ -110,13 +110,19 @@ class ApiTransactionsRepository implements TransactionsRepository {
     if (response is Map && response['data'] is List) {
       final list = response['data'] as List;
       return list
-          .map((item) =>
-              TransactionModel.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) => TransactionModel.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
           .toList();
     } else if (response is List) {
       return response
-          .map((item) =>
-              TransactionModel.fromJson(Map<String, dynamic>.from(item as Map)))
+          .map(
+            (item) => TransactionModel.fromJson(
+              Map<String, dynamic>.from(item as Map),
+            ),
+          )
           .toList();
     }
 

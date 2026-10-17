@@ -215,11 +215,12 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
     }
 
     final authState = ref.read(authProvider);
-    final String targetBusinessId = (selectedWallet.businessId != null &&
+    final String targetBusinessId =
+        (selectedWallet.businessId != null &&
             selectedWallet.businessId!.isNotEmpty)
         ? selectedWallet.businessId!
         : (authState.session?.user.businessId ??
-            WalletsNotifier.defaultBusinessId);
+              WalletsNotifier.defaultBusinessId);
 
     if (targetBusinessId.isEmpty) {
       _showErrorToast(modalContext, 'ไม่พบข้อมูลธุรกิจสำหรับทำรายการ');
@@ -235,8 +236,8 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
       transactions: transactions,
     );
 
-    final serviceId = taskInfo.id ??
-        (services.isNotEmpty ? services.first.id : null);
+    final serviceId =
+        taskInfo.id ?? (services.isNotEmpty ? services.first.id : null);
     if (serviceId == null || serviceId.isEmpty) {
       _showErrorToast(
         modalContext,
@@ -417,10 +418,15 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                               amount: _amountStr,
                               recipientName: resolveTaskServiceFromState(
                                 taskName: _selectedTask,
-                                services: ref.read(servicesProvider).allAccounts,
-                                transactions: ref.read(transactionsProvider).transactions,
+                                services: ref
+                                    .read(servicesProvider)
+                                    .allAccounts,
+                                transactions: ref
+                                    .read(transactionsProvider)
+                                    .transactions,
                               ).name,
-                              accountName: selectedOption?.value ?? 'Main Wallet',
+                              accountName:
+                                  selectedOption?.value ?? 'Main Wallet',
                               onClose: _closeModal,
                             )
                           : Column(
@@ -468,8 +474,8 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                           Select<String>(
                                             value: selectedOption.key,
                                             itemBuilder: (context, item) {
-                                              final entry =
-                                                  accountOptions.firstWhere(
+                                              final entry = accountOptions
+                                                  .firstWhere(
                                                     (e) => e.key == item,
                                                     orElse: () =>
                                                         accountOptions.first,
@@ -580,7 +586,8 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                   height: 50,
                                   child: PrimaryButton(
                                     alignment: Alignment.center,
-                                    onPressed: (_isSaving || accountOptions.isEmpty)
+                                    onPressed:
+                                        (_isSaving || accountOptions.isEmpty)
                                         ? null
                                         : () => _handleSave(modalContext),
                                     child: _isSaving
@@ -631,4 +638,3 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
     );
   }
 }
-

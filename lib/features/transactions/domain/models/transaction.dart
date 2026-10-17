@@ -46,11 +46,12 @@ class TransactionModel {
       serviceId: (json['service_id'] ?? json['serviceId']) as String? ?? '',
       categoryId: (json['category_id'] ?? json['categoryId']) as String?,
       type: json['type'] as String? ?? 'expense',
-      amount:
-          (json['amount'] is num) ? (json['amount'] as num).toDouble() : 0.0,
+      amount: (json['amount'] is num)
+          ? (json['amount'] as num).toDouble()
+          : 0.0,
       transactionDate: json['transaction_date'] != null
           ? DateTime.tryParse(json['transaction_date'].toString()) ??
-              DateTime.now()
+                DateTime.now()
           : DateTime.now(),
       description: json['description'] as String?,
       serviceName: service?['name'] as String?,

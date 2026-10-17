@@ -39,7 +39,8 @@ class TransactionsNotifier extends Notifier<TransactionsState> {
   TransactionsState build() {
     final authState = ref.watch(authProvider);
     final walletsState = ref.watch(walletsProvider);
-    final businessId = authState.session?.user.businessId ??
+    final businessId =
+        authState.session?.user.businessId ??
         (walletsState.wallets.isNotEmpty
             ? walletsState.wallets.first.businessId
             : null);
@@ -70,9 +71,7 @@ class TransactionsNotifier extends Notifier<TransactionsState> {
 
     try {
       final repo = ref.read(transactionsRepositoryProvider);
-      final list = await repo.getTransactions(
-        businessId: targetBusinessId,
-      );
+      final list = await repo.getTransactions(businessId: targetBusinessId);
 
       state = state.copyWith(
         transactions: list,
@@ -95,5 +94,5 @@ class TransactionsNotifier extends Notifier<TransactionsState> {
 
 final transactionsProvider =
     NotifierProvider<TransactionsNotifier, TransactionsState>(() {
-  return TransactionsNotifier();
-});
+      return TransactionsNotifier();
+    });

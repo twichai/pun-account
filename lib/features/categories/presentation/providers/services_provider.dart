@@ -21,7 +21,8 @@ class ServicesState {
   });
 
   final List<ServiceTrack> tracks;
-  final String selectedTrackKey; // 'content_creator', 'developer', 'designer', or 'all'
+  final String
+  selectedTrackKey; // 'content_creator', 'developer', 'designer', or 'all'
   final List<ServiceCategoryItem> quickServices;
   final List<ServiceCategoryItem> allAccounts;
   final int selectedFilterIndex; // 0 = All, 1 = My accounts
@@ -44,9 +45,7 @@ class ServicesState {
 
     // Filter by track if a specific track is selected
     if (selectedTrackKey.isNotEmpty && selectedTrackKey != 'all') {
-      items = items.where(
-        (item) => item.serviceCategoryId == selectedTrackKey,
-      );
+      items = items.where((item) => item.serviceCategoryId == selectedTrackKey);
     }
 
     // Filter by tab: 0 = All, 1 = My Accounts
@@ -173,9 +172,7 @@ class ServicesNotifier extends Notifier<ServicesState> {
         allAccounts: [...state.allAccounts, service],
       );
     } else {
-      state = state.copyWith(
-        allAccounts: [...state.allAccounts, service],
-      );
+      state = state.copyWith(allAccounts: [...state.allAccounts, service]);
     }
   }
 

@@ -210,80 +210,83 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                                   ),
                                 ),
                               ),
-                            const SizedBox(width: 8),
-                            IconButton.ghost(
-                              density: ButtonDensity.icon,
-                              icon: Icon(
-                                _isSearching
-                                    ? LucideIcons.x
-                                    : LucideIcons.search,
-                                size: 18,
-                                color: isDark
-                                    ? const Color(0xFFA1A1AA)
-                                    : const Color(0xFF71717A),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isSearching = !_isSearching;
-                                  if (!_isSearching) {
-                                    _searchController.clear();
-                                    ref
-                                        .read(servicesProvider.notifier)
-                                        .setSearchQuery('');
-                                  }
-                                });
-                              },
-                            ),
-                          ],
-                        ),
-
-                        if (_isSearching) ...[
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _searchController,
-                            autofocus: true,
-                            placeholder: const Text(
-                              'Search recipients & accounts...',
-                            ),
-                            onChanged: (val) {
-                              ref
-                                  .read(servicesProvider.notifier)
-                                  .setSearchQuery(val);
-                            },
-                          ),
-                        ],
-
-                        const SizedBox(height: 16),
-
-                        // 3. List of services or clean empty state
-                        if (filteredAccounts.isEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 32),
-                            child: Center(
-                              child: Text(
-                                'No services found for this category',
-                                style: TextStyle(
+                              const SizedBox(width: 8),
+                              IconButton.ghost(
+                                density: ButtonDensity.icon,
+                                icon: Icon(
+                                  _isSearching
+                                      ? LucideIcons.x
+                                      : LucideIcons.search,
+                                  size: 18,
                                   color: isDark
                                       ? const Color(0xFFA1A1AA)
                                       : const Color(0xFF71717A),
-                                  fontSize: 14,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isSearching = !_isSearching;
+                                    if (!_isSearching) {
+                                      _searchController.clear();
+                                      ref
+                                          .read(servicesProvider.notifier)
+                                          .setSearchQuery('');
+                                    }
+                                  });
+                                },
+                              ),
+                            ],
+                          ),
+
+                          if (_isSearching) ...[
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _searchController,
+                              autofocus: true,
+                              placeholder: const Text(
+                                'Search recipients & accounts...',
+                              ),
+                              onChanged: (val) {
+                                ref
+                                    .read(servicesProvider.notifier)
+                                    .setSearchQuery(val);
+                              },
+                            ),
+                          ],
+
+                          const SizedBox(height: 16),
+
+                          // 3. List of services or clean empty state
+                          if (filteredAccounts.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 32),
+                              child: Center(
+                                child: Text(
+                                  'No services found for this category',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? const Color(0xFFA1A1AA)
+                                        : const Color(0xFF71717A),
+                                    fontSize: 14,
+                                  ),
                                 ),
                               ),
-                            ),
-                          )
-                        else
-                          for (
-                            int index = 0;
-                            index < filteredAccounts.length;
-                            index++
-                          ) ...[
-                            if (index > 0) const SizedBox(height: 12),
-                            _buildAccountTile(filteredAccounts[index], isDark),
-                          ],
-                      ],
+                            )
+                          else
+                            for (
+                              int index = 0;
+                              index < filteredAccounts.length;
+                              index++
+                            ) ...[
+                              if (index > 0) const SizedBox(height: 12),
+                              _buildAccountTile(
+                                filteredAccounts[index],
+                                isDark,
+                              ),
+                            ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
+                  );
                 },
               ),
             ],
