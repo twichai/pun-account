@@ -1,5 +1,7 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../../../features/auth/controllers/auth_controller.dart';
 import '../../../../features/categories/presentation/services_screen.dart';
 import '../../../../features/dashboard/presentation/overview_screen.dart';
 import '../../../../features/transactions/presentation/quick_add_modal.dart';
@@ -11,7 +13,7 @@ import '../widgets/pun_navigation_bar.dart';
 /// Tab 0: Services & Categories (Recipients screen with category icons)
 /// Tab 1: Home (Total balance, Send/Request, Spending, Transactions)
 /// Tab 2: Cards (Digital cards stack with freeze, details, toggle)
-class MainNavigationScreen extends StatefulWidget {
+class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({
     super.key,
     required this.title,
@@ -24,10 +26,10 @@ class MainNavigationScreen extends StatefulWidget {
   final VoidCallback onToggleTheme;
 
   @override
-  State<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> {
+class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   // Default to Tab 1 (Home)
   late final PageController _pageController;
   Key? _selected = const ValueKey(1);
@@ -75,6 +77,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final auth = ref.watch(authProvider);
+    final user = auth.session?.user;
+
     return Scaffold(
       headers: [
         // Minimal top status bar with Pun branding & theme switch
@@ -100,6 +105,47 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
                 Row(
                   children: [
+                    if (user != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              user.name,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(width: 2),
+                            IconButton.ghost(
+                              density: ButtonDensity.icon,
+                              icon: const Icon(LucideIcons.logOut, size: 14),
+                              onPressed: () {
+                                ref.read(authProvider.notifier).signOut();
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                    ] else ...[
+                      OutlineButton(
+                        density: ButtonDensity.compact,
+                        size: ButtonSize.small,
+                        onPressed: () {
+                          ref.read(authProvider.notifier).signOut();
+                        },
+                        child: const Text('Sign In'),
+                      ),
+                      const SizedBox(width: 4),
+                    ],
                     IconButton.ghost(
                       density: ButtonDensity.icon,
                       icon: const Icon(LucideIcons.plus, size: 18),

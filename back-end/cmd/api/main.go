@@ -13,6 +13,9 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	authHandlers "pun-account-backend/internal/auth/handlers"
+	authRepository "pun-account-backend/internal/auth/repository"
+	authServices "pun-account-backend/internal/auth/services"
 	"pun-account-backend/internal/wallets/handlers"
 	"pun-account-backend/internal/wallets/repository"
 	"pun-account-backend/internal/wallets/services"
@@ -60,6 +63,10 @@ func main() {
 	}
 
 	// 3. Initialize layers
+	authRepo := authRepository.NewAuthRepository(db)
+	authService := authServices.NewAuthService(authRepo)
+	authHandler := authHandlers.NewAuthHandler(authService)
+
 	walletRepo := repository.NewWalletRepository(db)
 	walletService := services.NewWalletService(walletRepo)
 	walletHandler := handlers.NewWalletHandler(walletService)
@@ -83,6 +90,7 @@ func main() {
 
 	// API v1 Routing
 	apiV1 := app.Group("/api/v1")
+	authHandler.RegisterRoutes(apiV1)
 	walletHandler.RegisterRoutes(apiV1)
 
 	port := os.Getenv("PORT")
