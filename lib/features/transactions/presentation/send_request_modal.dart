@@ -201,7 +201,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: modalBg,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(24),
+                ),
                 border: Border(top: BorderSide(color: modalBorder, width: 0.5)),
               ),
               child: SafeArea(
@@ -270,169 +272,184 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                         ],
                                       ),
                                     ),
-                              const SizedBox(height: 12),
+                                    const SizedBox(height: 12),
 
-                              // Account Selector dropdown
-                              Select<String>(
-                                value: _selectedAccount,
-                                itemBuilder: (context, item) => Text(
-                                  item,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: modalFg,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                onChanged: (val) {
-                                  if (val != null) {
-                                    setState(() => _selectedAccount = val);
-                                  }
-                                },
-                                popup: SelectPopup(
-                                  items: SelectItemList(
-                                    children: [
-                                      for (final acc in _accounts)
-                                        SelectItemButton(
-                                          value: acc,
-                                          child: Text(acc),
+                                    // Account Selector dropdown
+                                    Select<String>(
+                                      value: _selectedAccount,
+                                      itemBuilder: (context, item) => Text(
+                                        item,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: modalFg,
+                                          fontWeight: FontWeight.w500,
                                         ),
+                                      ),
+                                      onChanged: (val) {
+                                        if (val != null) {
+                                          setState(
+                                            () => _selectedAccount = val,
+                                          );
+                                        }
+                                      },
+                                      popup: SelectPopup(
+                                        items: SelectItemList(
+                                          children: [
+                                            for (final acc in _accounts)
+                                              SelectItemButton(
+                                                value: acc,
+                                                child: Text(acc),
+                                              ),
+                                          ],
+                                        ),
+                                      ).call,
+                                    ),
+
+                                    if (widget.recipientName != null) ...[
+                                      const SizedBox(height: 6),
+                                      SecondaryBadge(
+                                        child: Text(
+                                          'To: ${widget.recipientName}',
+                                        ),
+                                      ),
                                     ],
-                                  ),
-                                ).call,
-                              ),
 
-                              if (widget.recipientName != null) ...[
-                                const SizedBox(height: 6),
-                                SecondaryBadge(
-                                  child: Text('To: ${widget.recipientName}'),
+                                    const SizedBox(height: 16),
+
+                                    // Amount Display
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.baseline,
+                                      textBaseline: TextBaseline.alphabetic,
+                                      children: [
+                                        Text(
+                                          r'$',
+                                          style: TextStyle(
+                                            fontSize: 36,
+                                            fontWeight: FontWeight.bold,
+                                            color: modalMutedFg,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          _amountStr,
+                                          style: TextStyle(
+                                            fontSize: 52,
+                                            fontWeight: FontWeight.w800,
+                                            color: modalFg,
+                                            letterSpacing: -1,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Available \$7,854.43',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                        color: modalMutedFg,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
+                            ),
+                          ),
 
-                              const SizedBox(height: 16),
+                          // create Card of that task also AWS cloud
+                          Column(
+                            // images
+                            // title: AWS cloud
+                            // subtitle:
+                            // btn use last cost if user is exists in db paid last time
+                            // else use toast not found cost paid last time
+                          ),
 
-                              // Amount Display
+                          const SizedBox(height: 14),
+
+                          // Keypad Grid (completely outside scroll view for instant gesture response)
+                          Column(
+                            children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.baseline,
-                                textBaseline: TextBaseline.alphabetic,
                                 children: [
-                                  Text(
-                                    r'$',
-                                    style: TextStyle(
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold,
-                                      color: modalMutedFg,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    _amountStr,
-                                    style: TextStyle(
-                                      fontSize: 52,
-                                      fontWeight: FontWeight.w800,
-                                      color: modalFg,
-                                      letterSpacing: -1,
-                                    ),
-                                  ),
+                                  _buildKeypadButton('1'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('2'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('3'),
                                 ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Available \$7,854.43',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                  color: modalMutedFg,
-                                ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  _buildKeypadButton('4'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('5'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('6'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  _buildKeypadButton('7'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('8'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('9'),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  _buildKeypadButton('.'),
+                                  const SizedBox(width: 8),
+                                  _buildKeypadButton('0'),
+                                  const SizedBox(width: 8),
+                                  _buildBackspaceButton(),
+                                ],
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
 
-                    const SizedBox(height: 14),
+                          const SizedBox(height: 12),
 
-                    // Keypad Grid (completely outside scroll view for instant gesture response)
-                    Column(
-                      children: [
-                        Row(
-                          children: [
-                            _buildKeypadButton('1'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('2'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('3'),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildKeypadButton('4'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('5'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('6'),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildKeypadButton('7'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('8'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('9'),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            _buildKeypadButton('.'),
-                            const SizedBox(width: 8),
-                            _buildKeypadButton('0'),
-                            const SizedBox(width: 8),
-                            _buildBackspaceButton(),
-                          ],
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: PrimaryButton(
-                        alignment: Alignment.center,
-                        onPressed: () {
-                          if (_operator != null &&
-                              _firstOperand != null) {
-                            _calculate();
-                            return;
-                          }
-                          closeOverlay(context);
-                        },
-                        child: Text(
-                          'Send \$$_amountStr',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                          SizedBox(
+                            width: double.infinity,
+                            height: 50,
+                            child: PrimaryButton(
+                              alignment: Alignment.center,
+                              onPressed: () {
+                                if (_operator != null &&
+                                    _firstOperand != null) {
+                                  _calculate();
+                                  return;
+                                }
+                                closeOverlay(context);
+                              },
+                              child: Text(
+                                'Send \$$_amountStr',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
-      );
-    },
-  ),
-),
-);
+      ),
+    );
   }
 
   Widget _buildModeTab(
@@ -456,7 +473,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
                 child: Basic(
                   leading: const Icon(LucideIcons.sparkles, size: 18),
                   title: const Text('กำลังพัฒนา'),
-                  subtitle: const Text('ฟังก์ชันรายเดือนกำลังอยู่ระหว่างการพัฒนา'),
+                  subtitle: const Text(
+                    'ฟังก์ชันรายเดือนกำลังอยู่ระหว่างการพัฒนา',
+                  ),
                 ),
               );
             },
@@ -553,10 +572,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
 /// - Snappy spring-scale compression and bounce-back
 /// - Zero gesture delay by listening directly to pointer events
 class _BouncingKeypadButton extends StatefulWidget {
-  const _BouncingKeypadButton({
-    required this.child,
-    required this.onPressed,
-  });
+  const _BouncingKeypadButton({required this.child, required this.onPressed});
 
   final Widget child;
   final VoidCallback onPressed;
@@ -618,10 +634,8 @@ class _BouncingKeypadButtonState extends State<_BouncingKeypadButton>
         onPointerCancel: _onPointerCancel,
         child: AnimatedBuilder(
           animation: _scaleAnimation,
-          builder: (context, child) => Transform.scale(
-            scale: _scaleAnimation.value,
-            child: child,
-          ),
+          builder: (context, child) =>
+              Transform.scale(scale: _scaleAnimation.value, child: child),
           child: SizedBox(
             height: 54,
             child: IgnorePointer(
