@@ -1,10 +1,62 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pun_account/features/wallets/data/wallets_repository.dart';
+import 'package:pun_account/features/wallets/domain/models/wallet.dart';
+import 'package:pun_account/features/wallets/domain/usecases/wallets_usecases.dart';
 import 'package:pun_account/features/wallets/presentation/providers/add_card_form_provider.dart';
 import 'package:pun_account/features/wallets/presentation/providers/wallets_provider.dart';
 import 'package:pun_account/features/wallets/presentation/wallets_screen.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class FakeWalletsRepository implements WalletsRepository {
+  List<Wallet> items = [];
+
+  @override
+  Future<List<Wallet>> getWallets({required String businessId}) async => items;
+
+  @override
+  Future<Wallet> getWalletById(String id) async =>
+      items.firstWhere((w) => w.id == id);
+
+  @override
+  Future<Wallet> createWallet({
+    required String businessId,
+    required Wallet wallet,
+    String? name,
+  }) async {
+    items = [...items, wallet];
+    return wallet;
+  }
+
+  @override
+  Future<Wallet> updateWallet({
+    required String id,
+    required Wallet wallet,
+    String? name,
+  }) async {
+    items = items.map((w) => w.id == id ? wallet : w).toList();
+    return wallet;
+  }
+
+  @override
+  Future<void> deleteWallet(String id) async {
+    items = items.where((w) => w.id != id).toList();
+  }
+}
+
+class FailingCreateWalletUseCase extends CreateWalletUseCase {
+  FailingCreateWalletUseCase() : super(FakeWalletsRepository());
+
+  @override
+  Future<Wallet> call({
+    required String businessId,
+    required Wallet wallet,
+    String? name,
+  }) async {
+    throw Exception('Network unreachable');
+  }
+}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -43,12 +95,12 @@ void main() {
       expect(container.read(addCardFormProvider).last4, '4444');
     });
 
-    test('validation fails when cardholder is empty', () {
+    test('validation fails when cardholder is empty', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final notifier = container.read(addCardFormProvider.notifier);
-      final success = notifier.submit();
+      final success = await notifier.submit();
 
       expect(success, isFalse);
       expect(
@@ -57,8 +109,15 @@ void main() {
       );
     });
 
-    test('successful submission appends new card to walletsProvider', () {
-      final container = ProviderContainer();
+    test('successful submission appends new card to walletsProvider', () async {
+      final fakeRepo = FakeWalletsRepository();
+      final container = ProviderContainer(
+        overrides: [
+          walletsRepositoryProvider.overrideWithValue(fakeRepo),
+          createWalletUseCaseProvider
+              .overrideWithValue(CreateWalletUseCase(fakeRepo)),
+        ],
+      );
       addTearDown(container.dispose);
 
       final initialWalletsCount = container.read(walletsProvider).wallets.length;
@@ -69,7 +128,7 @@ void main() {
       notifier.updateAuroraAccent('violet');
       notifier.updateBalance(50000.0);
 
-      final success = notifier.submit();
+      final success = await notifier.submit();
       expect(success, isTrue);
 
       final updatedWallets = container.read(walletsProvider).wallets;
@@ -81,6 +140,28 @@ void main() {
       expect(newCard.cardBrand, 'visa');
       expect(newCard.auroraAccent, 'violet');
       expect(newCard.balance, 50000.0);
+    });
+
+    test('failure during submission sets errorMessage and stops submitting', () async {
+      final container = ProviderContainer(
+        overrides: [
+          createWalletUseCaseProvider.overrideWithValue(
+            FailingCreateWalletUseCase(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(addCardFormProvider.notifier);
+      notifier.updateCardHolder('FAIL TEST');
+
+      final success = await notifier.submit();
+      expect(success, isFalse);
+
+      final state = container.read(addCardFormProvider);
+      expect(state.isSubmitting, isFalse);
+      expect(state.errorMessage, isNotNull);
+      expect(state.errorMessage, contains('Network unreachable'));
     });
   });
 

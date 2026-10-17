@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/controllers/auth_controller.dart';
+import '../../../../core/network/api_client.dart';
 import '../../domain/models/wallet.dart';
+import '../../domain/usecases/wallets_usecases.dart';
 import 'wallets_provider.dart';
 
 /// Form state for creating a new card
@@ -119,14 +122,16 @@ class AddCardFormNotifier extends Notifier<AddCardFormState> {
     state = const AddCardFormState();
   }
 
-  /// Validate and submit the form, adding the new card to walletsProvider
-  bool submit() {
+  /// Validate and submit the form, creating a new card via CreateWalletUseCase
+  Future<bool> submit({String? businessId}) async {
     if (state.cardHolder.trim().isEmpty) {
       state = state.copyWith(
         errorMessage: () => 'Please enter cardholder name',
       );
       return false;
     }
+
+    state = state.copyWith(isSubmitting: true, errorMessage: () => null);
 
     final newId = 'wallet-card-${DateTime.now().millisecondsSinceEpoch}';
     final newWallet = Wallet(
@@ -141,9 +146,36 @@ class AddCardFormNotifier extends Notifier<AddCardFormState> {
       isActive: true,
     );
 
-    ref.read(walletsProvider.notifier).addWallet(newWallet);
-    reset();
-    return true;
+    final authState = ref.read(authProvider);
+    final targetBusinessId = businessId ??
+        authState.session?.user.businessId ??
+        WalletsNotifier.defaultBusinessId;
+
+    try {
+      final createWalletUseCase = ref.read(createWalletUseCaseProvider);
+      final createdWallet = await createWalletUseCase(
+        businessId: targetBusinessId,
+        wallet: newWallet,
+        name: state.cardHolder.trim().toUpperCase(),
+      );
+
+      ref.read(walletsProvider.notifier).addWallet(createdWallet);
+      state = state.copyWith(isSubmitting: false);
+      reset();
+      return true;
+    } on ApiException catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        errorMessage: () => e.message,
+      );
+      return false;
+    } catch (e) {
+      state = state.copyWith(
+        isSubmitting: false,
+        errorMessage: () => e.toString(),
+      );
+      return false;
+    }
   }
 }
 

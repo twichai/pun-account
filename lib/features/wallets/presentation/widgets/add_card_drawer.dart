@@ -63,13 +63,13 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
     ref.read(addCardFormProvider.notifier).updateAuroraAccent(accent);
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     final notifier = ref.read(addCardFormProvider.notifier);
     final balanceVal = double.tryParse(_balanceController.text.trim()) ?? 25000.0;
     notifier.updateBalance(balanceVal);
 
-    final success = notifier.submit();
-    if (success) {
+    final success = await notifier.submit();
+    if (success && mounted) {
       closeOverlay(context);
     }
   }
@@ -399,18 +399,24 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                     Expanded(
                       flex: 2,
                       child: PrimaryButton(
-                        onPressed: _submit,
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(LucideIcons.plus, size: 16),
-                            SizedBox(width: 6),
-                            Text(
-                              'Add Card',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
+                        onPressed: formState.isSubmitting ? null : _submit,
+                        child: formState.isSubmitting
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              )
+                            : const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(LucideIcons.plus, size: 16),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Add Card',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                   ],
