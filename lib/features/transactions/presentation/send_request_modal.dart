@@ -66,6 +66,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
   String? _operator;
   double? _firstOperand;
   late String _selectedTask;
+  bool _isSaving = false;
 
   static final Map<String, _TaskServiceInfo> _taskDb = {
     'AWS Cloud': const _TaskServiceInfo(
@@ -349,120 +350,117 @@ class _SendRequestModalState extends State<SendRequestModal> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                    // Mode Switcher (Send / Request)
-                                    Container(
-                                      padding: const EdgeInsets.all(4),
-                                      decoration: BoxDecoration(
-                                        color: modalMutedBg,
-                                        borderRadius: BorderRadius.circular(24),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          _buildModeTab(
-                                            'ครั้งเดียว',
-                                            TransferMode.send,
-                                            modalBg,
-                                            modalFg,
-                                            modalMutedFg,
-                                            modalContext,
-                                          ),
-                                          _buildModeTab(
-                                            'รายเดือน',
-                                            TransferMode.request,
-                                            modalBg,
-                                            modalFg,
-                                            modalMutedFg,
-                                            modalContext,
-                                          ),
-                                        ],
-                                      ),
+                                  // Mode Switcher (Send / Request)
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: modalMutedBg,
+                                      borderRadius: BorderRadius.circular(24),
                                     ),
-                                    const SizedBox(height: 12),
-
-                                    // Account Selector dropdown
-                                    Select<String>(
-                                      value: _selectedAccount,
-                                      itemBuilder: (context, item) => Text(
-                                        item,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: modalFg,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          setState(
-                                            () => _selectedAccount = val,
-                                          );
-                                        }
-                                      },
-                                      popup: SelectPopup(
-                                        items: SelectItemList(
-                                          children: [
-                                            for (final acc in _accounts)
-                                              SelectItemButton(
-                                                value: acc,
-                                                child: Text(acc),
-                                              ),
-                                          ],
-                                        ),
-                                      ).call,
-                                    ),
-
-                                    if (widget.recipientName != null) ...[
-                                      const SizedBox(height: 6),
-                                      SecondaryBadge(
-                                        child: Text(
-                                          'To: ${widget.recipientName}',
-                                        ),
-                                      ),
-                                    ],
-
-                                    const SizedBox(height: 16),
-
-                                    // Amount Display
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.baseline,
-                                      textBaseline: TextBaseline.alphabetic,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Text(
-                                          r'$',
-                                          style: TextStyle(
-                                            fontSize: 36,
-                                            fontWeight: FontWeight.bold,
-                                            color: modalMutedFg,
-                                          ),
+                                        _buildModeTab(
+                                          'ครั้งเดียว',
+                                          TransferMode.send,
+                                          modalBg,
+                                          modalFg,
+                                          modalMutedFg,
+                                          modalContext,
                                         ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          _amountStr,
-                                          style: TextStyle(
-                                            fontSize: 52,
-                                            fontWeight: FontWeight.w800,
-                                            color: modalFg,
-                                            letterSpacing: -1,
-                                          ),
+                                        _buildModeTab(
+                                          'รายเดือน',
+                                          TransferMode.request,
+                                          modalBg,
+                                          modalFg,
+                                          modalMutedFg,
+                                          modalContext,
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'Available \$7,854.43',
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // Account Selector dropdown
+                                  Select<String>(
+                                    value: _selectedAccount,
+                                    itemBuilder: (context, item) => Text(
+                                      item,
                                       style: TextStyle(
                                         fontSize: 13,
+                                        color: modalFg,
                                         fontWeight: FontWeight.w500,
-                                        color: modalMutedFg,
+                                      ),
+                                    ),
+                                    onChanged: (val) {
+                                      if (val != null) {
+                                        setState(() => _selectedAccount = val);
+                                      }
+                                    },
+                                    popup: SelectPopup(
+                                      items: SelectItemList(
+                                        children: [
+                                          for (final acc in _accounts)
+                                            SelectItemButton(
+                                              value: acc,
+                                              child: Text(acc),
+                                            ),
+                                        ],
+                                      ),
+                                    ).call,
+                                  ),
+
+                                  if (widget.recipientName != null) ...[
+                                    const SizedBox(height: 6),
+                                    SecondaryBadge(
+                                      child: Text(
+                                        'To: ${widget.recipientName}',
                                       ),
                                     ),
                                   ],
-                                ),
+
+                                  const SizedBox(height: 16),
+
+                                  // Amount Display
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.baseline,
+                                    textBaseline: TextBaseline.alphabetic,
+                                    children: [
+                                      Text(
+                                        r'$',
+                                        style: TextStyle(
+                                          fontSize: 36,
+                                          fontWeight: FontWeight.bold,
+                                          color: modalMutedFg,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _amountStr,
+                                        style: TextStyle(
+                                          fontSize: 52,
+                                          fontWeight: FontWeight.w800,
+                                          color: modalFg,
+                                          letterSpacing: -1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Available \$7,854.43',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                      color: modalMutedFg,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
+                          ),
 
                           // Card for the task (defaults to AWS Cloud, displays last paid cost)
                           _buildTaskCard(
@@ -528,21 +526,51 @@ class _SendRequestModalState extends State<SendRequestModal> {
                             height: 50,
                             child: PrimaryButton(
                               alignment: Alignment.center,
-                              onPressed: () {
-                                if (_operator != null &&
-                                    _firstOperand != null) {
-                                  _calculate();
-                                  return;
-                                }
-                                closeOverlay(context);
-                              },
-                              child: Text(
-                                'Send \$$_amountStr',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
+                              onPressed: _isSaving
+                                  ? null
+                                  : () async {
+                                      if (_operator != null &&
+                                          _firstOperand != null) {
+                                        _calculate();
+                                        return;
+                                      }
+                                      setState(() => _isSaving = true);
+                                      await Future.delayed(
+                                        const Duration(milliseconds: 600),
+                                      );
+                                      if (!context.mounted) return;
+                                      closeOverlay(context);
+                                    },
+                              child: _isSaving
+                                  ? const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SizedBox(
+                                          width: 16,
+                                          height: 16,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Saving...',
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : Text(
+                                      'Save \$$_amountStr',
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                      ),
+                                    ),
                             ),
                           ),
                         ],

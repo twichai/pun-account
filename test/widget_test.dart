@@ -86,15 +86,16 @@ void main() {
     // Verify SendRequestModal is opened with keypad
     expect(find.text('Available \$7,854.43'), findsOneWidget);
     expect(find.text('Pavlo • 7642 USD'), findsOneWidget);
-    expect(find.text('Send \$1'), findsOneWidget);
+    expect(find.text('Save \$1'), findsOneWidget);
 
     // Tap on keypad '5'
     await tester.tap(find.text('5'));
     await tester.pumpAndSettle();
-    expect(find.text('Send \$5'), findsOneWidget);
+    expect(find.text('Save \$5'), findsOneWidget);
 
-    // Tap on 'Send $5' to submit and close modal
-    await tester.tap(find.text('Send \$5'));
+    // Tap on 'Save $5' to submit and close modal
+    await tester.tap(find.text('Save \$5'));
+    await tester.pump(const Duration(milliseconds: 700));
     await tester.pumpAndSettle();
     expect(find.text('Available \$7,854.43'), findsNothing);
   });

@@ -29,8 +29,8 @@ void main() {
       expect(find.text('Cloud Infrastructure • @aws.billing'), findsOneWidget);
       expect(find.text('Use \$345.50'), findsOneWidget);
 
-      // Verify initial send button amount
-      expect(find.text('Send \$1'), findsOneWidget);
+      // Verify initial save button amount
+      expect(find.text('Save \$1'), findsOneWidget);
 
       // Tap 'Use $345.50'
       await tester.tap(find.text('Use \$345.50'));
@@ -38,11 +38,17 @@ void main() {
 
       // Amount should now be updated to 345.50
       expect(find.text('345.50'), findsOneWidget);
-      expect(find.text('Send \$345.50'), findsOneWidget);
+      expect(find.text('Save \$345.50'), findsOneWidget);
       // Toast message should appear
       expect(find.text('ใช้ยอดล่าสุดแล้ว'), findsOneWidget);
 
-      // Drain toast timer
+      // Tap Save button to verify saving state
+      await tester.tap(find.text('Save \$345.50'));
+      await tester.pump();
+      expect(find.text('Saving...'), findsOneWidget);
+
+      // Allow saving delay and toast timer to complete
+      await tester.pump(const Duration(milliseconds: 700));
       await tester.pump(const Duration(seconds: 4));
     });
 
