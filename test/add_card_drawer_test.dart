@@ -289,7 +289,6 @@ void main() {
       await tester.pumpAndSettle();
 
       // Drawer should now be visible with form titles and preview
-      expect(find.text('Add Digital Card'), findsOneWidget);
       expect(find.text('Cardholder Name'), findsOneWidget);
       expect(find.text('Card Number / Digits'), findsOneWidget);
       expect(find.text('Aurora Glow Accent'), findsOneWidget);
@@ -318,8 +317,7 @@ void main() {
       await tester.tap(cardholderText);
       await tester.pumpAndSettle();
 
-      // Edit drawer should now be visible with 'Edit Digital Card' and 'Save Changes'
-      expect(find.text('Edit Digital Card'), findsOneWidget);
+      // Edit drawer should now be visible with 'Save Changes' button and fields
       expect(find.text('Save Changes'), findsOneWidget);
       expect(find.text('Cardholder Name'), findsOneWidget);
       expect(find.text('Cancel'), findsOneWidget);
@@ -347,8 +345,7 @@ void main() {
       await tester.tap(cashCardText);
       await tester.pumpAndSettle();
 
-      // Edit drawer should open with 'Edit Cash Wallet'
-      expect(find.text('Edit Cash Wallet'), findsOneWidget);
+      // Edit drawer should open with 'Save Changes', Wallet Name, and Current Balance
       expect(find.text('Save Changes'), findsOneWidget);
       expect(find.text('Wallet Name'), findsOneWidget);
       expect(find.text('Current Balance (THB)'), findsOneWidget);

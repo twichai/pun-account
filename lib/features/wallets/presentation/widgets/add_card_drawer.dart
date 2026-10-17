@@ -11,7 +11,7 @@ class AddCardDrawer extends ConsumerStatefulWidget {
 
   final Wallet? wallet;
 
-  /// Opens the Add or Edit Card Drawer from the bottom
+  /// Opens the Add or Edit Card Drawer from the bottom, sized to its content
   static Future<void> show(BuildContext context, {Wallet? wallet}) {
     final container = ProviderScope.containerOf(context, listen: false);
     final notifier = container.read(addCardFormProvider.notifier);
@@ -21,11 +21,15 @@ class AddCardDrawer extends ConsumerStatefulWidget {
       notifier.initForCreate();
     }
 
+    final screenHeight = MediaQuery.sizeOf(context).height;
     return showOverlay(
       context,
-      const DrawerConfiguration(
+      DrawerConfiguration(
         position: OverlayPosition.bottom,
         showDragHandle: true,
+        constraints: BoxConstraints(
+          maxHeight: screenHeight * 0.9,
+        ),
       ),
       builder: (context) => AddCardDrawer(wallet: wallet),
     ).future;
@@ -54,7 +58,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
     _cardHolderController = TextEditingController(text: formState.cardHolder);
     _cardNumberController = TextEditingController(text: formState.cardNumber);
     _balanceController = TextEditingController(
-      text: formState.balance > 0 ? formState.balance.toStringAsFixed(0) : '25000',
+      text: formState.balance > 0
+          ? formState.balance.toStringAsFixed(0)
+          : '25000',
     );
   }
 
@@ -76,7 +82,8 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
 
   Future<void> _submit() async {
     final notifier = ref.read(addCardFormProvider.notifier);
-    final balanceVal = double.tryParse(_balanceController.text.trim()) ?? 25000.0;
+    final balanceVal =
+        double.tryParse(_balanceController.text.trim()) ?? 25000.0;
     notifier.updateBalance(balanceVal);
 
     final success = await notifier.submit();
@@ -85,54 +92,13 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
     }
   }
 
-  void _confirmDelete(BuildContext drawerContext) {
-    showOverlay(
-      drawerContext,
-      const DialogConfiguration(),
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text('Delete Wallet'),
-          content: const Text(
-            'Are you sure you want to remove this card/wallet? This action cannot be undone.',
-          ),
-          actions: [
-            OutlineButton(
-              onPressed: () => closeOverlay(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            DestructiveButton(
-              onPressed: () async {
-                closeOverlay(dialogContext);
-                final success = await ref
-                    .read(addCardFormProvider.notifier)
-                    .deleteCurrentWallet();
-                if (success && drawerContext.mounted) {
-                  closeOverlay(drawerContext);
-                }
-              },
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(addCardFormProvider);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    final titleText = formState.isEdit
-        ? (formState.isCashWallet ? 'Edit Cash Wallet' : 'Edit Digital Card')
-        : 'Add Digital Card';
-
-    final subtitleText = formState.isEdit
-        ? 'Update and configure wallet settings'
-        : 'Issue and configure a new obsidian business card';
-
     return Center(
+      heightFactor: 1.0,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
         child: Padding(
@@ -147,43 +113,6 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Header with title, subtitle & actions (delete/close)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(titleText).h4(),
-                        const SizedBox(height: 2),
-                        Text(subtitleText).small().muted(),
-                      ],
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (formState.isEdit) ...[
-                          IconButton.ghost(
-                            icon: const Icon(
-                              LucideIcons.trash2,
-                              size: 18,
-                              color: Colors.red,
-                            ),
-                            onPressed: () => _confirmDelete(context),
-                          ),
-                          const SizedBox(width: 4),
-                        ],
-                        IconButton.ghost(
-                          icon: const Icon(LucideIcons.x, size: 18),
-                          onPressed: () => closeOverlay(context),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
                 // Live Card Preview
                 DarkObsidianWalletCard(
                   wallet: formState.toPreviewWallet(),
@@ -230,9 +159,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                 ],
 
                 // Name / Cardholder Field
-                Text(
-                  formState.isCashWallet ? 'Wallet Name' : 'Cardholder Name',
-                ).small().semiBold(),
+                Text(formState.isCashWallet ? 'Wallet Name' : 'Cardholder Name')
+                    .small()
+                    .semiBold(),
                 const SizedBox(height: 6),
                 TextField(
                   controller: _cardHolderController,
@@ -242,7 +171,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                         : 'e.g. PAVLO D.',
                   ),
                   onChanged: (val) {
-                    ref.read(addCardFormProvider.notifier).updateCardHolder(val);
+                    ref
+                        .read(addCardFormProvider.notifier)
+                        .updateCardHolder(val);
                   },
                 ),
                 const SizedBox(height: 14),
@@ -256,7 +187,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                     placeholder: const Text('4532 •••• •••• 7642'),
                     keyboardType: TextInputType.number,
                     onChanged: (val) {
-                      ref.read(addCardFormProvider.notifier).updateCardNumber(val);
+                      ref
+                          .read(addCardFormProvider.notifier)
+                          .updateCardNumber(val);
                     },
                   ),
                   const SizedBox(height: 14),
@@ -275,17 +208,19 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                             decoration: BoxDecoration(
                               color: formState.cardBrand == 'visa'
                                   ? (isDark
-                                      ? const Color(0xFF27272A)
-                                      : const Color(0xFFF4F4F5))
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF4F4F5))
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: formState.cardBrand == 'visa'
                                     ? theme.colorScheme.primary
                                     : (isDark
-                                        ? const Color(0xFF3F3F46)
-                                        : const Color(0xFFE4E4E7)),
-                                width: formState.cardBrand == 'visa' ? 1.5 : 1.0,
+                                          ? const Color(0xFF3F3F46)
+                                          : const Color(0xFFE4E4E7)),
+                                width: formState.cardBrand == 'visa'
+                                    ? 1.5
+                                    : 1.0,
                               ),
                             ),
                             child: const Center(
@@ -312,18 +247,19 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                             decoration: BoxDecoration(
                               color: formState.cardBrand == 'mastercard'
                                   ? (isDark
-                                      ? const Color(0xFF27272A)
-                                      : const Color(0xFFF4F4F5))
+                                        ? const Color(0xFF27272A)
+                                        : const Color(0xFFF4F4F5))
                                   : Colors.transparent,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: formState.cardBrand == 'mastercard'
                                     ? theme.colorScheme.primary
                                     : (isDark
-                                        ? const Color(0xFF3F3F46)
-                                        : const Color(0xFFE4E4E7)),
-                                width:
-                                    formState.cardBrand == 'mastercard' ? 1.5 : 1.0,
+                                          ? const Color(0xFF3F3F46)
+                                          : const Color(0xFFE4E4E7)),
+                                width: formState.cardBrand == 'mastercard'
+                                    ? 1.5
+                                    : 1.0,
                               ),
                             ),
                             child: Center(
@@ -398,8 +334,8 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                               color: isSelected
                                   ? opt.color
                                   : (isDark
-                                      ? const Color(0xFF3F3F46)
-                                      : const Color(0xFFE4E4E7)),
+                                        ? const Color(0xFF3F3F46)
+                                        : const Color(0xFFE4E4E7)),
                               width: isSelected ? 1.8 : 1.0,
                             ),
                           ),
@@ -415,7 +351,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: opt.color.withValues(alpha: 0.6),
+                                            color: opt.color.withValues(
+                                              alpha: 0.6,
+                                            ),
                                             blurRadius: 6,
                                           ),
                                         ]
@@ -433,8 +371,8 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                                   color: isSelected
                                       ? (isDark ? Colors.white : Colors.black)
                                       : (isDark
-                                          ? const Color(0xFFA1A1AA)
-                                          : const Color(0xFF71717A)),
+                                            ? const Color(0xFFA1A1AA)
+                                            : const Color(0xFF71717A)),
                                 ),
                               ),
                             ],
@@ -451,8 +389,8 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                   formState.isCashWallet
                       ? 'Current Balance (THB)'
                       : (formState.isEdit
-                          ? 'Current Limit / Balance (THB)'
-                          : 'Initial Limit / Balance (THB)'),
+                            ? 'Current Limit / Balance (THB)'
+                            : 'Initial Limit / Balance (THB)'),
                 ).small().semiBold(),
                 const SizedBox(height: 6),
                 TextField(
@@ -484,7 +422,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                             ? const SizedBox(
                                 width: 16,
                                 height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

@@ -31,16 +31,16 @@ class WalletsScreen extends ConsumerWidget {
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
               PrimaryButton(
-                density: ButtonDensity.compact,
                 onPressed: () => AddCardDrawer.show(context),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(LucideIcons.plus, size: 14),
-                    SizedBox(width: 6),
                     Text(
                       'Add Card',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
