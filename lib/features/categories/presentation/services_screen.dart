@@ -1,150 +1,41 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../../core/animations/grid_wave_animation.dart';
 import '../../transactions/presentation/send_request_modal.dart';
+import '../domain/models/service_category_item.dart';
+import 'providers/services_provider.dart';
 
-class ServiceCategoryItem {
-  const ServiceCategoryItem({
-    required this.id,
-    required this.name,
-    required this.accountNumber,
-    required this.icon,
-    required this.color,
-    this.badge,
-    this.imageUrl,
-  });
-
-  final String id;
-  final String name;
-  final String accountNumber;
-  final IconData icon;
-  final Color color;
-  final String? badge;
-  final String? imageUrl;
-}
+export '../domain/models/service_category_item.dart';
+export 'providers/services_provider.dart';
 
 /// Services and Categories screen matching Screenshot 4 with category/service icons
 /// instead of human portraits as requested by user.
-class ServicesScreen extends StatefulWidget {
+class ServicesScreen extends ConsumerStatefulWidget {
   const ServicesScreen({super.key, this.onAddCategory});
 
   final VoidCallback? onAddCategory;
 
   @override
-  State<ServicesScreen> createState() => _ServicesScreenState();
+  ConsumerState<ServicesScreen> createState() => _ServicesScreenState();
 }
 
-class _ServicesScreenState extends State<ServicesScreen> {
-  int _selectedFilterIndex = 0; // 0 = All, 1 = My Accounts
+class _ServicesScreenState extends ConsumerState<ServicesScreen> {
+  bool _isSearching = false;
+  late final TextEditingController _searchController;
 
-  final List<ServiceCategoryItem> _quickServices = const [
-    ServiceCategoryItem(
-      id: '1',
-      name: 'OpenAI',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.sparkles,
-      color: Color(0xFF10B981),
-      imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '2',
-      name: 'AWS Cloud',
-      accountNumber: 'Mastercard 9283',
-      icon: LucideIcons.cloud,
-      color: Color(0xFFF59E0B),
-      imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '3',
-      name: 'Figma',
-      accountNumber: 'KBank 1234',
-      icon: LucideIcons.palette,
-      color: Color(0xFFA855F7),
-      imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '4',
-      name: 'Apple',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.laptop,
-      color: Color(0xFF0EA5E9),
-      imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '5',
-      name: 'Google Cloud',
-      accountNumber: 'Mastercard 9283',
-      icon: LucideIcons.globe,
-      color: Color(0xFFEF4444),
-      imageUrl: 'https://avatars.githubusercontent.com/u/1342004?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '6',
-      name: 'GitHub',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.code,
-      color: Color(0xFF6366F1),
-      imageUrl: 'https://avatars.githubusercontent.com/u/9919?s=200&v=4',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
 
-  final List<ServiceCategoryItem> _allAccounts = const [
-    ServiceCategoryItem(
-      id: '1',
-      name: 'OpenAI API & ChatGPT',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.sparkles,
-      color: Color(0xFF10B981),
-      badge: 'Active',
-      imageUrl: 'https://avatars.githubusercontent.com/u/14957082?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '2',
-      name: 'AWS Infrastructure',
-      accountNumber: 'Mastercard 9283',
-      icon: LucideIcons.cloud,
-      color: Color(0xFFF59E0B),
-      badge: 'Active',
-      imageUrl: 'https://avatars.githubusercontent.com/u/2232217?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '3',
-      name: 'Figma Enterprise',
-      accountNumber: 'KBank 1234',
-      icon: LucideIcons.palette,
-      color: Color(0xFFA855F7),
-      badge: 'Active',
-      imageUrl: 'https://avatars.githubusercontent.com/u/5155369?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '4',
-      name: 'Apple Developer Account',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.laptop,
-      color: Color(0xFF0EA5E9),
-      badge: 'Annual',
-      imageUrl: 'https://avatars.githubusercontent.com/u/10639145?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '5',
-      name: 'Supabase Database',
-      accountNumber: 'KBank 1234',
-      icon: LucideIcons.database,
-      color: Color(0xFF22C55E),
-      badge: 'Active',
-      imageUrl: 'https://avatars.githubusercontent.com/u/54469796?s=200&v=4',
-    ),
-    ServiceCategoryItem(
-      id: '6',
-      name: 'Vercel Pro',
-      accountNumber: 'Chase 2983',
-      icon: LucideIcons.triangle,
-      color: Color(0xFF64748B),
-      badge: 'Active',
-      imageUrl: 'https://avatars.githubusercontent.com/u/14985020?s=200&v=4',
-    ),
-  ];
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _onPayService(ServiceCategoryItem service) {
     SendRequestModal.show(
@@ -155,6 +46,11 @@ class _ServicesScreenState extends State<ServicesScreen> {
   }
 
   void _showAddServiceModal() {
+    if (widget.onAddCategory != null) {
+      widget.onAddCategory!();
+      return;
+    }
+
     showOverlay(
       context,
       const DialogConfiguration(),
@@ -186,6 +82,11 @@ class _ServicesScreenState extends State<ServicesScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final servicesState = ref.watch(servicesProvider);
+    final quickServices = servicesState.quickServices;
+    final filteredAccounts = servicesState.filteredAccounts;
+    final selectedFilterIndex = servicesState.selectedFilterIndex;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -225,12 +126,12 @@ class _ServicesScreenState extends State<ServicesScreen> {
                       runSpacing: 24,
                       alignment: WrapAlignment.spaceAround,
                       children: [
-                        for (int i = 0; i < _quickServices.length; i++)
+                        for (int i = 0; i < quickServices.length; i++)
                           GridWaveAnimation.indexed(
                             index: i,
                             crossAxisCount: crossAxisCount,
                             child: _buildServiceAvatar(
-                              _quickServices[i],
+                              quickServices[i],
                               itemWidth,
                             ),
                           ),
@@ -273,35 +174,81 @@ class _ServicesScreenState extends State<ServicesScreen> {
                           children: [
                             Row(
                               children: [
-                                _buildFilterPill('All', 0, isDark),
+                                _buildFilterPill('All', 0, isDark, selectedFilterIndex),
                                 const SizedBox(width: 8),
-                                _buildFilterPill('My accounts', 1, isDark),
+                                _buildFilterPill(
+                                  'My accounts',
+                                  1,
+                                  isDark,
+                                  selectedFilterIndex,
+                                ),
                               ],
                             ),
                             IconButton.ghost(
                               density: ButtonDensity.icon,
                               icon: Icon(
-                                LucideIcons.search,
+                                _isSearching ? LucideIcons.x : LucideIcons.search,
                                 size: 18,
                                 color: isDark
                                     ? const Color(0xFFA1A1AA)
                                     : const Color(0xFF71717A),
                               ),
-                              onPressed: () {},
+                              onPressed: () {
+                                setState(() {
+                                  _isSearching = !_isSearching;
+                                  if (!_isSearching) {
+                                    _searchController.clear();
+                                    ref
+                                        .read(servicesProvider.notifier)
+                                        .setSearchQuery('');
+                                  }
+                                });
+                              },
                             ),
                           ],
                         ),
+
+                        if (_isSearching) ...[
+                          const SizedBox(height: 12),
+                          TextField(
+                            controller: _searchController,
+                            autofocus: true,
+                            placeholder: const Text('Search recipients & accounts...'),
+                            onChanged: (val) {
+                              ref
+                                  .read(servicesProvider.notifier)
+                                  .setSearchQuery(val);
+                            },
+                          ),
+                        ],
+
                         const SizedBox(height: 16),
 
-                        // List of items
-                        for (
-                          int index = 0;
-                          index < _allAccounts.length;
-                          index++
-                        ) ...[
-                          if (index > 0) const SizedBox(height: 12),
-                          _buildAccountTile(_allAccounts[index], isDark),
-                        ],
+                        // List of items or empty state
+                        if (filteredAccounts.isEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 32),
+                            child: Center(
+                              child: Text(
+                                'No accounts found',
+                                style: TextStyle(
+                                  color: isDark
+                                      ? const Color(0xFFA1A1AA)
+                                      : const Color(0xFF71717A),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          for (
+                            int index = 0;
+                            index < filteredAccounts.length;
+                            index++
+                          ) ...[
+                            if (index > 0) const SizedBox(height: 12),
+                            _buildAccountTile(filteredAccounts[index], isDark),
+                          ],
                       ],
                     ),
                   );
@@ -385,10 +332,16 @@ class _ServicesScreenState extends State<ServicesScreen> {
     );
   }
 
-  Widget _buildFilterPill(String title, int index, bool isDark) {
-    final isSelected = _selectedFilterIndex == index;
+  Widget _buildFilterPill(
+    String title,
+    int index,
+    bool isDark,
+    int selectedFilterIndex,
+  ) {
+    final isSelected = selectedFilterIndex == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedFilterIndex = index),
+      onTap: () =>
+          ref.read(servicesProvider.notifier).setFilterIndex(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(

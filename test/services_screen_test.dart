@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pun_account/features/categories/presentation/services_screen.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -10,7 +11,9 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const ShadcnApp(home: Scaffold(child: ServicesScreen())),
+        const ProviderScope(
+          child: ShadcnApp(home: Scaffold(child: ServicesScreen())),
+        ),
       );
       await tester.pumpAndSettle();
 
