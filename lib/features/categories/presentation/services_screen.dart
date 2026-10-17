@@ -1,5 +1,6 @@
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../../core/animations/grid_wave_animation.dart';
 import '../../transactions/presentation/send_request_modal.dart';
 
 class ServiceCategoryItem {
@@ -235,17 +236,25 @@ class _ServicesScreenState extends State<ServicesScreen> {
                 ),
                 const SizedBox(height: 24),
 
-                // 2x3 Grid of Circular Category / Service Avatars
+                // 2x3 Grid of Circular Category / Service Avatars with Grid Wave animation
                 LayoutBuilder(
                   builder: (context, constraints) {
                     final itemWidth = (constraints.maxWidth - 32) / 3;
+                    const crossAxisCount = 3;
                     return Wrap(
                       spacing: 16,
                       runSpacing: 24,
                       alignment: WrapAlignment.spaceAround,
                       children: [
-                        for (final service in _quickServices)
-                          _buildServiceAvatar(service, itemWidth),
+                        for (int i = 0; i < _quickServices.length; i++)
+                          GridWaveAnimation.indexed(
+                            index: i,
+                            crossAxisCount: crossAxisCount,
+                            child: _buildServiceAvatar(
+                              _quickServices[i],
+                              itemWidth,
+                            ),
+                          ),
                       ],
                     );
                   },
