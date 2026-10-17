@@ -46,39 +46,6 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     );
   }
 
-  void _showAddServiceModal() {
-    if (widget.onAddCategory != null) {
-      widget.onAddCategory!();
-      return;
-    }
-
-    showOverlay(
-      context,
-      const DialogConfiguration(),
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add Service / Category').h4(),
-          content: const SizedBox(
-            width: 320,
-            child: Text(
-              'Add a recurring cloud service, software subscription, or creator tool to your payment list.',
-            ),
-          ),
-          actions: [
-            OutlineButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            PrimaryButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Add Service'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
