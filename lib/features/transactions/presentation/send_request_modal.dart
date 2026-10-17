@@ -29,12 +29,8 @@ class SendRequestModal extends StatefulWidget {
       context,
       DrawerConfiguration(
         position: OverlayPosition.bottom,
-        showDragHandle: false,
-        surfaceOpacity: 0,
-        constraints: BoxConstraints(
-          minHeight: screenHeight * 0.95,
-          maxHeight: screenHeight * 0.95,
-        ),
+        showDragHandle: true,
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
       ),
       builder: (context) =>
           SendRequestModal(initialMode: mode, recipientName: recipientName),
@@ -348,12 +344,11 @@ class _SendRequestModalState extends State<SendRequestModal> {
 
                           // Top flexible area (scrolls only if screen is very short, without affecting keypad)
                           Expanded(
-                            child: Center(
-                              child: SingleChildScrollView(
-                                physics: const ClampingScrollPhysics(),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
+                            child: SingleChildScrollView(
+                              physics: const ClampingScrollPhysics(),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
                                     // Mode Switcher (Send / Request)
                                     Container(
                                       padding: const EdgeInsets.all(4),
@@ -468,7 +463,6 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                 ),
                               ),
                             ),
-                          ),
 
                           // Card for the task (defaults to AWS Cloud, displays last paid cost)
                           _buildTaskCard(
