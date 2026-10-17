@@ -10,7 +10,7 @@ export 'widgets/transactions_empty_view.dart';
 export 'widgets/transactions_error_view.dart';
 export 'widgets/transactions_sheet_header.dart';
 
-/// Redesigned Home Overview screen connecting header, overview summary, and draggable transactions sheet.
+/// Redesigned Home Overview screen connected to real Wallets & Transactions
 class OverviewScreen extends StatelessWidget {
   const OverviewScreen({
     super.key,
