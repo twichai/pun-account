@@ -191,78 +191,85 @@ class _SendRequestModalState extends State<SendRequestModal> {
 
     return Theme(
       data: modalTheme,
-      child: Container(
-        height: screenHeight * 0.95,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: modalBg,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          border: Border(top: BorderSide(color: modalBorder, width: 0.5)),
-        ),
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  10,
-                  20,
-                  max(16.0, bottomPadding + 8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // Drag Handle
-                    Center(
-                      child: Container(
-                        width: 40,
-                        height: 4,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: modalMutedFg.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(2),
-                        ),
+      child: ToastLayer(
+        maxStackedEntries: 1,
+        padding: const EdgeInsets.only(top: 20),
+        child: Builder(
+          builder: (modalContext) {
+            return Container(
+              height: screenHeight * 0.95,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: modalBg,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                border: Border(top: BorderSide(color: modalBorder, width: 0.5)),
+              ),
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 440),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        20,
+                        10,
+                        20,
+                        max(16.0, bottomPadding + 8),
                       ),
-                    ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // Drag Handle
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 4,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: modalMutedFg.withValues(alpha: 0.35),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
 
-                    // Top flexible area (scrolls only if screen is very short, without affecting keypad)
-                    Expanded(
-                      child: Center(
-                        child: SingleChildScrollView(
-                          physics: const ClampingScrollPhysics(),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Mode Switcher (Send / Request)
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: modalMutedBg,
-                                  borderRadius: BorderRadius.circular(24),
-                                ),
-                                child: Row(
+                          // Top flexible area (scrolls only if screen is very short, without affecting keypad)
+                          Expanded(
+                            child: Center(
+                              child: SingleChildScrollView(
+                                physics: const ClampingScrollPhysics(),
+                                child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    _buildModeTab(
-                                      'Send',
-                                      TransferMode.send,
-                                      modalBg,
-                                      modalFg,
-                                      modalMutedFg,
+                                    // Mode Switcher (Send / Request)
+                                    Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: modalMutedBg,
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          _buildModeTab(
+                                            'ครั้งเดียว',
+                                            TransferMode.send,
+                                            modalBg,
+                                            modalFg,
+                                            modalMutedFg,
+                                            modalContext,
+                                          ),
+                                          _buildModeTab(
+                                            'รายเดือน',
+                                            TransferMode.request,
+                                            modalBg,
+                                            modalFg,
+                                            modalMutedFg,
+                                            modalContext,
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                    _buildModeTab(
-                                      'Request',
-                                      TransferMode.request,
-                                      modalBg,
-                                      modalFg,
-                                      modalMutedFg,
-                                    ),
-                                  ],
-                                ),
-                              ),
                               const SizedBox(height: 12),
 
                               // Account Selector dropdown
@@ -406,9 +413,9 @@ class _SendRequestModalState extends State<SendRequestModal> {
                           }
                           closeOverlay(context);
                         },
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(
+                        child: Text(
+                          'Send \$$_amountStr',
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
@@ -421,8 +428,11 @@ class _SendRequestModalState extends State<SendRequestModal> {
             ),
           ),
         ),
-      ),
-    );
+      );
+    },
+  ),
+),
+);
   }
 
   Widget _buildModeTab(
@@ -431,10 +441,30 @@ class _SendRequestModalState extends State<SendRequestModal> {
     Color modalBg,
     Color modalFg,
     Color modalMutedFg,
+    BuildContext toastContext,
   ) {
     final isSelected = _mode == mode;
     return GestureDetector(
-      onTap: () => setState(() => _mode = mode),
+      onTap: () {
+        if (mode == TransferMode.request) {
+          showToast(
+            context: toastContext,
+            location: ToastLocation.topCenter,
+            showDuration: const Duration(seconds: 3),
+            builder: (context, overlay) {
+              return SurfaceCard(
+                child: Basic(
+                  leading: const Icon(LucideIcons.sparkles, size: 18),
+                  title: const Text('กำลังพัฒนา'),
+                  subtitle: const Text('ฟังก์ชันรายเดือนกำลังอยู่ระหว่างการพัฒนา'),
+                ),
+              );
+            },
+          );
+          return;
+        }
+        setState(() => _mode = mode);
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
