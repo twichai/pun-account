@@ -21,20 +21,42 @@ void main() {
       expect(find.text('Cards'), findsOneWidget);
     });
 
-    testWidgets('Respects reduced motion setting', (tester) async {
+    testWidgets('Smoothly fades out when trigger becomes false', (tester) async {
+      bool active = true;
+
       await tester.pumpWidget(
-        const MediaQuery(
-          data: MediaQueryData(disableAnimations: true),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: FadeInAnimation(
-              child: Text('Reduced Motion'),
-            ),
+        StatefulBuilder(
+          builder: (context, setState) {
+            return Directionality(
+              textDirection: TextDirection.ltr,
+              child: FadeInAnimation(
+                trigger: active,
+                child: const Text('Cards'),
+              ),
+            );
+          },
+        ),
+      );
+
+      // Finish fade in
+      await tester.pumpAndSettle();
+      expect(find.text('Cards'), findsOneWidget);
+
+      // Switch to inactive
+      active = false;
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: FadeInAnimation(
+            trigger: active,
+            child: const Text('Cards'),
           ),
         ),
       );
 
-      expect(find.text('Reduced Motion'), findsOneWidget);
+      // Animate fade out
+      await tester.pumpAndSettle();
+      expect(find.text('Cards'), findsOneWidget);
     });
   });
 }

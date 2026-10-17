@@ -1,34 +1,44 @@
+import 'dart:async';
 import 'package:flutter/widgets.dart';
 
-/// A gentle, clean Fade-In entrance animation with a subtle slide offset.
-/// Provides a natural, non-distracting transition for screen elements.
+/// A gentle, clean Fade In/Out entrance and exit animation with a subtle slide offset.
+/// Provides a natural, non-distracting transition for screen elements when appearing or exiting.
 class FadeInAnimation extends StatefulWidget {
   const FadeInAnimation({
     super.key,
     required this.child,
-    this.duration = const Duration(milliseconds: 320),
+    this.duration = const Duration(milliseconds: 300),
+    this.reverseDuration = const Duration(milliseconds: 200),
     this.delay = Duration.zero,
     this.offset = const Offset(0, 10),
     this.curve = Curves.easeOutCubic,
+    this.reverseCurve = Curves.easeInCubic,
     this.trigger,
   });
 
   /// The widget to animate
   final Widget child;
 
-  /// Duration of the fade-in (default 320ms)
+  /// Duration of the fade-in (default 300ms)
   final Duration duration;
 
-  /// Delay before animating (useful for subtle staggering)
+  /// Duration of the fade-out when exiting (default 200ms)
+  final Duration reverseDuration;
+
+  /// Delay before animating in (useful for subtle staggering)
   final Duration delay;
 
   /// Subtle initial offset (default 10px downward for gentle rise)
   final Offset offset;
 
-  /// Easing curve (default Curves.easeOutCubic)
+  /// Easing curve when entering (default Curves.easeOutCubic)
   final Curve curve;
 
-  /// Optional trigger to replay the fade (e.g. tab switch)
+  /// Easing curve when exiting (default Curves.easeInCubic)
+  final Curve reverseCurve;
+
+  /// Trigger flag (e.g. isActive boolean).
+  /// When true, it fades in; when false, it smoothly fades out.
   final dynamic trigger;
 
   @override
@@ -40,6 +50,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
   late final AnimationController _controller;
   late final Animation<double> _opacity;
   late final Animation<Offset> _slide;
+  Timer? _delayTimer;
   bool _hasStarted = false;
 
   @override
@@ -48,11 +59,13 @@ class _FadeInAnimationState extends State<FadeInAnimation>
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration,
+      reverseDuration: widget.reverseDuration,
     );
 
     final curvedAnimation = CurvedAnimation(
       parent: _controller,
       curve: widget.curve,
+      reverseCurve: widget.reverseCurve,
     );
 
     _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(curvedAnimation);
@@ -68,33 +81,37 @@ class _FadeInAnimationState extends State<FadeInAnimation>
     super.didUpdateWidget(oldWidget);
     if (oldWidget.trigger != widget.trigger) {
       if (widget.trigger is bool && !(widget.trigger as bool)) {
-        _controller.reset();
-        if (mounted) {
-          setState(() {
-            _hasStarted = false;
-          });
-        }
+        // Smoothly fade out when leaving the screen
+        _delayTimer?.cancel();
+        _controller.reverse();
       } else {
-        _controller.reset();
+        // Fade in when entering the screen
         _schedulePlay();
       }
     }
   }
 
   void _schedulePlay() {
-    _hasStarted = false;
+    _delayTimer?.cancel();
     if (widget.delay == Duration.zero) {
       if (mounted) {
-        _hasStarted = true;
-        _controller.forward(from: 0.0);
+        setState(() {
+          _hasStarted = true;
+        });
+        _controller.forward();
       }
     } else {
-      Future.delayed(widget.delay, () {
+      if (mounted) {
+        setState(() {
+          _hasStarted = false;
+        });
+      }
+      _delayTimer = Timer(widget.delay, () {
         if (mounted) {
           setState(() {
             _hasStarted = true;
           });
-          _controller.forward(from: 0.0);
+          _controller.forward();
         }
       });
     }
@@ -102,6 +119,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
 
   @override
   void dispose() {
+    _delayTimer?.cancel();
     _controller.dispose();
     super.dispose();
   }
@@ -113,7 +131,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
       return widget.child;
     }
 
-    if (!_hasStarted && widget.delay > Duration.zero) {
+    if (!_hasStarted && _controller.value == 0.0 && widget.delay > Duration.zero) {
       return Opacity(
         opacity: 0.0,
         child: widget.child,
@@ -124,7 +142,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
       animation: _controller,
       builder: (context, child) {
         return Opacity(
-          opacity: _opacity.value,
+          opacity: _opacity.value.clamp(0.0, 1.0),
           child: Transform.translate(
             offset: _slide.value,
             child: child,
