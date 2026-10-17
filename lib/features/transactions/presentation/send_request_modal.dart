@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/services.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 enum TransferMode { send, request }
@@ -65,17 +66,26 @@ class _SendRequestModalState extends State<SendRequestModal> {
     _amountStr = widget.initialAmount;
   }
 
+  bool _hasUserTyped = false;
+
   void _onKeyPress(String key) {
     setState(() {
+      if (!_hasUserTyped) {
+        _hasUserTyped = true;
+        if (key == '.') {
+          _amountStr = '0.';
+        } else {
+          _amountStr = key;
+        }
+        return;
+      }
+
       if (key == '.') {
         if (!_amountStr.contains('.')) {
           _amountStr = '$_amountStr.';
         }
       } else {
-        if (_amountStr == '0' ||
-            _amountStr == '1' &&
-                widget.initialAmount == '1' &&
-                _amountStr.length == 1) {
+        if (_amountStr == '0') {
           _amountStr = key;
         } else {
           // Limit to 2 decimals if decimal exists
@@ -95,6 +105,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
 
   void _onBackspace() {
     setState(() {
+      _hasUserTyped = true;
       if (_amountStr.length > 1) {
         _amountStr = _amountStr.substring(0, _amountStr.length - 1);
       } else {
@@ -194,38 +205,37 @@ class _SendRequestModalState extends State<SendRequestModal> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 440),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  10,
+                  20,
+                  max(16.0, bottomPadding + 8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // Drag Handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: modalMutedFg.withValues(alpha: 0.35),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
                       ),
-                      child: IntrinsicHeight(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(
-                            20,
-                            10,
-                            20,
-                            max(16.0, bottomPadding + 8),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              // Drag Handle
-                              Center(
-                                child: Container(
-                                  width: 40,
-                                  height: 4,
-                                  margin: const EdgeInsets.only(bottom: 12),
-                                  decoration: BoxDecoration(
-                                    color: modalMutedFg.withValues(alpha: 0.35),
-                                    borderRadius: BorderRadius.circular(2),
-                                  ),
-                                ),
-                              ),
+                    ),
 
+                    // Top flexible area (scrolls only if screen is very short, without affecting keypad)
+                    Expanded(
+                      child: Center(
+                        child: SingleChildScrollView(
+                          physics: const ClampingScrollPhysics(),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
                               // Mode Switcher (Send / Request)
                               Container(
                                 padding: const EdgeInsets.all(4),
@@ -328,131 +338,85 @@ class _SendRequestModalState extends State<SendRequestModal> {
                                   color: modalMutedFg,
                                 ),
                               ),
-
-                              const SizedBox(height: 16),
-
-                              // Spacer pushes Send button to the very bottom neatly
-                              const Spacer(),
-                              // Math Operators Row (+, -, ×, ÷)
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  _buildOperatorButton(
-                                    '+',
-                                    modalBg,
-                                    modalFg,
-                                    modalMutedBg,
-                                    modalMutedFg,
-                                    modalBorder,
-                                  ),
-                                  _buildOperatorButton(
-                                    '-',
-                                    modalBg,
-                                    modalFg,
-                                    modalMutedBg,
-                                    modalMutedFg,
-                                    modalBorder,
-                                  ),
-                                  _buildOperatorButton(
-                                    '×',
-                                    modalBg,
-                                    modalFg,
-                                    modalMutedBg,
-                                    modalMutedFg,
-                                    modalBorder,
-                                  ),
-                                  _buildOperatorButton(
-                                    '÷',
-                                    modalBg,
-                                    modalFg,
-                                    modalMutedBg,
-                                    modalMutedFg,
-                                    modalBorder,
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 14),
-
-                              // Keypad Grid
-                              Column(
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _buildKeypadButton('1', modalFg),
-                                      _buildKeypadButton('2', modalFg),
-                                      _buildKeypadButton('3', modalFg),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _buildKeypadButton('4', modalFg),
-                                      _buildKeypadButton('5', modalFg),
-                                      _buildKeypadButton('6', modalFg),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _buildKeypadButton('7', modalFg),
-                                      _buildKeypadButton('8', modalFg),
-                                      _buildKeypadButton('9', modalFg),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      _buildKeypadButton('.', modalFg),
-                                      _buildKeypadButton('0', modalFg),
-                                      _buildBackspaceButton(modalFg),
-                                    ],
-                                  ),
-                                ],
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Action Button pinned at the very bottom
-                              SizedBox(
-                                width: double.infinity,
-                                height: 50,
-                                child: PrimaryButton(
-                                  onPressed: () {
-                                    if (_operator != null &&
-                                        _firstOperand != null) {
-                                      _calculate();
-                                      return;
-                                    }
-                                    closeOverlay(context);
-                                  },
-                                  child: Text(
-                                    _mode == TransferMode.send
-                                        ? 'Send \$$_amountStr'
-                                        : 'Request \$$_amountStr',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),
                       ),
                     ),
-                  );
-                },
+
+                    const SizedBox(height: 14),
+
+                    // Keypad Grid (completely outside scroll view for instant gesture response)
+                    Column(
+                      children: [
+                        Row(
+                          children: [
+                            _buildKeypadButton('1'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('2'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('3'),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _buildKeypadButton('4'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('5'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('6'),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _buildKeypadButton('7'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('8'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('9'),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _buildKeypadButton('.'),
+                            const SizedBox(width: 8),
+                            _buildKeypadButton('0'),
+                            const SizedBox(width: 8),
+                            _buildBackspaceButton(),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: PrimaryButton(
+                        alignment: Alignment.center,
+                        onPressed: () {
+                          if (_operator != null &&
+                              _firstOperand != null) {
+                            _calculate();
+                            return;
+                          }
+                          closeOverlay(context);
+                        },
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -499,6 +463,7 @@ class _SendRequestModalState extends State<SendRequestModal> {
     );
   }
 
+  // ignore: unused_element
   Widget _buildOperatorButton(
     String op,
     Color modalBg,
@@ -535,39 +500,109 @@ class _SendRequestModalState extends State<SendRequestModal> {
     );
   }
 
-  Widget _buildKeypadButton(String label, Color modalFg) {
-    return SizedBox(
-      width: 76,
-      height: 56,
-      child: Button(
-        style: ButtonStyle.ghost(
-          density: ButtonDensity.compact,
-          shape: ButtonShape.circle,
-        ),
-        onPressed: () => _onKeyPress(label),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: modalFg,
-          ),
-        ),
+  Widget _buildKeypadButton(String label) {
+    return _BouncingKeypadButton(
+      onPressed: () => _onKeyPress(label),
+      child: Text(
+        label,
+        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
       ),
     );
   }
 
-  Widget _buildBackspaceButton(Color modalFg) {
-    return SizedBox(
-      width: 76,
-      height: 56,
-      child: Button(
-        style: ButtonStyle.ghost(
-          density: ButtonDensity.compact,
-          shape: ButtonShape.circle,
+  Widget _buildBackspaceButton() {
+    return _BouncingKeypadButton(
+      onPressed: _onBackspace,
+      child: const Icon(LucideIcons.delete, size: 20),
+    );
+  }
+}
+
+/// A keypad button wrapper that provides immediate tactile feedback:
+/// - Instant haptic vibration on pointer down
+/// - Snappy spring-scale compression and bounce-back
+/// - Zero gesture delay by listening directly to pointer events
+class _BouncingKeypadButton extends StatefulWidget {
+  const _BouncingKeypadButton({
+    required this.child,
+    required this.onPressed,
+  });
+
+  final Widget child;
+  final VoidCallback onPressed;
+
+  @override
+  State<_BouncingKeypadButton> createState() => _BouncingKeypadButtonState();
+}
+
+class _BouncingKeypadButtonState extends State<_BouncingKeypadButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 60),
+      reverseDuration: const Duration(milliseconds: 140),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInQuad,
+        reverseCurve: Curves.easeOutBack,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onPointerDown(PointerDownEvent _) {
+    HapticFeedback.lightImpact();
+    // Fire immediately on touch down: zero delay, 100% reliable for rapid taps
+    widget.onPressed();
+    _controller.forward(from: 0.0);
+  }
+
+  void _onPointerUp(PointerUpEvent _) {
+    _controller.reverse();
+  }
+
+  void _onPointerCancel(PointerCancelEvent _) {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: _onPointerDown,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        child: AnimatedBuilder(
+          animation: _scaleAnimation,
+          builder: (context, child) => Transform.scale(
+            scale: _scaleAnimation.value,
+            child: child,
+          ),
+          child: SizedBox(
+            height: 54,
+            child: IgnorePointer(
+              child: SecondaryButton(
+                alignment: Alignment.center,
+                onPressed: () {},
+                child: widget.child,
+              ),
+            ),
+          ),
         ),
-        onPressed: _onBackspace,
-        child: Icon(LucideIcons.delete, size: 22, color: modalFg),
       ),
     );
   }
