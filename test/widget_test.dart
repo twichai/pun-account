@@ -59,7 +59,7 @@ void main() {
 
     // Verify Cards screen is displayed
     expect(find.text('Cards'), findsOneWidget);
-    expect(find.text('Order a card'), findsOneWidget);
+    expect(find.text('Add Card'), findsOneWidget);
     expect(find.textContaining('7642'), findsAtLeastNWidgets(1));
 
     // Tap on Tab 0 (Recipients / Services)

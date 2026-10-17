@@ -3,6 +3,7 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../domain/models/wallet.dart';
 import 'providers/wallets_provider.dart';
+import 'widgets/add_card_drawer.dart';
 import 'widgets/dark_obsidian_wallet_card.dart';
 
 /// WalletsScreen presenting Dark Obsidian Mesh / Aurora cards and Cash wallets
@@ -78,73 +79,6 @@ class _WalletsScreenState extends ConsumerState<WalletsScreen> {
     );
   }
 
-  void _showAddWalletModal() {
-    showOverlay(
-      context,
-      const DialogConfiguration(),
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add new wallet or card').h4(),
-          content: const SizedBox(
-            width: 320,
-            child: Text(
-              'Choose whether to add a new Cash Wallet (เงินสด) or issue a Digital Card.',
-            ),
-          ),
-          actions: [
-            OutlineButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            OutlineButton(
-              onPressed: () {
-                final newId = DateTime.now().millisecondsSinceEpoch.toString();
-                ref
-                    .read(walletsProvider.notifier)
-                    .addWallet(
-                      Wallet(
-                        id: newId,
-                        type: 'cash',
-                        balance: 5000.00,
-                        currency: 'THB',
-                        auroraAccent: 'emerald',
-                      ),
-                    );
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add Cash Wallet'),
-            ),
-            PrimaryButton(
-              onPressed: () {
-                final newId = DateTime.now().millisecondsSinceEpoch.toString();
-                final accents = ['cyan', 'violet', 'amber'];
-                final pickedAccent =
-                    accents[DateTime.now().second % accents.length];
-
-                ref
-                    .read(walletsProvider.notifier)
-                    .addWallet(
-                      Wallet(
-                        id: newId,
-                        type: 'credit_card',
-                        balance: 30000.00,
-                        currency: 'THB',
-                        cardHolder: 'PAVLO D.',
-                        last4: '${1000 + DateTime.now().millisecond % 9000}',
-                        cardBrand: 'visa',
-                        auroraAccent: pickedAccent,
-                      ),
-                    );
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add Digital Card'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final wallets = ref.watch(walletsProvider);
@@ -154,7 +88,7 @@ class _WalletsScreenState extends ConsumerState<WalletsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Header Row: Title & "Order a card" button
+          // Header Row: Title & "Add Card" button
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -165,10 +99,17 @@ class _WalletsScreenState extends ConsumerState<WalletsScreen> {
               ),
               PrimaryButton(
                 density: ButtonDensity.compact,
-                onPressed: _showAddWalletModal,
-                child: const Text(
-                  'Order a card',
-                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                onPressed: () => AddCardDrawer.show(context),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(LucideIcons.plus, size: 14),
+                    SizedBox(width: 6),
+                    Text(
+                      'Add Card',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                    ),
+                  ],
                 ),
               ),
             ],
