@@ -157,15 +157,19 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       runSpacing: 24,
                       alignment: WrapAlignment.spaceAround,
                       children: [
-                        for (int i = 0; i < quickServices.length; i++)
-                          GridWaveAnimation.indexed(
-                            index: i,
-                            crossAxisCount: crossAxisCount,
-                            child: _buildServiceAvatar(
-                              quickServices[i],
-                              itemWidth,
+                        if (quickServices.isEmpty && servicesState.isLoading)
+                          for (int i = 0; i < 6; i++)
+                            _buildSkeletonAvatar(itemWidth, isDark)
+                        else
+                          for (int i = 0; i < quickServices.length; i++)
+                            GridWaveAnimation.indexed(
+                              index: i,
+                              crossAxisCount: crossAxisCount,
+                              child: _buildServiceAvatar(
+                                quickServices[i],
+                                itemWidth,
+                              ),
                             ),
-                          ),
                       ],
                     );
                   },
@@ -384,6 +388,34 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonAvatar(double width, bool isDark) {
+    return SizedBox(
+      width: width,
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            width: 48,
+            height: 12,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+            ),
+          ),
+          const SizedBox(height: 2),
+        ],
       ),
     );
   }

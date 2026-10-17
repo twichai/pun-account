@@ -4,55 +4,150 @@ import 'package:pun_account/features/categories/domain/models/service_category_i
 import 'package:pun_account/features/categories/presentation/providers/services_provider.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+class FakeServicesRepository implements ServicesRepository {
+  List<ServiceTrack> fakeTracks = [
+    const ServiceTrack(
+      id: 'cat-1',
+      key: 'content_creator',
+      name: 'Content Creator',
+      description: 'For creators',
+      icon: LucideIcons.video,
+      color: Color(0xFFEF4444),
+    ),
+    const ServiceTrack(
+      id: 'cat-2',
+      key: 'developer',
+      name: 'Developer',
+      description: 'For devs',
+      icon: LucideIcons.code,
+      color: Color(0xFF10B981),
+    ),
+  ];
+
+  List<ServiceCategoryItem> fakeServices = [
+    const ServiceCategoryItem(
+      id: 'svc-1',
+      name: 'Canva Pro',
+      accountNumber: 'KBank 1234',
+      icon: LucideIcons.palette,
+      color: Color(0xFF00C4CC),
+      serviceCategoryId: 'content_creator',
+      categoryTrack: 'Content Creator',
+      isMyAccount: true,
+      isQuick: true,
+    ),
+    const ServiceCategoryItem(
+      id: 'svc-2',
+      name: 'ChatGPT Plus',
+      accountNumber: 'Chase 2983',
+      icon: LucideIcons.sparkles,
+      color: Color(0xFF10B981),
+      serviceCategoryId: 'content_creator',
+      categoryTrack: 'Content Creator',
+      isMyAccount: true,
+      isQuick: true,
+    ),
+    const ServiceCategoryItem(
+      id: 'svc-3',
+      name: 'AWS Cloud',
+      accountNumber: 'Mastercard 9283',
+      icon: LucideIcons.cloud,
+      color: Color(0xFFF59E0B),
+      serviceCategoryId: 'developer',
+      categoryTrack: 'Developer',
+      isMyAccount: false,
+      isQuick: true,
+    ),
+  ];
+
+  @override
+  Future<List<ServiceTrack>> getServiceCategories({String? businessId}) async =>
+      fakeTracks;
+
+  @override
+  Future<List<ServiceCategoryItem>> getServices({
+    String? businessId,
+    String? categoryKey,
+  }) async =>
+      fakeServices;
+}
+
 void main() {
   group('ServicesProvider Unit Tests', () {
     late ProviderContainer container;
+    late FakeServicesRepository fakeRepo;
 
     setUp(() {
-      container = ProviderContainer();
+      fakeRepo = FakeServicesRepository();
+      container = ProviderContainer(
+        overrides: [
+          servicesRepositoryProvider.overrideWithValue(fakeRepo),
+        ],
+      );
     });
 
     tearDown(() {
       container.dispose();
     });
 
-    test('initial state defaults to content_creator track and services', () {
+    test('fetchCategoriesAndServices populates real data from repository', () async {
+      await container
+          .read(servicesProvider.notifier)
+          .fetchCategoriesAndServices();
+
       final state = container.read(servicesProvider);
+      expect(state.isLoading, isFalse);
+      expect(state.tracks.length, 2);
+      expect(state.allAccounts.length, 3);
       expect(state.selectedTrackKey, 'content_creator');
-      expect(state.tracks.isNotEmpty, isTrue);
-      expect(state.quickServices.isNotEmpty, isTrue);
-      expect(state.trackQuickServices.every((s) => s.serviceCategoryId == 'content_creator'), isTrue);
-      expect(state.selectedFilterIndex, 0);
-      expect(state.searchQuery, '');
+      expect(state.trackQuickServices.length, 2);
+      expect(
+        state.trackQuickServices
+            .every((s) => s.serviceCategoryId == 'content_creator'),
+        isTrue,
+      );
     });
 
-    test('switching track updates filtered accounts and quick services', () {
+    test('switching track updates filtered accounts and quick services', () async {
+      await container
+          .read(servicesProvider.notifier)
+          .fetchCategoriesAndServices();
       final notifier = container.read(servicesProvider.notifier);
       notifier.setTrack('developer');
 
       final state = container.read(servicesProvider);
       expect(state.selectedTrackKey, 'developer');
-      expect(state.trackQuickServices.every((s) => s.serviceCategoryId == 'developer'), isTrue);
-      expect(state.filteredAccounts.every((s) => s.serviceCategoryId == 'developer'), isTrue);
+      expect(state.trackQuickServices.length, 1);
+      expect(state.trackQuickServices.first.name, 'AWS Cloud');
+      expect(state.filteredAccounts.length, 1);
+      expect(state.filteredAccounts.first.name, 'AWS Cloud');
     });
 
-    test('filtering by My Accounts returns only isMyAccount items', () {
+    test('filtering by My Accounts returns only isMyAccount items', () async {
+      await container
+          .read(servicesProvider.notifier)
+          .fetchCategoriesAndServices();
       final notifier = container.read(servicesProvider.notifier);
+      notifier.setTrack('all');
       notifier.setFilterIndex(1);
 
       final state = container.read(servicesProvider);
       expect(state.selectedFilterIndex, 1);
       expect(state.filteredAccounts.every((item) => item.isMyAccount), isTrue);
+      expect(state.filteredAccounts.length, 2); // Canva and ChatGPT
     });
 
-    test('search query filters accounts by name case-insensitively', () {
+    test('search query filters accounts by name case-insensitively', () async {
+      await container
+          .read(servicesProvider.notifier)
+          .fetchCategoriesAndServices();
       final notifier = container.read(servicesProvider.notifier);
       notifier.setTrack('all');
-      notifier.setSearchQuery('openai');
+      notifier.setSearchQuery('chatgpt');
 
       final state = container.read(servicesProvider);
       expect(state.filteredAccounts.length, 1);
-      expect(state.filteredAccounts.first.name, contains('OpenAI'));
+      expect(state.filteredAccounts.first.name, contains('ChatGPT'));
     });
 
     test('addService adds account properly', () {
@@ -74,16 +169,18 @@ void main() {
       expect(state.allAccounts.any((s) => s.id == 'test-999'), isTrue);
     });
 
-    test('removeService removes account properly', () {
+    test('removeService removes account properly', () async {
+      await container
+          .read(servicesProvider.notifier)
+          .fetchCategoriesAndServices();
       final notifier = container.read(servicesProvider.notifier);
       final initialCount = container.read(servicesProvider).allAccounts.length;
-      final targetId = container.read(servicesProvider).allAccounts.first.id;
 
-      notifier.removeService(targetId);
+      notifier.removeService('svc-1');
 
       final state = container.read(servicesProvider);
       expect(state.allAccounts.length, initialCount - 1);
-      expect(state.allAccounts.any((s) => s.id == targetId), isFalse);
+      expect(state.allAccounts.any((s) => s.id == 'svc-1'), isFalse);
     });
   });
 }
