@@ -350,5 +350,37 @@ void main() {
       expect(find.text('Wallet Name'), findsOneWidget);
       expect(find.text('Current Balance (THB)'), findsOneWidget);
     });
+
+    testWidgets(
+      'WalletsScreen renders RefreshTrigger and refresh button triggers refresh',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(
+            child: ShadcnApp(
+              home: Scaffold(
+                child: WalletsScreen(),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Verify RefreshTrigger is present in the widget tree
+        expect(find.byType(RefreshTrigger), findsOneWidget);
+
+        // Verify programmatic refresh button is present
+        final refreshButton = find.byIcon(LucideIcons.refreshCw);
+        expect(refreshButton, findsOneWidget);
+
+        // Tap refresh button
+        await tester.tap(refreshButton);
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 2));
+        await tester.pumpAndSettle();
+
+        // Screen remains intact
+        expect(find.text('Cards'), findsOneWidget);
+      },
+    );
   });
 }
