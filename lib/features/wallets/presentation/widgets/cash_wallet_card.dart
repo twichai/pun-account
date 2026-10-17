@@ -132,7 +132,7 @@ class CashWalletCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${wallet.currency == 'THB' ? '฿' : wallet.currency} ${wallet.balance.toStringAsFixed(2)}',
+                        '${wallet.currency} ${wallet.balance.toStringAsFixed(2)}',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 28,
