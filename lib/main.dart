@@ -14,9 +14,10 @@ Future<void> main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key, this.home});
+  const MyApp({super.key, this.home, this.overrides = const []});
 
   final Widget? home;
+  final List<Override> overrides;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -40,6 +41,7 @@ class _MyAppState extends State<MyApp> {
     final thaiTypography = Typography.geist(sans: GoogleFonts.notoSansThai());
 
     return ProviderScope(
+      overrides: widget.overrides,
       child: ShadcnApp(
         title: 'Pun Account',
         theme: ThemeData(

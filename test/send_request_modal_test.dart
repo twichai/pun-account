@@ -1,11 +1,154 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:pun_account/features/categories/domain/models/service_category_item.dart';
+import 'package:pun_account/features/categories/presentation/providers/services_provider.dart';
+import 'package:pun_account/features/transactions/data/transactions_repository.dart';
+import 'package:pun_account/features/transactions/domain/models/transaction.dart';
+import 'package:pun_account/features/transactions/presentation/providers/transactions_provider.dart';
 import 'package:pun_account/features/transactions/presentation/send_request_modal.dart';
+import 'package:pun_account/features/wallets/domain/models/wallet.dart';
+import 'package:pun_account/features/wallets/presentation/providers/wallets_provider.dart';
+import 'package:shadcn_flutter/shadcn_flutter.dart';
+
+class FakeWalletsNotifier extends WalletsNotifier {
+  final List<Wallet> initialWallets;
+  FakeWalletsNotifier(this.initialWallets);
+
+  @override
+  WalletsState build() => WalletsState(wallets: initialWallets);
+}
+
+class FakeTransactionsNotifier extends TransactionsNotifier {
+  final List<TransactionModel> initialTransactions;
+  FakeTransactionsNotifier(this.initialTransactions);
+
+  @override
+  TransactionsState build() =>
+      TransactionsState(transactions: initialTransactions);
+}
+
+class FakeServicesNotifier extends ServicesNotifier {
+  final List<ServiceCategoryItem> initialServices;
+  FakeServicesNotifier(this.initialServices);
+
+  @override
+  ServicesState build() => ServicesState(allAccounts: initialServices);
+}
+
+class FakeTransactionsRepository implements TransactionsRepository {
+  @override
+  Future<TransactionModel> createTransaction({
+    required String businessId,
+    required String walletId,
+    required String serviceId,
+    String? categoryId,
+    required String type,
+    required double amount,
+    DateTime? transactionDate,
+    String? description,
+  }) async {
+    return TransactionModel(
+      id: 'tx-new',
+      businessId: businessId,
+      walletId: walletId,
+      serviceId: serviceId,
+      type: type,
+      amount: amount,
+      transactionDate: transactionDate ?? DateTime.now(),
+      description: description,
+    );
+  }
+
+  @override
+  Future<List<TransactionModel>> getTransactions({
+    String? businessId,
+    String? walletId,
+    String? serviceId,
+    String? categoryId,
+    String? type,
+    int? limit,
+    int? offset,
+  }) async {
+    return [];
+  }
+}
 
 void main() {
+  final defaultTestWallets = [
+    const Wallet(
+      id: 'wallet-cash-1',
+      businessId: 'biz-1',
+      type: 'cash',
+      balance: 18500.00,
+      currency: 'THB',
+      cardHolder: 'เงินสดในมือ',
+      auroraAccent: 'emerald',
+    ),
+    const Wallet(
+      id: 'wallet-card-1',
+      businessId: 'biz-1',
+      type: 'credit_card',
+      balance: 145250.00,
+      currency: 'THB',
+      cardHolder: 'PAVLO D.',
+      last4: '7642',
+      cardBrand: 'visa',
+      auroraAccent: 'cyan',
+    ),
+    const Wallet(
+      id: 'wallet-card-2',
+      businessId: 'biz-1',
+      type: 'credit_card',
+      balance: 42800.50,
+      currency: 'THB',
+      cardHolder: 'PAVLO D.',
+      last4: '5123',
+      cardBrand: 'mastercard',
+      auroraAccent: 'violet',
+    ),
+  ];
+
+  const defaultTestServices = [
+    ServiceCategoryItem(
+      id: 'srv-aws',
+      name: 'AWS Cloud',
+      accountNumber: 'aws.billing',
+      icon: LucideIcons.cloud,
+      color: Color(0xFFF59E0B),
+      categoryTrack: 'Cloud Infrastructure',
+    ),
+  ];
+
+  final defaultTestTransactions = [
+    TransactionModel(
+      id: 'tx-1',
+      businessId: 'biz-1',
+      walletId: 'wallet-card-1',
+      serviceId: 'srv-aws',
+      type: 'expense',
+      amount: 345.50,
+      transactionDate: DateTime(2026, 10, 17),
+      description: 'Send to AWS Cloud',
+      serviceName: 'AWS Cloud',
+    ),
+  ];
+
   Widget createTestWidget({String? recipientName}) {
     return ProviderScope(
+      overrides: [
+        walletsProvider.overrideWith(
+          () => FakeWalletsNotifier(defaultTestWallets),
+        ),
+        transactionsProvider.overrideWith(
+          () => FakeTransactionsNotifier(defaultTestTransactions),
+        ),
+        servicesProvider.overrideWith(
+          () => FakeServicesNotifier(defaultTestServices),
+        ),
+        transactionsRepositoryProvider.overrideWithValue(
+          FakeTransactionsRepository(),
+        ),
+      ],
       child: ShadcnApp(
         theme: ThemeData(
           colorScheme: ColorSchemes.lightSlate,
@@ -24,12 +167,12 @@ void main() {
       tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(450, 900));
-      await tester.pumpWidget(createTestWidget());
+      await tester.pumpWidget(createTestWidget(recipientName: 'AWS Cloud'));
       await tester.pumpAndSettle();
 
       // Verify AWS Cloud task card elements
       expect(find.text('AWS Cloud'), findsOneWidget);
-      expect(find.text('Cloud Infrastructure • @aws.billing'), findsOneWidget);
+      expect(find.text('Cloud Infrastructure • aws.billing'), findsOneWidget);
       expect(find.text('Use \$345.50'), findsOneWidget);
 
       // Verify initial save button amount
@@ -56,7 +199,7 @@ void main() {
       expect(find.text('345.50'), findsOneWidget);
       expect(find.text('ปิด'), findsOneWidget);
 
-      // Test 3s auto-redirect
+      // Test auto-redirect
       await tester.pump(const Duration(seconds: 4));
     });
 
@@ -64,7 +207,7 @@ void main() {
       tester,
     ) async {
       await tester.binding.setSurfaceSize(const Size(450, 900));
-      await tester.pumpWidget(createTestWidget());
+      await tester.pumpWidget(createTestWidget(recipientName: 'AWS Cloud'));
       await tester.pumpAndSettle();
 
       // Tap Save $1
@@ -109,7 +252,7 @@ void main() {
       'renders correct account selector labels for cash (เงินสด • :name) and cards (:card_brand • :last4)',
       (tester) async {
         await tester.binding.setSurfaceSize(const Size(450, 900));
-        await tester.pumpWidget(createTestWidget());
+        await tester.pumpWidget(createTestWidget(recipientName: 'AWS Cloud'));
         await tester.pumpAndSettle();
 
         // Default selected wallet is the first wallet (cash): 'เงินสด • เงินสดในมือ'

@@ -7,7 +7,7 @@ import '../../domain/usecases/wallets_usecases.dart';
 /// State representation for Wallets feature
 class WalletsState {
   const WalletsState({
-    this.wallets = defaultWallets,
+    this.wallets = const [],
     this.isLoading = false,
     this.errorMessage,
   });
@@ -15,40 +15,6 @@ class WalletsState {
   final List<Wallet> wallets;
   final bool isLoading;
   final String? errorMessage;
-
-  static const List<Wallet> defaultWallets = [
-    // 1. Mockup Cash Wallet (เงินสดในมือ / Petty Cash)
-    Wallet(
-      id: 'wallet-cash-1',
-      type: 'cash',
-      balance: 18500.00,
-      currency: 'THB',
-      cardHolder: 'เงินสดในมือ',
-      auroraAccent: 'emerald',
-    ),
-    // 2. Visa Business Card
-    Wallet(
-      id: 'wallet-card-1',
-      type: 'credit_card',
-      balance: 145250.00,
-      currency: 'THB',
-      cardHolder: 'PAVLO D.',
-      last4: '7642',
-      cardBrand: 'visa',
-      auroraAccent: 'cyan',
-    ),
-    // 3. Mastercard Operating Card
-    Wallet(
-      id: 'wallet-card-2',
-      type: 'credit_card',
-      balance: 42800.50,
-      currency: 'THB',
-      cardHolder: 'PAVLO D.',
-      last4: '5123',
-      cardBrand: 'mastercard',
-      auroraAccent: 'violet',
-    ),
-  ];
 
   WalletsState copyWith({
     List<Wallet>? wallets,
@@ -66,7 +32,7 @@ class WalletsState {
 /// Notifier managing the list of Wallets using Riverpod and domain usecases
 class WalletsNotifier extends Notifier<WalletsState> {
   static const String defaultBusinessId =
-      '018f3a20-0000-7000-8000-000000000001';
+      '01a14818-3b9f-7f23-8f3c-488550adb5e4';
 
   @override
   WalletsState build() {
@@ -96,11 +62,7 @@ class WalletsNotifier extends Notifier<WalletsState> {
       final list = await useCase(businessId: targetBusinessId);
       state = state.copyWith(wallets: list, isLoading: false);
     } catch (e) {
-      // If API fails (e.g. offline dev mode or network error), fallback to defaultWallets
       state = state.copyWith(
-        wallets: state.wallets.isNotEmpty
-            ? state.wallets
-            : WalletsState.defaultWallets,
         isLoading: false,
         errorMessage: () => e.toString(),
       );
@@ -131,9 +93,7 @@ class WalletsNotifier extends Notifier<WalletsState> {
       );
       return true;
     } catch (e) {
-      // Optimistic fallback for offline dev/mock environments
       state = state.copyWith(
-        wallets: [...state.wallets, wallet],
         isLoading: false,
         errorMessage: () => e.toString(),
       );
@@ -154,7 +114,6 @@ class WalletsNotifier extends Notifier<WalletsState> {
       return true;
     } catch (e) {
       state = state.copyWith(
-        wallets: state.wallets.map((w) => w.id == id ? wallet : w).toList(),
         isLoading: false,
         errorMessage: () => e.toString(),
       );
@@ -175,7 +134,6 @@ class WalletsNotifier extends Notifier<WalletsState> {
       return true;
     } catch (e) {
       state = state.copyWith(
-        wallets: state.wallets.where((w) => w.id != id).toList(),
         isLoading: false,
         errorMessage: () => e.toString(),
       );

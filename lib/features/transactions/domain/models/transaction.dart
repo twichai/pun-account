@@ -8,6 +8,11 @@ class TransactionModel {
   final double amount;
   final DateTime transactionDate;
   final String? description;
+  final String? serviceName;
+  final String? serviceIcon;
+  final String? serviceColor;
+  final String? serviceImageUrl;
+  final String? walletName;
 
   const TransactionModel({
     required this.id,
@@ -19,9 +24,21 @@ class TransactionModel {
     required this.amount,
     required this.transactionDate,
     this.description,
+    this.serviceName,
+    this.serviceIcon,
+    this.serviceColor,
+    this.serviceImageUrl,
+    this.walletName,
   });
 
   factory TransactionModel.fromJson(Map<String, dynamic> json) {
+    final service = json['service'] is Map
+        ? Map<String, dynamic>.from(json['service'] as Map)
+        : null;
+    final wallet = json['wallet'] is Map
+        ? Map<String, dynamic>.from(json['wallet'] as Map)
+        : null;
+
     return TransactionModel(
       id: json['id'] as String? ?? '',
       businessId: (json['business_id'] ?? json['businessId']) as String? ?? '',
@@ -36,6 +53,11 @@ class TransactionModel {
               DateTime.now()
           : DateTime.now(),
       description: json['description'] as String?,
+      serviceName: service?['name'] as String?,
+      serviceIcon: service?['icon'] as String?,
+      serviceColor: service?['color'] as String?,
+      serviceImageUrl: service?['image_url'] as String?,
+      walletName: wallet?['name'] as String?,
     );
   }
 

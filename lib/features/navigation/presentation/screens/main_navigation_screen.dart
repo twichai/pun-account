@@ -3,7 +3,6 @@ import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../../../features/categories/presentation/services_screen.dart';
 import '../../../../features/dashboard/presentation/overview_screen.dart';
-import '../../../../features/transactions/presentation/quick_add_modal.dart';
 import '../../../../features/transactions/presentation/send_request_modal.dart';
 import '../../../../features/wallets/presentation/wallets_screen.dart';
 import '../widgets/pun_navigation_bar.dart';
@@ -51,7 +50,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   }
 
   void _onOpenAddTransaction() {
-    QuickAddModal.show(context);
+    SendRequestModal.show(context, mode: TransferMode.send);
   }
 
   void _goToPage(int index) {

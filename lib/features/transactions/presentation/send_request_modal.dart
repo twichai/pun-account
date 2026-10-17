@@ -5,9 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../auth/controllers/auth_controller.dart';
+import '../../categories/presentation/providers/services_provider.dart';
 import '../../wallets/domain/models/wallet.dart';
 import '../../wallets/presentation/providers/wallets_provider.dart';
-import '../data/transactions_repository.dart';
+import 'providers/transactions_provider.dart';
 import 'widgets/amount_display.dart';
 import 'widgets/numeric_keypad.dart';
 import 'widgets/send_request_success_view.dart';
@@ -68,13 +69,34 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
     super.initState();
     _mode = widget.initialMode;
     _amountStr = widget.initialAmount;
-    _selectedTask = widget.recipientName ?? 'AWS Cloud';
+    _selectedTask = widget.recipientName ?? 'OpenAI ChatGPT Plus';
   }
 
   void _closeModal() {
     if (mounted) {
       closeOverlay(context);
     }
+  }
+
+  void _showErrorToast(BuildContext context, String message) {
+    showToast(
+      context: context,
+      location: ToastLocation.topCenter,
+      showDuration: const Duration(seconds: 4),
+      builder: (context, overlay) {
+        return SurfaceCard(
+          child: Basic(
+            leading: const Icon(
+              LucideIcons.circleAlert,
+              size: 20,
+              color: Color(0xFFEF4444),
+            ),
+            title: const Text('เกิดข้อผิดพลาด'),
+            subtitle: Text(message),
+          ),
+        );
+      },
+    );
   }
 
   void _onKeyPress(String key) {
@@ -157,7 +179,7 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
     return '$integerPart.${parts[1]}';
   }
 
-  Future<void> _handleSave() async {
+  Future<void> _handleSave(BuildContext modalContext) async {
     if (_operator != null && _firstOperand != null) {
       _calculate();
       return;
@@ -165,16 +187,19 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
 
     final amountVal = double.tryParse(_amountStr) ?? 0.0;
     if (amountVal <= 0) {
+      _showErrorToast(modalContext, 'กรุณาระบุจำนวนเงินที่มากกว่า 0');
       return;
     }
 
-    setState(() => _isSaving = true);
-
-    final taskInfo = resolveTaskService(_selectedTask);
-    final serviceId = taskInfo.id ?? '01927600-0201-7000-8000-000000000001';
-
-    final authState = ref.read(authProvider);
     final wallets = ref.read(walletsProvider).wallets;
+    if (wallets.isEmpty) {
+      _showErrorToast(
+        modalContext,
+        'ไม่พบกระเป๋าเงินในระบบ กรุณาเพิ่มกระเป๋าเงินก่อนทำรายการ',
+      );
+      return;
+    }
+
     Wallet? selectedWallet;
     for (final w in wallets) {
       if (w.id == _selectedWalletId) {
@@ -182,44 +207,84 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
         break;
       }
     }
-    if (selectedWallet == null && wallets.isNotEmpty) {
-      selectedWallet = wallets.first;
+    selectedWallet ??= wallets.firstOrNull;
+
+    if (selectedWallet == null) {
+      _showErrorToast(modalContext, 'กรุณาเลือกกระเป๋าเงินสำหรับทำรายการ');
+      return;
     }
 
-    final targetBusinessId = authState.session?.user.businessId ??
-        selectedWallet?.businessId ??
-        '01a14648-44b7-7330-b07d-d0ca0c9353ba';
-    final targetWalletId =
-        selectedWallet?.id ?? '01a14648-44bd-7989-8dbe-66cf133b3e98';
+    final authState = ref.read(authProvider);
+    final String targetBusinessId = (selectedWallet.businessId != null &&
+            selectedWallet.businessId!.isNotEmpty)
+        ? selectedWallet.businessId!
+        : (authState.session?.user.businessId ??
+            WalletsNotifier.defaultBusinessId);
+
+    if (targetBusinessId.isEmpty) {
+      _showErrorToast(modalContext, 'ไม่พบข้อมูลธุรกิจสำหรับทำรายการ');
+      return;
+    }
+
+    // Resolve service from real backend services
+    final services = ref.read(servicesProvider).allAccounts;
+    final transactions = ref.read(transactionsProvider).transactions;
+    final taskInfo = resolveTaskServiceFromState(
+      taskName: _selectedTask,
+      services: services,
+      transactions: transactions,
+    );
+
+    final serviceId = taskInfo.id ??
+        (services.isNotEmpty ? services.first.id : null);
+    if (serviceId == null || serviceId.isEmpty) {
+      _showErrorToast(
+        modalContext,
+        'ไม่พบบริการหรือคู่ค้าสำหรับทำรายการ กรุณาตรวจสอบข้อมูลบริการ',
+      );
+      return;
+    }
+
     final txType = _mode == TransferMode.send ? 'expense' : 'income';
+
+    setState(() => _isSaving = true);
 
     try {
       final repo = ref.read(transactionsRepositoryProvider);
       await repo.createTransaction(
         businessId: targetBusinessId,
-        walletId: targetWalletId,
+        walletId: selectedWallet.id,
         serviceId: serviceId,
         type: txType,
         amount: amountVal,
         description:
             '${_mode == TransferMode.send ? "Send to" : "Request from"} ${taskInfo.name}',
       );
-      // Refresh wallets in the background to show new balance
+
+      // Refresh wallets & transactions in the background to show new balance and transaction history
       unawaited(
         ref
             .read(walletsProvider.notifier)
             .fetchWallets(businessId: targetBusinessId),
       );
-    } catch (e) {
-      // In case backend is offline, test environment or network timeout
-      debugPrint('Create transaction notice: $e');
-    }
+      unawaited(
+        ref
+            .read(transactionsProvider.notifier)
+            .fetchTransactions(businessId: targetBusinessId),
+      );
 
-    if (!mounted) return;
-    setState(() {
-      _isSaving = false;
-      _isSuccess = true;
-    });
+      if (!mounted) return;
+      setState(() {
+        _isSaving = false;
+        _isSuccess = true;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      if (modalContext.mounted) {
+        _showErrorToast(modalContext, 'ไม่สามารถบันทึกรายการได้: $e');
+      }
+    }
   }
 
   @override
@@ -248,33 +313,32 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
         }
         accountOptions.add(MapEntry(w.id, label));
       }
+    }
+
+    if (accountOptions.isNotEmpty) {
+      if (_selectedWalletId == null ||
+          !accountOptions.any((opt) => opt.key == _selectedWalletId)) {
+        _selectedWalletId = accountOptions.first.key;
+      }
     } else {
-      accountOptions.addAll(const [
-        MapEntry('wallet-cash-1', 'เงินสด • เงินสดในมือ'),
-        MapEntry('wallet-card-1', 'visa • 7642'),
-        MapEntry('wallet-card-2', 'mastercard • 5123'),
-      ]);
+      _selectedWalletId = null;
     }
 
-    if (_selectedWalletId == null ||
-        !accountOptions.any((opt) => opt.key == _selectedWalletId)) {
-      _selectedWalletId = accountOptions.first.key;
-    }
-    final selectedOption = accountOptions.firstWhere(
-      (opt) => opt.key == _selectedWalletId,
-      orElse: () => accountOptions.first,
-    );
+    final selectedOption = accountOptions.isNotEmpty
+        ? accountOptions.firstWhere(
+            (opt) => opt.key == _selectedWalletId,
+            orElse: () => accountOptions.first,
+          )
+        : null;
 
-    final availableWallets =
-        wallets.isNotEmpty ? wallets : WalletsState.defaultWallets;
     Wallet? selectedWallet;
-    for (final w in availableWallets) {
+    for (final w in wallets) {
       if (w.id == _selectedWalletId) {
         selectedWallet = w;
         break;
       }
     }
-    selectedWallet ??= availableWallets.firstOrNull;
+    selectedWallet ??= wallets.firstOrNull;
 
     final availableBalanceText = selectedWallet != null
         ? 'Available \$${_formatCurrency(selectedWallet.balance)}'
@@ -351,9 +415,12 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                       child: _isSuccess
                           ? SendRequestSuccessView(
                               amount: _amountStr,
-                              recipientName: resolveTaskService(_selectedTask)
-                                  .name,
-                              accountName: selectedOption.value,
+                              recipientName: resolveTaskServiceFromState(
+                                taskName: _selectedTask,
+                                services: ref.read(servicesProvider).allAccounts,
+                                transactions: ref.read(transactionsProvider).transactions,
+                              ).name,
+                              accountName: selectedOption?.value ?? 'Main Wallet',
                               onClose: _closeModal,
                             )
                           : Column(
@@ -395,45 +462,66 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                         ),
                                         const SizedBox(height: 12),
 
-                                        // Account Selector dropdown
-                                        Select<String>(
-                                          value: selectedOption.key,
-                                          itemBuilder: (context, item) {
-                                            final entry =
-                                                accountOptions.firstWhere(
-                                                  (e) => e.key == item,
-                                                  orElse: () =>
-                                                      accountOptions.first,
-                                                );
-                                            return Text(
-                                              entry.value,
+                                        // Account Selector dropdown or Empty Warning
+                                        if (accountOptions.isNotEmpty &&
+                                            selectedOption != null)
+                                          Select<String>(
+                                            value: selectedOption.key,
+                                            itemBuilder: (context, item) {
+                                              final entry =
+                                                  accountOptions.firstWhere(
+                                                    (e) => e.key == item,
+                                                    orElse: () =>
+                                                        accountOptions.first,
+                                                  );
+                                              return Text(
+                                                entry.value,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: modalFg,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              );
+                                            },
+                                            onChanged: (val) {
+                                              if (val != null) {
+                                                setState(() {
+                                                  _selectedWalletId = val;
+                                                });
+                                              }
+                                            },
+                                            popup: SelectPopup(
+                                              items: SelectItemList(
+                                                children: [
+                                                  for (final opt
+                                                      in accountOptions)
+                                                    SelectItemButton(
+                                                      value: opt.key,
+                                                      child: Text(opt.value),
+                                                    ),
+                                                ],
+                                              ),
+                                            ).call,
+                                          )
+                                        else
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 14,
+                                              vertical: 8,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: modalMutedBg,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            child: Text(
+                                              'ไม่พบกระเป๋าเงินในระบบ กรุณาเพิ่มบัตร/กระเป๋าเงิน',
                                               style: TextStyle(
                                                 fontSize: 13,
-                                                color: modalFg,
-                                                fontWeight: FontWeight.w500,
+                                                color: modalMutedFg,
                                               ),
-                                            );
-                                          },
-                                          onChanged: (val) {
-                                            if (val != null) {
-                                              setState(() {
-                                                _selectedWalletId = val;
-                                              });
-                                            }
-                                          },
-                                          popup: SelectPopup(
-                                            items: SelectItemList(
-                                              children: [
-                                                for (final opt
-                                                    in accountOptions)
-                                                  SelectItemButton(
-                                                    value: opt.key,
-                                                    child: Text(opt.value),
-                                                  ),
-                                              ],
                                             ),
-                                          ).call,
-                                        ),
+                                          ),
 
                                         if (widget.recipientName != null) ...[
                                           const SizedBox(height: 6),
@@ -459,7 +547,7 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                   ),
                                 ),
 
-                                // Card for the task (defaults to AWS Cloud, displays last paid cost)
+                                // Card for the task (displays last paid cost from real history)
                                 TaskServiceCard(
                                   taskName: _selectedTask,
                                   onSelectLastCost: (cost) {
@@ -492,7 +580,9 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                   height: 50,
                                   child: PrimaryButton(
                                     alignment: Alignment.center,
-                                    onPressed: _isSaving ? null : _handleSave,
+                                    onPressed: (_isSaving || accountOptions.isEmpty)
+                                        ? null
+                                        : () => _handleSave(modalContext),
                                     child: _isSaving
                                         ? const Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -518,7 +608,9 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                             ],
                                           )
                                         : Text(
-                                            'Save \$$_amountStr',
+                                            accountOptions.isEmpty
+                                                ? 'No Wallet Available'
+                                                : 'Save \$$_amountStr',
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 16,
