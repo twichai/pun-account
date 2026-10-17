@@ -200,44 +200,39 @@ class _ServicesScreenState extends State<ServicesScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Top Dark Area
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header: Recipients / Services & "Add" button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Recipients',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    PrimaryButton(
-                      density: ButtonDensity.compact,
-                      onPressed: _showAddServiceModal,
-                      child: const Text(
-                        'Add',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Fixed Top Header: Recipients & "Add" button
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Recipients',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 24),
+              ),
+              PrimaryButton(
+                onPressed: _showAddServiceModal,
+                child: const Text('Add'),
+              ),
+            ],
+          ),
+        ),
 
-                // 2x3 Grid of Circular Category / Service Avatars with Grid Wave animation
-                LayoutBuilder(
+        // Main Body: Quick Services Grid behind + Draggable Bottom Sheet in front
+        Expanded(
+          child: Stack(
+            children: [
+              // 2x3 Grid of Circular Category / Service Avatars with Grid Wave animation
+              SingleChildScrollView(
+                physics: const ClampingScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
+                child: LayoutBuilder(
                   builder: (context, constraints) {
                     final itemWidth = (constraints.maxWidth - 32) / 3;
                     const crossAxisCount = 3;
@@ -259,89 +254,92 @@ class _ServicesScreenState extends State<ServicesScreen> {
                     );
                   },
                 ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Bottom Sheet: White / Light contrasting card
-          Container(
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF18181B) : Colors.white,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(32),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, -4),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Pull handle
-                Center(
-                  child: Container(
-                    width: 36,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF3F3F46)
-                          : const Color(0xFFE4E4E7),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
 
-                // Filter tabs + Search button
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        _buildFilterPill('All', 0, isDark),
-                        const SizedBox(width: 8),
-                        _buildFilterPill('My accounts', 1, isDark),
+              // Bottom Sheet: DraggableScrollableSheet
+              // maxChildSize = 1.0 reaches exactly to the top of Expanded (right under the Header)
+              DraggableScrollableSheet(
+                initialChildSize: 0.52,
+                minChildSize: 0.35,
+                maxChildSize: 1.0,
+                snap: true,
+                snapSizes: const [0.35, 0.52, 1.0],
+                builder: (context, scrollController) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF18181B) : Colors.white,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(32),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, -4),
+                        ),
                       ],
                     ),
-                    IconButton.ghost(
-                      density: ButtonDensity.icon,
-                      icon: Icon(
-                        LucideIcons.search,
-                        size: 18,
-                        color: isDark
-                            ? const Color(0xFFA1A1AA)
-                            : const Color(0xFF71717A),
-                      ),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
+                      children: [
+                        // Pull handle
+                        Center(
+                          child: Container(
+                            width: 36,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? const Color(0xFF3F3F46)
+                                  : const Color(0xFFE4E4E7),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
 
-                // List of items
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _allAccounts.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = _allAccounts[index];
-                    return _buildAccountTile(item, isDark);
-                  },
-                ),
-              ],
-            ),
+                        // Filter tabs + Search button
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                _buildFilterPill('All', 0, isDark),
+                                const SizedBox(width: 8),
+                                _buildFilterPill('My accounts', 1, isDark),
+                              ],
+                            ),
+                            IconButton.ghost(
+                              density: ButtonDensity.icon,
+                              icon: Icon(
+                                LucideIcons.search,
+                                size: 18,
+                                color: isDark
+                                    ? const Color(0xFFA1A1AA)
+                                    : const Color(0xFF71717A),
+                              ),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+
+                        // List of items
+                        for (int index = 0;
+                            index < _allAccounts.length;
+                            index++) ...[
+                          if (index > 0) const SizedBox(height: 12),
+                          _buildAccountTile(_allAccounts[index], isDark),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
