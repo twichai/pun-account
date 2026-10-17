@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../data/services_repository.dart';
 import '../../domain/models/service_category_item.dart';
 import '../../domain/models/service_track.dart';
 
+export '../../data/services_repository.dart';
 export '../../domain/models/service_track.dart';
 
 /// State representation for Services and Categories screen
@@ -420,7 +422,41 @@ class ServicesState {
 class ServicesNotifier extends Notifier<ServicesState> {
   @override
   ServicesState build() {
+    // Asynchronously fetch real categories and services from the backend API
+    Future.microtask(() => fetchCategoriesAndServices());
     return const ServicesState();
+  }
+
+  /// Fetch categories (tracks) and services from Go backend API
+  Future<void> fetchCategoriesAndServices({String? businessId}) async {
+    state = state.copyWith(isLoading: true, errorMessage: () => null);
+    try {
+      final repo = ref.read(servicesRepositoryProvider);
+      final categoriesFuture =
+          repo.getServiceCategories(businessId: businessId);
+      final servicesFuture = repo.getServices(businessId: businessId);
+
+      final results = await Future.wait([categoriesFuture, servicesFuture]);
+      final fetchedCategories = results[0] as List<ServiceTrack>;
+      final fetchedServices = results[1] as List<ServiceCategoryItem>;
+
+      final quicks = fetchedServices.where((s) => s.isQuick).toList();
+
+      state = state.copyWith(
+        tracks:
+            fetchedCategories.isNotEmpty ? fetchedCategories : state.tracks,
+        allAccounts:
+            fetchedServices.isNotEmpty ? fetchedServices : state.allAccounts,
+        quickServices: quicks.isNotEmpty ? quicks : state.quickServices,
+        isLoading: false,
+      );
+    } catch (e) {
+      // Graceful fallback to default/cached data if offline or network error
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: () => e.toString(),
+      );
+    }
   }
 
   /// Change active job track (e.g. 'content_creator', 'developer', 'designer', or 'all')

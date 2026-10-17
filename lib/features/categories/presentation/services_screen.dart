@@ -8,10 +8,11 @@ import '../domain/models/service_category_item.dart';
 import 'providers/services_provider.dart';
 
 export '../domain/models/service_category_item.dart';
+export '../domain/models/service_track.dart';
 export 'providers/services_provider.dart';
 
-/// Services and Categories screen matching Screenshot 4 with category/service icons
-/// instead of human portraits as requested by user.
+/// Services and Categories screen matching solopreneur and content creator workflows.
+/// Fetches and displays job tracks (categories) and associated recurring services from the backend.
 class ServicesScreen extends ConsumerStatefulWidget {
   const ServicesScreen({super.key, this.onAddCategory});
 
@@ -60,7 +61,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           content: const SizedBox(
             width: 320,
             child: Text(
-              'Add a recurring cloud service, software subscription, or tax category to your payment list.',
+              'Add a recurring cloud service, software subscription, or creator tool to your payment list.',
             ),
           ),
           actions: [
@@ -84,6 +85,8 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final servicesState = ref.watch(servicesProvider);
+    final tracks = servicesState.tracks;
+    final selectedTrackKey = servicesState.selectedTrackKey;
     final quickServices = servicesState.trackQuickServices;
     final filteredAccounts = servicesState.filteredAccounts;
     final selectedFilterIndex = servicesState.selectedFilterIndex;
@@ -91,19 +94,47 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Fixed Top Header: Recipients & "Add" button
+        // Fixed Top Header: Recipients, Refresh trigger & "Add" button
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Recipients',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'Recipients',
+                    style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                  ),
+                  if (servicesState.isLoading) ...[
+                    const SizedBox(width: 12),
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(),
+                    ),
+                  ],
+                ],
               ),
-              PrimaryButton(
-                onPressed: _showAddServiceModal,
-                child: const Text('Add'),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton.ghost(
+                    density: ButtonDensity.icon,
+                    icon: const Icon(LucideIcons.refreshCw, size: 18),
+                    onPressed: () {
+                      ref
+                          .read(servicesProvider.notifier)
+                          .fetchCategoriesAndServices();
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  PrimaryButton(
+                    onPressed: _showAddServiceModal,
+                    child: const Text('Add'),
+                  ),
+                ],
               ),
             ],
           ),
@@ -168,13 +199,52 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       controller: scrollController,
                       padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
                       children: [
-                        // Filter tabs + Search button
+                        // 1. Profession / Job Categories Tracks Switcher
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
+                          child: Row(
+                            children: [
+                              for (final track in tracks) ...[
+                                _buildTrackPill(
+                                  title: track.name,
+                                  icon: track.icon,
+                                  color: track.color,
+                                  isSelected: selectedTrackKey == track.key,
+                                  onTap: () => ref
+                                      .read(servicesProvider.notifier)
+                                      .setTrack(track.key),
+                                  isDark: isDark,
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              _buildTrackPill(
+                                title: 'All Tracks',
+                                icon: LucideIcons.layers,
+                                color: const Color(0xFF71717A),
+                                isSelected: selectedTrackKey == 'all',
+                                onTap: () => ref
+                                    .read(servicesProvider.notifier)
+                                    .setTrack('all'),
+                                isDark: isDark,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+
+                        // 2. Filter tabs (All / My accounts) + Search button
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
                               children: [
-                                _buildFilterPill('All', 0, isDark, selectedFilterIndex),
+                                _buildFilterPill(
+                                  'All',
+                                  0,
+                                  isDark,
+                                  selectedFilterIndex,
+                                ),
                                 const SizedBox(width: 8),
                                 _buildFilterPill(
                                   'My accounts',
@@ -187,7 +257,9 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                             IconButton.ghost(
                               density: ButtonDensity.icon,
                               icon: Icon(
-                                _isSearching ? LucideIcons.x : LucideIcons.search,
+                                _isSearching
+                                    ? LucideIcons.x
+                                    : LucideIcons.search,
                                 size: 18,
                                 color: isDark
                                     ? const Color(0xFFA1A1AA)
@@ -213,7 +285,8 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                           TextField(
                             controller: _searchController,
                             autofocus: true,
-                            placeholder: const Text('Search recipients & accounts...'),
+                            placeholder:
+                                const Text('Search recipients & accounts...'),
                             onChanged: (val) {
                               ref
                                   .read(servicesProvider.notifier)
@@ -224,13 +297,13 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
 
                         const SizedBox(height: 16),
 
-                        // List of items or empty state
+                        // 3. List of services or clean empty state
                         if (filteredAccounts.isEmpty)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 32),
                             child: Center(
                               child: Text(
-                                'No accounts found',
+                                'No services found for this category',
                                 style: TextStyle(
                                   color: isDark
                                       ? const Color(0xFFA1A1AA)
@@ -258,6 +331,60 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTrackPill({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? color.withValues(alpha: isDark ? 0.25 : 0.15)
+              : (isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? color : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected
+                  ? color
+                  : (isDark
+                      ? const Color(0xFFA1A1AA)
+                      : const Color(0xFF71717A)),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected
+                    ? (isDark ? Colors.white : const Color(0xFF09090B))
+                    : (isDark
+                        ? const Color(0xFFA1A1AA)
+                        : const Color(0xFF71717A)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -340,8 +467,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
   ) {
     final isSelected = selectedFilterIndex == index;
     return GestureDetector(
-      onTap: () =>
-          ref.read(servicesProvider.notifier).setFilterIndex(index),
+      onTap: () => ref.read(servicesProvider.notifier).setFilterIndex(index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
@@ -432,6 +558,27 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                 ],
               ),
             ),
+
+            if (item.badge != null)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF3F3F46).withValues(alpha: 0.5)
+                      : const Color(0xFFE4E4E7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  item.badge!,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: isDark
+                        ? const Color(0xFFA1A1AA)
+                        : const Color(0xFF52525B),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

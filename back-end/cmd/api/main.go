@@ -16,6 +16,9 @@ import (
 	authHandlers "pun-account-backend/internal/auth/handlers"
 	authRepository "pun-account-backend/internal/auth/repository"
 	authServices "pun-account-backend/internal/auth/services"
+	serviceHandlers "pun-account-backend/internal/services/handlers"
+	serviceRepository "pun-account-backend/internal/services/repository"
+	serviceServices "pun-account-backend/internal/services/services"
 	"pun-account-backend/internal/wallets/handlers"
 	"pun-account-backend/internal/wallets/repository"
 	"pun-account-backend/internal/wallets/services"
@@ -71,6 +74,10 @@ func main() {
 	walletService := services.NewWalletService(walletRepo)
 	walletHandler := handlers.NewWalletHandler(walletService)
 
+	serviceRepo := serviceRepository.NewServiceRepository(db)
+	serviceService := serviceServices.NewServiceService(serviceRepo)
+	serviceHandler := serviceHandlers.NewServiceHandler(serviceService)
+
 	// 4. Setup Fiber Web Application
 	app := fiber.New(fiber.Config{
 		AppName: "Pun Account API v1",
@@ -92,6 +99,7 @@ func main() {
 	apiV1 := app.Group("/api/v1")
 	authHandler.RegisterRoutes(apiV1)
 	walletHandler.RegisterRoutes(apiV1)
+	serviceHandler.RegisterRoutes(apiV1)
 
 	port := os.Getenv("PORT")
 	if port == "" {
