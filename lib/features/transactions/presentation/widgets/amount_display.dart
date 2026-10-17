@@ -5,12 +5,14 @@ class AmountDisplay extends StatelessWidget {
   const AmountDisplay({
     super.key,
     required this.amount,
-    this.availableBalance = 'Available \$7,854.43',
+    this.currencySymbol = r'$',
+    this.availableBalance = 'Available \$0.00',
     required this.modalFg,
     required this.modalMutedFg,
   });
 
   final String amount;
+  final String currencySymbol;
   final String availableBalance;
   final Color modalFg;
   final Color modalMutedFg;
@@ -26,7 +28,7 @@ class AmountDisplay extends StatelessWidget {
           textBaseline: TextBaseline.alphabetic,
           children: [
             Text(
-              r'$',
+              currencySymbol,
               style: TextStyle(
                 fontSize: 38,
                 fontWeight: FontWeight.bold,

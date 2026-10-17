@@ -81,7 +81,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify SendRequestModal is opened with keypad
-    expect(find.text('Available \$7,854.43'), findsOneWidget);
+    expect(find.text('Available \$18,500.00'), findsOneWidget);
     expect(find.text('เงินสด • เงินสดในมือ'), findsOneWidget);
     expect(find.text('Save \$1'), findsOneWidget);
 
@@ -95,6 +95,6 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
-    expect(find.text('Available \$7,854.43'), findsNothing);
+    expect(find.text('Available \$18,500.00'), findsNothing);
   });
 }

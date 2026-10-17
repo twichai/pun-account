@@ -148,6 +148,15 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
         : result.toStringAsFixed(2);
   }
 
+  String _formatCurrency(double amount) {
+    final parts = amount.toStringAsFixed(2).split('.');
+    final integerPart = parts[0].replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (match) => '${match[1]},',
+    );
+    return '$integerPart.${parts[1]}';
+  }
+
   Future<void> _handleSave() async {
     if (_operator != null && _firstOperand != null) {
       _calculate();
@@ -255,6 +264,21 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
       (opt) => opt.key == _selectedWalletId,
       orElse: () => accountOptions.first,
     );
+
+    final availableWallets =
+        wallets.isNotEmpty ? wallets : WalletsState.defaultWallets;
+    Wallet? selectedWallet;
+    for (final w in availableWallets) {
+      if (w.id == _selectedWalletId) {
+        selectedWallet = w;
+        break;
+      }
+    }
+    selectedWallet ??= availableWallets.firstOrNull;
+
+    final availableBalanceText = selectedWallet != null
+        ? 'Available \$${_formatCurrency(selectedWallet.balance)}'
+        : 'Available \$0.00';
 
     // Convert background to foreground code, and foreground to bg
     final Color modalBg = theme.colorScheme.foreground;
@@ -425,6 +449,8 @@ class _SendRequestModalState extends ConsumerState<SendRequestModal> {
                                         // Amount Display
                                         AmountDisplay(
                                           amount: _amountStr,
+                                          availableBalance:
+                                              availableBalanceText,
                                           modalFg: modalFg,
                                           modalMutedFg: modalMutedFg,
                                         ),

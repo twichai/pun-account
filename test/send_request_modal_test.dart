@@ -114,6 +114,7 @@ void main() {
 
         // Default selected wallet is the first wallet (cash): 'เงินสด • เงินสดในมือ'
         expect(find.text('เงินสด • เงินสดในมือ'), findsOneWidget);
+        expect(find.text('Available \$18,500.00'), findsOneWidget);
 
         // Open account selector dropdown
         await tester.tap(find.text('เงินสด • เงินสดในมือ'));
@@ -130,8 +131,19 @@ void main() {
         await tester.tap(find.text('visa • 7642'));
         await tester.pumpAndSettle();
 
-        // The selected value should now display 'visa • 7642'
+        // The selected value should now display 'visa • 7642' and update available balance
         expect(find.text('visa • 7642'), findsOneWidget);
+        expect(find.text('Available \$145,250.00'), findsOneWidget);
+
+        // Select mastercard
+        await tester.tap(find.text('visa • 7642'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('mastercard • 5123'));
+        await tester.pumpAndSettle();
+
+        // Available balance updates to mastercard balance
+        expect(find.text('mastercard • 5123'), findsOneWidget);
+        expect(find.text('Available \$42,800.50'), findsOneWidget);
       },
     );
   });
