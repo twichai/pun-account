@@ -93,6 +93,7 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
                 WalletsScreen(
                   key: const PageStorageKey('wallets_screen'),
                   onAddTransaction: _onOpenAddTransaction,
+                  isActive: _selected == const ValueKey(2),
                 ),
               ],
             ),
