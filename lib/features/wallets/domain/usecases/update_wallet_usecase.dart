@@ -12,10 +12,6 @@ class UpdateWalletUseCase {
     required Wallet wallet,
     String? name,
   }) {
-    return _repository.updateWallet(
-      id: id,
-      wallet: wallet,
-      name: name,
-    );
+    return _repository.updateWallet(id: id, wallet: wallet, name: name);
   }
 }

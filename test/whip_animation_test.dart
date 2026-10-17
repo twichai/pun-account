@@ -7,7 +7,10 @@ void main() {
     test('Curve and duration match klik-anim Motion Atlas spec', () {
       expect(WhipMotion.defaultDuration, const Duration(milliseconds: 500));
       expect(WhipMotion.curve, const Cubic(0.9, 0.0, 0.1, 1.0));
-      expect(WhipMotion.reducedMotionDuration, const Duration(milliseconds: 250));
+      expect(
+        WhipMotion.reducedMotionDuration,
+        const Duration(milliseconds: 250),
+      );
     });
 
     test('Whip curve produces near-vertical velocity peak in the middle', () {
@@ -48,15 +51,15 @@ void main() {
       expect(completed, isTrue);
     });
 
-    testWidgets('Respects reduced motion by skipping smear and translating', (tester) async {
+    testWidgets('Respects reduced motion by skipping smear and translating', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(disableAnimations: true),
           child: const Directionality(
             textDirection: TextDirection.ltr,
-            child: WhipAnimation(
-              child: Text('Reduced Motion'),
-            ),
+            child: WhipAnimation(child: Text('Reduced Motion')),
           ),
         ),
       );

@@ -37,9 +37,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final thaiTypography = Typography.geist(
-      sans: GoogleFonts.notoSansThai(),
-    );
+    final thaiTypography = Typography.geist(sans: GoogleFonts.notoSansThai());
 
     return ProviderScope(
       child: ShadcnApp(
@@ -55,11 +53,9 @@ class _MyAppState extends State<MyApp> {
           typography: thaiTypography,
         ),
         themeMode: _themeMode,
-        home: widget.home ??
-            AuthGate(
-              themeMode: _themeMode,
-              onToggleTheme: _toggleTheme,
-            ),
+        home:
+            widget.home ??
+            AuthGate(themeMode: _themeMode, onToggleTheme: _toggleTheme),
       ),
     );
   }
@@ -87,9 +83,6 @@ class AuthGate extends ConsumerWidget {
       );
     }
 
-    return SignInScreen(
-      onToggleTheme: onToggleTheme,
-    );
+    return SignInScreen(onToggleTheme: onToggleTheme);
   }
 }
-

@@ -32,13 +32,15 @@ void main() {
     });
 
     // Pump MyApp directly into MainNavigationScreen
-    await tester.pumpWidget(MyApp(
-      home: MainNavigationScreen(
-        title: 'Pun Account',
-        themeMode: ThemeMode.dark,
-        onToggleTheme: () {},
+    await tester.pumpWidget(
+      MyApp(
+        home: MainNavigationScreen(
+          title: 'Pun Account',
+          themeMode: ThemeMode.dark,
+          onToggleTheme: () {},
+        ),
       ),
-    ));
+    );
     await tester.pumpAndSettle();
 
     // Verify initial Home (Overview) screen is displayed

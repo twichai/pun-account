@@ -27,9 +27,7 @@ class AddCardDrawer extends ConsumerStatefulWidget {
       DrawerConfiguration(
         position: OverlayPosition.bottom,
         showDragHandle: true,
-        constraints: BoxConstraints(
-          maxHeight: screenHeight * 0.9,
-        ),
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.9),
       ),
       builder: (context) => AddCardDrawer(wallet: wallet),
     ).future;
@@ -59,13 +57,13 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
     _cardNumberController = TextEditingController(text: formState.cardNumber);
     final initialBalanceText = formState.isEdit
         ? (formState.balance % 1 == 0
-            ? formState.balance.toInt().toString()
-            : formState.balance.toString())
+              ? formState.balance.toInt().toString()
+              : formState.balance.toString())
         : (formState.balance > 0
-            ? (formState.balance % 1 == 0
-                ? formState.balance.toInt().toString()
-                : formState.balance.toString())
-            : '25000');
+              ? (formState.balance % 1 == 0
+                    ? formState.balance.toInt().toString()
+                    : formState.balance.toString())
+              : '25000');
     _balanceController = TextEditingController(text: initialBalanceText);
   }
 
@@ -88,7 +86,8 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
   Future<void> _submit() async {
     final notifier = ref.read(addCardFormProvider.notifier);
     final text = _balanceController.text.trim();
-    final balanceVal = double.tryParse(text) ??
+    final balanceVal =
+        double.tryParse(text) ??
         (widget.wallet != null ? widget.wallet!.balance : 25000.0);
     notifier.updateBalance(balanceVal);
 
@@ -402,8 +401,9 @@ class _AddCardDrawerState extends ConsumerState<AddCardDrawer> {
                 TextField(
                   controller: _balanceController,
                   placeholder: const Text('25000'),
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   onChanged: (val) {
                     final d = double.tryParse(val.trim());
                     if (d != null) {

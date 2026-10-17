@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 /// A gentle, clean Fade In/Out entrance and exit animation with a subtle slide offset.
@@ -69,7 +70,10 @@ class _FadeInAnimationState extends State<FadeInAnimation>
     );
 
     _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(curvedAnimation);
-    _slide = Tween<Offset>(begin: widget.offset, end: Offset.zero).animate(curvedAnimation);
+    _slide = Tween<Offset>(
+      begin: widget.offset,
+      end: Offset.zero,
+    ).animate(curvedAnimation);
 
     if (widget.trigger is! bool || (widget.trigger as bool)) {
       _schedulePlay();
@@ -126,16 +130,16 @@ class _FadeInAnimationState extends State<FadeInAnimation>
 
   @override
   Widget build(BuildContext context) {
-    final disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     if (disableAnimations) {
       return widget.child;
     }
 
-    if (!_hasStarted && _controller.value == 0.0 && widget.delay > Duration.zero) {
-      return Opacity(
-        opacity: 0.0,
-        child: widget.child,
-      );
+    if (!_hasStarted &&
+        _controller.value == 0.0 &&
+        widget.delay > Duration.zero) {
+      return Opacity(opacity: 0.0, child: widget.child);
     }
 
     return AnimatedBuilder(
@@ -143,10 +147,7 @@ class _FadeInAnimationState extends State<FadeInAnimation>
       builder: (context, child) {
         return Opacity(
           opacity: _opacity.value.clamp(0.0, 1.0),
-          child: Transform.translate(
-            offset: _slide.value,
-            child: child,
-          ),
+          child: Transform.translate(offset: _slide.value, child: child),
         );
       },
       child: widget.child,

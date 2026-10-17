@@ -8,9 +8,7 @@ void main() {
       await tester.pumpWidget(
         const Directionality(
           textDirection: TextDirection.ltr,
-          child: FadeInAnimation(
-            child: Text('Cards'),
-          ),
+          child: FadeInAnimation(child: Text('Cards')),
         ),
       );
 
@@ -21,7 +19,9 @@ void main() {
       expect(find.text('Cards'), findsOneWidget);
     });
 
-    testWidgets('Smoothly fades out when trigger becomes false', (tester) async {
+    testWidgets('Smoothly fades out when trigger becomes false', (
+      tester,
+    ) async {
       bool active = true;
 
       await tester.pumpWidget(
@@ -47,10 +47,7 @@ void main() {
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
-          child: FadeInAnimation(
-            trigger: active,
-            child: const Text('Cards'),
-          ),
+          child: FadeInAnimation(trigger: active, child: const Text('Cards')),
         ),
       );
 

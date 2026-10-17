@@ -109,7 +109,8 @@ class AddCardFormNotifier extends Notifier<AddCardFormState> {
       walletId: wallet.id,
       isEdit: true,
       walletType: wallet.type,
-      cardHolder: wallet.cardHolder ?? (wallet.type == 'cash' ? 'Cash Wallet' : ''),
+      cardHolder:
+          wallet.cardHolder ?? (wallet.type == 'cash' ? 'Cash Wallet' : ''),
       cardNumber: wallet.last4 != null ? '•••• •••• •••• ${wallet.last4}' : '',
       cardBrand: wallet.cardBrand ?? 'visa',
       auroraAccent: wallet.auroraAccent,
@@ -176,7 +177,9 @@ class AddCardFormNotifier extends Notifier<AddCardFormState> {
         balance: state.balance,
         currency: state.currency,
         cardHolder: state.isCashWallet
-            ? (state.cardHolder.trim().isEmpty ? 'Cash Wallet' : state.cardHolder.trim())
+            ? (state.cardHolder.trim().isEmpty
+                  ? 'Cash Wallet'
+                  : state.cardHolder.trim())
             : state.cardHolder.trim().toUpperCase(),
         last4: state.isCashWallet ? null : state.last4,
         cardBrand: state.isCashWallet ? null : state.cardBrand,
@@ -226,7 +229,8 @@ class AddCardFormNotifier extends Notifier<AddCardFormState> {
     );
 
     final authState = ref.read(authProvider);
-    final targetBusinessId = businessId ??
+    final targetBusinessId =
+        businessId ??
         authState.session?.user.businessId ??
         WalletsNotifier.defaultBusinessId;
 
@@ -285,5 +289,5 @@ class AddCardFormNotifier extends Notifier<AddCardFormState> {
 
 final addCardFormProvider =
     NotifierProvider<AddCardFormNotifier, AddCardFormState>(() {
-  return AddCardFormNotifier();
-});
+      return AddCardFormNotifier();
+    });

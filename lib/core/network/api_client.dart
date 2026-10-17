@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../config/env_config.dart';
 
 /// Shared singleton provider for ApiClient across the app
@@ -9,8 +10,9 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
 class ApiClient {
   ApiClient({String? baseUrl, Dio? dio})
-      : _baseUrl = baseUrl ?? EnvConfig.apiBaseUrl {
-    _dio = dio ??
+    : _baseUrl = baseUrl ?? EnvConfig.apiBaseUrl {
+    _dio =
+        dio ??
         Dio(
           BaseOptions(
             baseUrl: _baseUrl,
@@ -125,9 +127,11 @@ class ApiClient {
     final statusCode = error.response?.statusCode ?? 500;
     final responseData = error.response?.data;
 
-    String errorMessage = error.message ?? 'An unexpected network error occurred';
+    String errorMessage =
+        error.message ?? 'An unexpected network error occurred';
 
-    if (responseData is Map<String, dynamic> && responseData.containsKey('error')) {
+    if (responseData is Map<String, dynamic> &&
+        responseData.containsKey('error')) {
       final err = responseData['error'];
       if (err is Map && err.containsKey('message')) {
         errorMessage = err['message'].toString();

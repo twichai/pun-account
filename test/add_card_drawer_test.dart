@@ -114,13 +114,17 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           walletsRepositoryProvider.overrideWithValue(fakeRepo),
-          createWalletUseCaseProvider
-              .overrideWithValue(CreateWalletUseCase(fakeRepo)),
+          createWalletUseCaseProvider.overrideWithValue(
+            CreateWalletUseCase(fakeRepo),
+          ),
         ],
       );
       addTearDown(container.dispose);
 
-      final initialWalletsCount = container.read(walletsProvider).wallets.length;
+      final initialWalletsCount = container
+          .read(walletsProvider)
+          .wallets
+          .length;
 
       final notifier = container.read(addCardFormProvider.notifier);
       notifier.updateCardHolder('NOAH DEV');
@@ -142,27 +146,30 @@ void main() {
       expect(newCard.balance, 50000.0);
     });
 
-    test('failure during submission sets errorMessage and stops submitting', () async {
-      final container = ProviderContainer(
-        overrides: [
-          createWalletUseCaseProvider.overrideWithValue(
-            FailingCreateWalletUseCase(),
-          ),
-        ],
-      );
-      addTearDown(container.dispose);
+    test(
+      'failure during submission sets errorMessage and stops submitting',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            createWalletUseCaseProvider.overrideWithValue(
+              FailingCreateWalletUseCase(),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      final notifier = container.read(addCardFormProvider.notifier);
-      notifier.updateCardHolder('FAIL TEST');
+        final notifier = container.read(addCardFormProvider.notifier);
+        notifier.updateCardHolder('FAIL TEST');
 
-      final success = await notifier.submit();
-      expect(success, isFalse);
+        final success = await notifier.submit();
+        expect(success, isFalse);
 
-      final state = container.read(addCardFormProvider);
-      expect(state.isSubmitting, isFalse);
-      expect(state.errorMessage, isNotNull);
-      expect(state.errorMessage, contains('Network unreachable'));
-    });
+        final state = container.read(addCardFormProvider);
+        expect(state.isSubmitting, isFalse);
+        expect(state.errorMessage, isNotNull);
+        expect(state.errorMessage, contains('Network unreachable'));
+      },
+    );
 
     test('initForEdit correctly populates state from an existing wallet', () {
       final container = ProviderContainer();
@@ -192,44 +199,48 @@ void main() {
       expect(state.balance, 75000.0);
     });
 
-    test('edit mode submit updates existing wallet in walletsProvider', () async {
-      final fakeRepo = FakeWalletsRepository();
-      const existingWallet = Wallet(
-        id: 'wallet-card-1',
-        type: 'credit_card',
-        balance: 145250.00,
-        currency: 'THB',
-        cardHolder: 'PAVLO D.',
-        last4: '7642',
-        cardBrand: 'visa',
-        auroraAccent: 'cyan',
-      );
-      fakeRepo.items = [existingWallet];
+    test(
+      'edit mode submit updates existing wallet in walletsProvider',
+      () async {
+        final fakeRepo = FakeWalletsRepository();
+        const existingWallet = Wallet(
+          id: 'wallet-card-1',
+          type: 'credit_card',
+          balance: 145250.00,
+          currency: 'THB',
+          cardHolder: 'PAVLO D.',
+          last4: '7642',
+          cardBrand: 'visa',
+          auroraAccent: 'cyan',
+        );
+        fakeRepo.items = [existingWallet];
 
-      final container = ProviderContainer(
-        overrides: [
-          walletsRepositoryProvider.overrideWithValue(fakeRepo),
-          updateWalletUseCaseProvider
-              .overrideWithValue(UpdateWalletUseCase(fakeRepo)),
-        ],
-      );
-      addTearDown(container.dispose);
+        final container = ProviderContainer(
+          overrides: [
+            walletsRepositoryProvider.overrideWithValue(fakeRepo),
+            updateWalletUseCaseProvider.overrideWithValue(
+              UpdateWalletUseCase(fakeRepo),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
 
-      final notifier = container.read(addCardFormProvider.notifier);
-      notifier.initForEdit(existingWallet);
-      notifier.updateCardHolder('PAVLO UPDATED');
-      notifier.updateBalance(200000.0);
+        final notifier = container.read(addCardFormProvider.notifier);
+        notifier.initForEdit(existingWallet);
+        notifier.updateCardHolder('PAVLO UPDATED');
+        notifier.updateBalance(200000.0);
 
-      final success = await notifier.submit();
-      expect(success, isTrue);
+        final success = await notifier.submit();
+        expect(success, isTrue);
 
-      final updated = container
-          .read(walletsProvider)
-          .wallets
-          .firstWhere((w) => w.id == 'wallet-card-1');
-      expect(updated.cardHolder, 'PAVLO UPDATED');
-      expect(updated.balance, 200000.0);
-    });
+        final updated = container
+            .read(walletsProvider)
+            .wallets
+            .firstWhere((w) => w.id == 'wallet-card-1');
+        expect(updated.cardHolder, 'PAVLO UPDATED');
+        expect(updated.balance, 200000.0);
+      },
+    );
 
     test('deleteCurrentWallet removes wallet from walletsProvider', () async {
       final fakeRepo = FakeWalletsRepository();
@@ -248,8 +259,9 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           walletsRepositoryProvider.overrideWithValue(fakeRepo),
-          deleteWalletUseCaseProvider
-              .overrideWithValue(DeleteWalletUseCase(fakeRepo)),
+          deleteWalletUseCaseProvider.overrideWithValue(
+            DeleteWalletUseCase(fakeRepo),
+          ),
         ],
       );
       addTearDown(container.dispose);
@@ -271,11 +283,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         const ProviderScope(
-          child: ShadcnApp(
-            home: Scaffold(
-              child: WalletsScreen(),
-            ),
-          ),
+          child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
         ),
       );
       await tester.pumpAndSettle();
@@ -295,82 +303,71 @@ void main() {
       expect(find.text('Cancel'), findsOneWidget);
     });
 
-    testWidgets('Tapping a digital card on WalletsScreen opens edit drawer form', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: ShadcnApp(
-            home: Scaffold(
-              child: WalletsScreen(),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Find the cardholder name on the digital card
-      final cardholderText = find.text('PAVLO D.').first;
-      expect(cardholderText, findsOneWidget);
-
-      // Tap on the card
-      await tester.tap(cardholderText);
-      await tester.pumpAndSettle();
-
-      // Edit drawer should now be visible with 'Save Changes' button and fields
-      expect(find.text('Save Changes'), findsOneWidget);
-      expect(find.text('Cardholder Name'), findsOneWidget);
-      expect(find.text('Cancel'), findsOneWidget);
-    });
-
-    testWidgets('Tapping Cash Wallet on WalletsScreen opens edit cash drawer form', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        const ProviderScope(
-          child: ShadcnApp(
-            home: Scaffold(
-              child: WalletsScreen(),
-            ),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-
-      // Find cash wallet card
-      final cashCardText = find.text('CASH WALLET');
-      expect(cashCardText, findsOneWidget);
-
-      // Tap on cash wallet card
-      await tester.tap(cashCardText);
-      await tester.pumpAndSettle();
-
-      // Edit drawer should open with 'Save Changes', Wallet Name, and Current Balance
-      expect(find.text('Save Changes'), findsOneWidget);
-      expect(find.text('Wallet Name'), findsOneWidget);
-      expect(find.text('Current Balance (THB)'), findsOneWidget);
-    });
-
     testWidgets(
-      'WalletsScreen renders RefreshTrigger and Cards header',
+      'Tapping a digital card on WalletsScreen opens edit drawer form',
       (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
-            child: ShadcnApp(
-              home: Scaffold(
-                child: WalletsScreen(),
-              ),
-            ),
+            child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
           ),
         );
         await tester.pumpAndSettle();
 
-        // Verify RefreshTrigger is present in the widget tree
-        expect(find.byType(RefreshTrigger), findsOneWidget);
+        // Find the cardholder name on the digital card
+        final cardholderText = find.text('PAVLO D.').first;
+        expect(cardholderText, findsOneWidget);
 
-        // Screen remains intact
-        expect(find.text('Cards'), findsOneWidget);
+        // Tap on the card
+        await tester.tap(cardholderText);
+        await tester.pumpAndSettle();
+
+        // Edit drawer should now be visible with 'Save Changes' button and fields
+        expect(find.text('Save Changes'), findsOneWidget);
+        expect(find.text('Cardholder Name'), findsOneWidget);
+        expect(find.text('Cancel'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'Tapping Cash Wallet on WalletsScreen opens edit cash drawer form',
+      (tester) async {
+        await tester.pumpWidget(
+          const ProviderScope(
+            child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Find cash wallet card
+        final cashCardText = find.text('CASH WALLET');
+        expect(cashCardText, findsOneWidget);
+
+        // Tap on cash wallet card
+        await tester.tap(cashCardText);
+        await tester.pumpAndSettle();
+
+        // Edit drawer should open with 'Save Changes', Wallet Name, and Current Balance
+        expect(find.text('Save Changes'), findsOneWidget);
+        expect(find.text('Wallet Name'), findsOneWidget);
+        expect(find.text('Current Balance (THB)'), findsOneWidget);
+      },
+    );
+
+    testWidgets('WalletsScreen renders RefreshTrigger and Cards header', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: ShadcnApp(home: Scaffold(child: WalletsScreen())),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Verify RefreshTrigger is present in the widget tree
+      expect(find.byType(RefreshTrigger), findsOneWidget);
+
+      // Screen remains intact
+      expect(find.text('Cards'), findsOneWidget);
+    });
   });
 }

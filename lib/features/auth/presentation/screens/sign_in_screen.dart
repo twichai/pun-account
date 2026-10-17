@@ -20,8 +20,12 @@ class SignInScreen extends ConsumerStatefulWidget {
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   bool _showCustomDevInputs = false;
-  final TextEditingController _emailController = TextEditingController(text: 'alex.maker@indie.co');
-  final TextEditingController _nameController = TextEditingController(text: 'Alex Maker');
+  final TextEditingController _emailController = TextEditingController(
+    text: 'alex.maker@indie.co',
+  );
+  final TextEditingController _nameController = TextEditingController(
+    text: 'Alex Maker',
+  );
   final TextEditingController _tokenController = TextEditingController();
 
   @override
@@ -35,10 +39,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _handleGoogleSignIn() async {
     // If the developer opened custom simulator and typed specific credentials, use simulator
     if (_showCustomDevInputs && _emailController.text.trim().isNotEmpty) {
-      final success = await ref.read(authProvider.notifier).signInWithGoogle(
-            idToken: _tokenController.text.trim().isNotEmpty ? _tokenController.text.trim() : null,
+      final success = await ref
+          .read(authProvider.notifier)
+          .signInWithGoogle(
+            idToken: _tokenController.text.trim().isNotEmpty
+                ? _tokenController.text.trim()
+                : null,
             email: _emailController.text.trim(),
-            name: _nameController.text.trim().isNotEmpty ? _nameController.text.trim() : 'Solopreneur',
+            name: _nameController.text.trim().isNotEmpty
+                ? _nameController.text.trim()
+                : 'Solopreneur',
             googleId: 'g-${DateTime.now().millisecondsSinceEpoch}',
           );
 
@@ -49,7 +59,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     }
 
     // Standard flow: Opens the real native Google account selector dialog (Choose Gmail)
-    final success = await ref.read(authProvider.notifier).signInWithGoogleAccount();
+    final success = await ref
+        .read(authProvider.notifier)
+        .signInWithGoogleAccount();
     if (success && mounted) {
       widget.onSignInSuccess?.call();
     }
@@ -136,7 +148,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFF59E0B).withValues(alpha: 0.2),
+                              color: const Color(0xFFF59E0B)
+                                  .withValues(alpha: 0.2),
                               blurRadius: 24,
                               spreadRadius: 2,
                             ),
@@ -213,12 +226,16 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         width: double.infinity,
                         height: 48,
                         child: OutlineButton(
-                          onPressed: authState.isLoading ? null : _handleGoogleSignIn,
+                          onPressed: authState.isLoading
+                              ? null
+                              : _handleGoogleSignIn,
                           leading: authState.isLoading
                               ? const SizedBox(
                                   width: 18,
                                   height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 )
                               : const GoogleLogo(size: 20),
                           child: Text(
@@ -263,9 +280,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: GhostButton(
-                          onPressed: authState.isLoading ? null : () => _handleDemoSignIn('alex'),
-                          leading: const Text('🚀', style: TextStyle(fontSize: 16)),
-                          trailing: const Icon(LucideIcons.arrowRight, size: 14),
+                          onPressed: authState.isLoading
+                              ? null
+                              : () => _handleDemoSignIn('alex'),
+                          leading: const Text(
+                            '🚀',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          trailing: const Icon(
+                            LucideIcons.arrowRight,
+                            size: 14,
+                          ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -274,11 +299,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                 children: [
                                   Text(
                                     'Alex Maker',
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                   Text(
                                     'Indie Solopreneur (THB)',
-                                    style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -293,9 +324,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: GhostButton(
-                          onPressed: authState.isLoading ? null : () => _handleDemoSignIn('sarah'),
-                          leading: const Text('🎨', style: TextStyle(fontSize: 16)),
-                          trailing: const Icon(LucideIcons.arrowRight, size: 14),
+                          onPressed: authState.isLoading
+                              ? null
+                              : () => _handleDemoSignIn('sarah'),
+                          leading: const Text(
+                            '🎨',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          trailing: const Icon(
+                            LucideIcons.arrowRight,
+                            size: 14,
+                          ),
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -304,11 +343,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                                 children: [
                                   Text(
                                     'Sarah Design',
-                                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                   Text(
                                     'Freelance Studio (THB)',
-                                    style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFF94A3B8),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -330,7 +375,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Icon(
-                              _showCustomDevInputs ? LucideIcons.chevronUp : LucideIcons.slidersHorizontal,
+                              _showCustomDevInputs
+                                  ? LucideIcons.chevronUp
+                                  : LucideIcons.slidersHorizontal,
                               size: 14,
                             ),
                             const SizedBox(width: 6),
@@ -349,10 +396,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         Container(
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                            color: isDark
+                                ? const Color(0xFF0F172A)
+                                : const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                              color: isDark
+                                  ? const Color(0xFF1E293B)
+                                  : const Color(0xFFE2E8F0),
                             ),
                           ),
                           child: Column(
@@ -360,12 +411,17 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                             children: [
                               const Text(
                                 'Developer OAuth Simulator',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                ),
                               ),
                               const SizedBox(height: 8),
                               TextField(
                                 controller: _emailController,
-                                placeholder: const Text('Email (e.g. solopreneur@maker.dev)'),
+                                placeholder: const Text(
+                                  'Email (e.g. solopreneur@maker.dev)',
+                                ),
                               ),
                               const SizedBox(height: 8),
                               TextField(
@@ -375,7 +431,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                               const SizedBox(height: 8),
                               TextField(
                                 controller: _tokenController,
-                                placeholder: const Text('Google ID Token (Optional)'),
+                                placeholder: const Text(
+                                  'Google ID Token (Optional)',
+                                ),
                               ),
                             ],
                           ),
@@ -393,7 +451,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8),
+                    color: isDark
+                        ? const Color(0xFF64748B)
+                        : const Color(0xFF94A3B8),
                   ),
                 ),
               ],

@@ -25,7 +25,8 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
   final VoidCallback? onToggleTheme;
 
   @override
-  ConsumerState<MainNavigationScreen> createState() => _MainNavigationScreenState();
+  ConsumerState<MainNavigationScreen> createState() =>
+      _MainNavigationScreenState();
 }
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {

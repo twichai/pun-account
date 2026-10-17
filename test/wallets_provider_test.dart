@@ -71,14 +71,18 @@ void main() {
       container = ProviderContainer(
         overrides: [
           walletsRepositoryProvider.overrideWithValue(fakeRepo),
-          getWalletsUseCaseProvider
-              .overrideWithValue(GetWalletsUseCase(fakeRepo)),
-          createWalletUseCaseProvider
-              .overrideWithValue(CreateWalletUseCase(fakeRepo)),
-          updateWalletUseCaseProvider
-              .overrideWithValue(UpdateWalletUseCase(fakeRepo)),
-          deleteWalletUseCaseProvider
-              .overrideWithValue(DeleteWalletUseCase(fakeRepo)),
+          getWalletsUseCaseProvider.overrideWithValue(
+            GetWalletsUseCase(fakeRepo),
+          ),
+          createWalletUseCaseProvider.overrideWithValue(
+            CreateWalletUseCase(fakeRepo),
+          ),
+          updateWalletUseCaseProvider.overrideWithValue(
+            UpdateWalletUseCase(fakeRepo),
+          ),
+          deleteWalletUseCaseProvider.overrideWithValue(
+            DeleteWalletUseCase(fakeRepo),
+          ),
         ],
       );
     });
@@ -104,37 +108,48 @@ void main() {
       expect(state.wallets.first.id, 'test-1');
     });
 
-    test('createWallet appends new wallet through CreateWalletUseCase', () async {
-      final notifier = container.read(walletsProvider.notifier);
-      const newCard = Wallet(
-        id: 'new-2',
-        type: 'credit_card',
-        balance: 35000.0,
-        currency: 'THB',
-        cardHolder: 'ALICE',
-        last4: '2222',
-        cardBrand: 'mastercard',
-        auroraAccent: 'violet',
-      );
+    test(
+      'createWallet appends new wallet through CreateWalletUseCase',
+      () async {
+        final notifier = container.read(walletsProvider.notifier);
+        const newCard = Wallet(
+          id: 'new-2',
+          type: 'credit_card',
+          balance: 35000.0,
+          currency: 'THB',
+          cardHolder: 'ALICE',
+          last4: '2222',
+          cardBrand: 'mastercard',
+          auroraAccent: 'violet',
+        );
 
-      final ok = await notifier.createWallet(newCard);
-      expect(ok, isTrue);
+        final ok = await notifier.createWallet(newCard);
+        expect(ok, isTrue);
 
-      final state = container.read(walletsProvider);
-      expect(state.wallets.any((w) => w.id == 'new-2'), isTrue);
-    });
+        final state = container.read(walletsProvider);
+        expect(state.wallets.any((w) => w.id == 'new-2'), isTrue);
+      },
+    );
 
-    test('updateWallet updates existing wallet through UpdateWalletUseCase', () async {
-      final notifier = container.read(walletsProvider.notifier);
-      await notifier.fetchWallets();
+    test(
+      'updateWallet updates existing wallet through UpdateWalletUseCase',
+      () async {
+        final notifier = container.read(walletsProvider.notifier);
+        await notifier.fetchWallets();
 
-      final updated = fakeRepo.items.first.copyWith(cardHolder: 'UPDATED ALICE');
-      final ok = await notifier.updateWallet('test-1', updated);
-      expect(ok, isTrue);
+        final updated = fakeRepo.items.first.copyWith(
+          cardHolder: 'UPDATED ALICE',
+        );
+        final ok = await notifier.updateWallet('test-1', updated);
+        expect(ok, isTrue);
 
-      final state = container.read(walletsProvider);
-      expect(state.wallets.firstWhere((w) => w.id == 'test-1').cardHolder, 'UPDATED ALICE');
-    });
+        final state = container.read(walletsProvider);
+        expect(
+          state.wallets.firstWhere((w) => w.id == 'test-1').cardHolder,
+          'UPDATED ALICE',
+        );
+      },
+    );
 
     test('deleteWallet removes wallet through DeleteWalletUseCase', () async {
       final notifier = container.read(walletsProvider.notifier);
@@ -150,24 +165,28 @@ void main() {
       final authContainer = ProviderContainer(
         overrides: [
           walletsRepositoryProvider.overrideWithValue(fakeRepo),
-          getWalletsUseCaseProvider
-              .overrideWithValue(GetWalletsUseCase(fakeRepo)),
-          createWalletUseCaseProvider
-              .overrideWithValue(CreateWalletUseCase(fakeRepo)),
-          authProvider.overrideWith(() => _MockAuthNotifier(
-                const AuthState(
-                  status: AuthStatus.authenticated,
-                  session: AuthSession(
-                    token: 'mock-token',
-                    user: UserModel(
-                      id: 'user-1',
-                      email: 'alex@indie.co',
-                      name: 'Alex',
-                      businessId: 'biz-123',
-                    ),
+          getWalletsUseCaseProvider.overrideWithValue(
+            GetWalletsUseCase(fakeRepo),
+          ),
+          createWalletUseCaseProvider.overrideWithValue(
+            CreateWalletUseCase(fakeRepo),
+          ),
+          authProvider.overrideWith(
+            () => _MockAuthNotifier(
+              const AuthState(
+                status: AuthStatus.authenticated,
+                session: AuthSession(
+                  token: 'mock-token',
+                  user: UserModel(
+                    id: 'user-1',
+                    email: 'alex@indie.co',
+                    name: 'Alex',
+                    businessId: 'biz-123',
                   ),
                 ),
-              )),
+              ),
+            ),
+          ),
         ],
       );
       addTearDown(authContainer.dispose);
@@ -189,8 +208,7 @@ void main() {
   group('AuthNotifier Session Persistence Tests', () {
     test('restores saved session on startup', () async {
       SharedPreferences.setMockInitialValues({
-        'pun_auth_session':
-            '{"token":"persisted-jwt-123","user":{"id":"u-1","email":"user@test.com","name":"Test User","business_id":"biz-999"}}'
+        'pun_auth_session': '{"token":"persisted-jwt-123","user":{"id":"u-1","email":"user@test.com","name":"Test User","business_id":"biz-999"}}',
       });
 
       final container = ProviderContainer();

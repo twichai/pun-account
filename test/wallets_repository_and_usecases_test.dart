@@ -119,7 +119,10 @@ void main() {
       await deleteWalletUseCase('wallet-1');
       final listAfterDelete = await getWalletsUseCase(businessId: businessId);
       expect(listAfterDelete, isEmpty);
-      expect(() => getWalletByIdUseCase('wallet-1'), throwsA(isA<ApiException>()));
+      expect(
+        () => getWalletByIdUseCase('wallet-1'),
+        throwsA(isA<ApiException>()),
+      );
     });
   });
 }

@@ -55,7 +55,8 @@ class ApiWalletsRepository implements WalletsRepository {
     required Wallet wallet,
     String? name,
   }) async {
-    final walletName = name ??
+    final walletName =
+        name ??
         (wallet.cardHolder?.isNotEmpty == true
             ? wallet.cardHolder!
             : (wallet.type == 'cash' ? 'Cash Wallet' : 'Digital Card'));

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
+
 import 'package:flutter/widgets.dart';
 
 /// Motion specifications from Motion Atlas / klik-anim for the "Whip" animation.
@@ -81,10 +82,8 @@ class _WhipAnimationState extends State<WhipAnimation>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: widget.duration,
-    )..addStatusListener((status) {
+    _controller = AnimationController(vsync: this, duration: widget.duration)
+      ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           widget.onCompleted?.call();
         }
@@ -140,7 +139,8 @@ class _WhipAnimationState extends State<WhipAnimation>
 
   @override
   Widget build(BuildContext context) {
-    final disableAnimations = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final disableAnimations =
+        MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     // Reduced-motion alternative: Replace it with a short crossfade
     if (disableAnimations) {
@@ -154,10 +154,7 @@ class _WhipAnimationState extends State<WhipAnimation>
 
     // If waiting for delay, render invisible initially to prevent flash of content
     if (!_hasStarted && widget.delay > Duration.zero) {
-      return Opacity(
-        opacity: 0.0,
-        child: widget.child,
-      );
+      return Opacity(opacity: 0.0, child: widget.child);
     }
 
     return AnimatedBuilder(
@@ -167,12 +164,14 @@ class _WhipAnimationState extends State<WhipAnimation>
         final progress = WhipMotion.curve.transform(t);
 
         // Opacity transition
-        final opacity = widget.fadeIn
-            ? (progress * 1.6).clamp(0.0, 1.0)
-            : 1.0;
+        final opacity = widget.fadeIn ? (progress * 1.6).clamp(0.0, 1.0) : 1.0;
 
         // Position translation (slam into place)
-        final currentOffset = Offset.lerp(widget.startOffset, Offset.zero, progress)!;
+        final currentOffset = Offset.lerp(
+          widget.startOffset,
+          Offset.zero,
+          progress,
+        )!;
 
         // Smear calculation:
         // Calculate instantaneous velocity near current time t:
@@ -182,7 +181,8 @@ class _WhipAnimationState extends State<WhipAnimation>
           const dt = 0.02;
           final t1 = (t - dt).clamp(0.0, 1.0);
           final t2 = (t + dt).clamp(0.0, 1.0);
-          final dp = WhipMotion.curve.transform(t2) - WhipMotion.curve.transform(t1);
+          final dp =
+              WhipMotion.curve.transform(t2) - WhipMotion.curve.transform(t1);
           final velocity = (dp / (t2 - t1)).abs();
 
           // Peak velocity is ~3.8. Smear activates when velocity > 0.8 and maxes out at ~3.5
@@ -190,9 +190,14 @@ class _WhipAnimationState extends State<WhipAnimation>
         }
 
         // Determine motion orientation for directional smear
-        final isMovingVertical = widget.startOffset.dy.abs() >= widget.startOffset.dx.abs();
-        final double sigmaX = isMovingVertical ? 0.0 : widget.maxBlur * smearFactor;
-        final double sigmaY = isMovingVertical ? widget.maxBlur * smearFactor : 0.0;
+        final isMovingVertical =
+            widget.startOffset.dy.abs() >= widget.startOffset.dx.abs();
+        final double sigmaX = isMovingVertical
+            ? 0.0
+            : widget.maxBlur * smearFactor;
+        final double sigmaY = isMovingVertical
+            ? widget.maxBlur * smearFactor
+            : 0.0;
 
         // Directional squash and stretch
         final double scaleX = isMovingVertical
@@ -208,8 +213,12 @@ class _WhipAnimationState extends State<WhipAnimation>
             scaleX: scaleX,
             scaleY: scaleY,
             alignment: isMovingVertical
-                ? (widget.startOffset.dy > 0 ? Alignment.bottomCenter : Alignment.topCenter)
-                : (widget.startOffset.dx > 0 ? Alignment.centerRight : Alignment.centerLeft),
+                ? (widget.startOffset.dy > 0
+                      ? Alignment.bottomCenter
+                      : Alignment.topCenter)
+                : (widget.startOffset.dx > 0
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft),
             child: child,
           ),
         );
@@ -226,10 +235,7 @@ class _WhipAnimationState extends State<WhipAnimation>
         }
 
         if (widget.fadeIn) {
-          rendered = Opacity(
-            opacity: opacity,
-            child: rendered,
-          );
+          rendered = Opacity(opacity: opacity, child: rendered);
         }
 
         return rendered;

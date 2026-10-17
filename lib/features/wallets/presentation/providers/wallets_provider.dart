@@ -72,7 +72,9 @@ class WalletsNotifier extends Notifier<WalletsState> {
     final authState = ref.watch(authProvider);
     final businessId = authState.session?.user.businessId;
 
-    if (authState.isAuthenticated && businessId != null && businessId.isNotEmpty) {
+    if (authState.isAuthenticated &&
+        businessId != null &&
+        businessId.isNotEmpty) {
       // Trigger API fetch for the authenticated user's business
       Future.microtask(() => fetchWallets(businessId: businessId));
       return const WalletsState(isLoading: true);
@@ -84,22 +86,20 @@ class WalletsNotifier extends Notifier<WalletsState> {
   /// Fetch wallets from backend via GetWalletsUseCase using auth session
   Future<void> fetchWallets({String? businessId}) async {
     final authState = ref.read(authProvider);
-    final targetBusinessId = businessId ??
-        authState.session?.user.businessId ??
-        defaultBusinessId;
+    final targetBusinessId =
+        businessId ?? authState.session?.user.businessId ?? defaultBusinessId;
 
     state = state.copyWith(isLoading: true, errorMessage: () => null);
     try {
       final useCase = ref.read(getWalletsUseCaseProvider);
       final list = await useCase(businessId: targetBusinessId);
-      state = state.copyWith(
-        wallets: list,
-        isLoading: false,
-      );
+      state = state.copyWith(wallets: list, isLoading: false);
     } catch (e) {
       // If API fails (e.g. offline dev mode or network error), fallback to defaultWallets
       state = state.copyWith(
-        wallets: state.wallets.isNotEmpty ? state.wallets : WalletsState.defaultWallets,
+        wallets: state.wallets.isNotEmpty
+            ? state.wallets
+            : WalletsState.defaultWallets,
         isLoading: false,
         errorMessage: () => e.toString(),
       );
@@ -113,9 +113,8 @@ class WalletsNotifier extends Notifier<WalletsState> {
     String? name,
   }) async {
     final authState = ref.read(authProvider);
-    final targetBusinessId = businessId ??
-        authState.session?.user.businessId ??
-        defaultBusinessId;
+    final targetBusinessId =
+        businessId ?? authState.session?.user.businessId ?? defaultBusinessId;
 
     state = state.copyWith(isLoading: true, errorMessage: () => null);
     try {
@@ -142,11 +141,7 @@ class WalletsNotifier extends Notifier<WalletsState> {
   }
 
   /// Update an existing wallet via UpdateWalletUseCase
-  Future<bool> updateWallet(
-    String id,
-    Wallet wallet, {
-    String? name,
-  }) async {
+  Future<bool> updateWallet(String id, Wallet wallet, {String? name}) async {
     state = state.copyWith(isLoading: true, errorMessage: () => null);
     try {
       final useCase = ref.read(updateWalletUseCaseProvider);
@@ -195,7 +190,9 @@ class WalletsNotifier extends Notifier<WalletsState> {
   /// Replace an updated wallet locally
   void updateWalletItem(Wallet updated) {
     state = state.copyWith(
-      wallets: state.wallets.map((w) => w.id == updated.id ? updated : w).toList(),
+      wallets: state.wallets
+          .map((w) => w.id == updated.id ? updated : w)
+          .toList(),
     );
   }
 

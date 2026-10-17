@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+
 import 'package:flutter/widgets.dart';
 
 /// Clean, scalable vector Google "G" logo rendered via CustomPainter.
@@ -12,9 +13,7 @@ class GoogleLogo extends StatelessWidget {
     return SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _GoogleLogoPainter(),
-      ),
+      child: CustomPaint(painter: _GoogleLogoPainter()),
     );
   }
 }
@@ -28,7 +27,10 @@ class _GoogleLogoPainter extends CustomPainter {
     final double radius = math.min(w, h) / 2;
     final double strokeWidth = radius * 0.42;
 
-    final rect = Rect.fromCircle(center: center, radius: radius - strokeWidth / 2);
+    final rect = Rect.fromCircle(
+      center: center,
+      radius: radius - strokeWidth / 2,
+    );
 
     final Paint paintRed = Paint()
       ..color = const Color(0xFFEA4335)

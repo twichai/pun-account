@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -37,7 +38,8 @@ class EnvConfig {
 
   /// Backend API Base URL
   static String get apiBaseUrl {
-    final configured = _get('API_BASE_URL') ??
+    final configured =
+        _get('API_BASE_URL') ??
         const String.fromEnvironment('API_BASE_URL', defaultValue: '');
     if (configured.isNotEmpty) {
       return configured;
@@ -47,7 +49,8 @@ class EnvConfig {
 
   /// Network Timeout in milliseconds
   static int get apiTimeoutMs {
-    final raw = _get('API_TIMEOUT_MS') ??
+    final raw =
+        _get('API_TIMEOUT_MS') ??
         const String.fromEnvironment('API_TIMEOUT_MS', defaultValue: '10000');
     return int.tryParse(raw) ?? 10000;
   }
@@ -67,7 +70,10 @@ class EnvConfig {
   /// Google OAuth Android Client ID
   static String get googleClientIdAndroid {
     return _get('GOOGLE_CLIENT_ID_ANDROID') ??
-        const String.fromEnvironment('GOOGLE_CLIENT_ID_ANDROID', defaultValue: '');
+        const String.fromEnvironment(
+          'GOOGLE_CLIENT_ID_ANDROID',
+          defaultValue: '',
+        );
   }
 
   static String _defaultBaseUrl() {

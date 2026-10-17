@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,19 +8,20 @@ import '../../../core/config/env_config.dart';
 
 class GoogleAuthService {
   GoogleAuthService({GoogleSignIn? googleSignIn})
-      : _googleSignIn = googleSignIn ??
-            GoogleSignIn(
-              clientId: kIsWeb
-                  ? (EnvConfig.googleClientIdWeb.isNotEmpty
+    : _googleSignIn =
+          googleSignIn ??
+          GoogleSignIn(
+            clientId: kIsWeb
+                ? (EnvConfig.googleClientIdWeb.isNotEmpty
                       ? EnvConfig.googleClientIdWeb
                       : null)
-                  : (!kIsWeb && (Platform.isIOS || Platform.isMacOS)
+                : (!kIsWeb && (Platform.isIOS || Platform.isMacOS)
                       ? (EnvConfig.googleClientIdIos.isNotEmpty
-                          ? EnvConfig.googleClientIdIos
-                          : null)
+                            ? EnvConfig.googleClientIdIos
+                            : null)
                       : null),
-              scopes: const ['email', 'profile'],
-            );
+            scopes: const ['email', 'profile'],
+          );
 
   final GoogleSignIn _googleSignIn;
 
