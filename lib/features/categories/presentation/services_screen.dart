@@ -169,44 +169,47 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                         ),
                       ],
                     ),
-                    child: ListView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
-                      children: [
-                        // Category filter tabs + Search button
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                physics: const BouncingScrollPhysics(),
-                                child: Row(
-                                  children: [
-                                    _buildFilterPill(
-                                      title: 'All',
-                                      isSelected: selectedTrackKey == 'all',
-                                      onTap: () => ref
-                                          .read(servicesProvider.notifier)
-                                          .setTrack('all'),
-                                      isDark: isDark,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    for (final track in tracks) ...[
+                    child: ScrollConfiguration(
+                      behavior: ScrollConfiguration.of(context)
+                          .copyWith(scrollbars: false),
+                      child: ListView(
+                        controller: scrollController,
+                        padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),
+                        children: [
+                          // Category filter tabs + Search button
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  physics: const BouncingScrollPhysics(),
+                                  child: Row(
+                                    children: [
                                       _buildFilterPill(
-                                        title: track.name,
-                                        isSelected:
-                                            selectedTrackKey == track.key,
+                                        title: 'All',
+                                        isSelected: selectedTrackKey == 'all',
                                         onTap: () => ref
                                             .read(servicesProvider.notifier)
-                                            .setTrack(track.key),
+                                            .setTrack('all'),
                                         isDark: isDark,
                                       ),
                                       const SizedBox(width: 8),
+                                      for (final track in tracks) ...[
+                                        _buildFilterPill(
+                                          title: track.name,
+                                          isSelected:
+                                              selectedTrackKey == track.key,
+                                          onTap: () => ref
+                                              .read(servicesProvider.notifier)
+                                              .setTrack(track.key),
+                                          isDark: isDark,
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
                                     ],
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
                             const SizedBox(width: 8),
                             IconButton.ghost(
                               density: ButtonDensity.icon,
@@ -279,7 +282,8 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                           ],
                       ],
                     ),
-                  );
+                  ),
+                );
                 },
               ),
             ],
