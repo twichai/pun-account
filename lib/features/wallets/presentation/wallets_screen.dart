@@ -81,7 +81,8 @@ class _WalletsScreenState extends ConsumerState<WalletsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final wallets = ref.watch(walletsProvider);
+    final walletsState = ref.watch(walletsProvider);
+    final wallets = walletsState.wallets;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),

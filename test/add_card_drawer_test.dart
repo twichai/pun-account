@@ -4,8 +4,12 @@ import 'package:pun_account/features/wallets/presentation/providers/add_card_for
 import 'package:pun_account/features/wallets/presentation/providers/wallets_provider.dart';
 import 'package:pun_account/features/wallets/presentation/wallets_screen.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences.setMockInitialValues({});
+
   group('AddCardFormProvider Unit Tests', () {
     test('initial state has sensible defaults', () {
       final container = ProviderContainer();
@@ -57,7 +61,7 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final initialWalletsCount = container.read(walletsProvider).length;
+      final initialWalletsCount = container.read(walletsProvider).wallets.length;
 
       final notifier = container.read(addCardFormProvider.notifier);
       notifier.updateCardHolder('NOAH DEV');
@@ -68,7 +72,7 @@ void main() {
       final success = notifier.submit();
       expect(success, isTrue);
 
-      final updatedWallets = container.read(walletsProvider);
+      final updatedWallets = container.read(walletsProvider).wallets;
       expect(updatedWallets.length, initialWalletsCount + 1);
 
       final newCard = updatedWallets.last;

@@ -1,5 +1,11 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/env_config.dart';
+
+/// Shared singleton provider for ApiClient across the app
+final apiClientProvider = Provider<ApiClient>((ref) {
+  return ApiClient();
+});
 
 class ApiClient {
   ApiClient({String? baseUrl, Dio? dio})

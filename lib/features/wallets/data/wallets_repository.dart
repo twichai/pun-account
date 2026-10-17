@@ -8,7 +8,7 @@ export '../domain/repositories/wallets_repository.dart';
 
 /// Provider for WalletsRepository
 final walletsRepositoryProvider = Provider<WalletsRepository>((ref) {
-  return ApiWalletsRepository();
+  return ApiWalletsRepository(client: ref.watch(apiClientProvider));
 });
 
 /// API implementation of WalletsRepository communicating with Go backend

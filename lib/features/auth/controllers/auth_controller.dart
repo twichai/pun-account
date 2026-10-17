@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../core/network/api_client.dart';
 import '../data/auth_repository.dart';
 import '../data/google_auth_service.dart';
 import '../models/user_model.dart';
@@ -38,13 +42,55 @@ class AuthState {
 }
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return ApiAuthRepository();
+  return ApiAuthRepository(client: ref.watch(apiClientProvider));
 });
 
 class AuthNotifier extends Notifier<AuthState> {
+  static const String _sessionKey = 'pun_auth_session';
+
   @override
   AuthState build() {
+    Future.microtask(() => _restoreSession());
     return const AuthState(status: AuthStatus.unauthenticated);
+  }
+
+  /// Restore saved session from persistent storage on startup
+  Future<void> _restoreSession() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionJson = prefs.getString(_sessionKey);
+      if (sessionJson != null && sessionJson.isNotEmpty) {
+        final Map<String, dynamic> data = jsonDecode(sessionJson);
+        final session = AuthSession.fromJson(data);
+        if (session.token.isNotEmpty) {
+          ref.read(apiClientProvider).setAuthToken(session.token);
+          state = AuthState(
+            status: AuthStatus.authenticated,
+            session: session,
+          );
+        }
+      }
+    } catch (_) {
+      // If corrupted, clean up saved key
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_sessionKey);
+    }
+  }
+
+  Future<void> _saveSession(AuthSession session) async {
+    ref.read(apiClientProvider).setAuthToken(session.token);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_sessionKey, jsonEncode(session.toJson()));
+    } catch (_) {}
+  }
+
+  Future<void> _clearSession() async {
+    ref.read(apiClientProvider).setAuthToken(null);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_sessionKey);
+    } catch (_) {}
   }
 
   /// Real Google Account Picker (Native dialog allowing user to choose their Gmail)
@@ -72,6 +118,7 @@ class AuthNotifier extends Notifier<AuthState> {
         googleId: account.id,
       );
 
+      await _saveSession(session);
       state = AuthState(
         status: AuthStatus.authenticated,
         session: session,
@@ -105,6 +152,7 @@ class AuthNotifier extends Notifier<AuthState> {
         googleId: googleId,
       );
 
+      await _saveSession(session);
       state = AuthState(
         status: AuthStatus.authenticated,
         session: session,
@@ -142,6 +190,7 @@ class AuthNotifier extends Notifier<AuthState> {
     try {
       await ref.read(googleAuthServiceProvider).signOut();
     } catch (_) {}
+    await _clearSession();
     state = const AuthState(status: AuthStatus.unauthenticated);
   }
 }
