@@ -206,6 +206,29 @@ class ApiServicesRepository implements ServicesRepository {
         return LucideIcons.play;
       case 'book-open':
         return LucideIcons.bookOpen;
+      case 'shopping-bag':
+      case 'shopping-cart':
+      case 'store':
+        return LucideIcons.shoppingBag;
+      case 'share-2':
+      case 'share':
+        return LucideIcons.share2;
+      case 'smartphone':
+        return LucideIcons.smartphone;
+      case 'graduation-cap':
+        return LucideIcons.graduationCap;
+      case 'hard-drive':
+        return LucideIcons.hardDrive;
+      case 'server':
+        return LucideIcons.server;
+      case 'camera':
+        return LucideIcons.camera;
+      case 'heart':
+        return LucideIcons.heart;
+      case 'users':
+        return LucideIcons.users;
+      case 'bot':
+        return LucideIcons.bot;
       default:
         return LucideIcons.globe;
     }
