@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../../auth/controllers/auth_controller.dart';
+import '../../../auth/presentation/widgets/profile_drawer.dart';
 
 /// Fixed top header displaying profile avatar (from user.avatarUrl) and notification icon button with red badge.
 class OverviewHeader extends ConsumerWidget {
@@ -26,6 +27,8 @@ class OverviewHeader extends ConsumerWidget {
 
     final user = ref.watch(authProvider).session?.user;
     final effectiveAvatarUrl = avatarUrl ?? user?.avatarUrl;
+    final initialLetter =
+        (user?.name.isNotEmpty == true) ? user!.name[0].toUpperCase() : 'P';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -33,11 +36,15 @@ class OverviewHeader extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Profile Avatar
-          GestureDetector(
-            onTap: onProfilePressed,
-            child: Container(
-              width: 44,
-              height: 44,
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: onProfilePressed ?? () => ProfileDrawer.show(context),
+              child: Tooltip(
+                tooltip: (context) => const Text('Account Profile & Logout'),
+                child: Container(
+                  width: 44,
+                  height: 44,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isDark
@@ -59,21 +66,21 @@ class OverviewHeader extends ConsumerWidget {
                         width: 44,
                         height: 44,
                         fit: BoxFit.cover,
-                        errorWidget: (context, url, err) => const Center(
+                        errorWidget: (context, url, err) => Center(
                           child: Text(
-                            'P',
+                            initialLetter,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        placeholder: (context, url) => const Center(
+                        placeholder: (context, url) => Center(
                           child: Text(
-                            'P',
+                            initialLetter,
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
@@ -81,16 +88,18 @@ class OverviewHeader extends ConsumerWidget {
                         ),
                       ),
                     )
-                  : const Center(
+                  : Center(
                       child: Text(
-                        'P',
+                        initialLetter,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
+                ),
+              ),
             ),
           ),
 

@@ -9,6 +9,7 @@ import '../../wallets/presentation/providers/wallets_provider.dart';
 import '../../wallets/presentation/widgets/dark_obsidian_wallet_card.dart';
 import '../../../core/router/app_router.dart';
 import '../../transaction_details/transaction_details.dart';
+import '../../auth/presentation/widgets/profile_drawer.dart';
 import 'widgets/overview_header.dart';
 import 'widgets/transaction_row.dart';
 import 'widgets/transactions_empty_view.dart';
@@ -154,9 +155,7 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
             // Top Header: Profile Avatar & Actions
             OverviewHeader(
               onReloadPressed: _triggerReload,
-              onProfilePressed: () {
-                // Could navigate to profile or account sheet
-              },
+              onProfilePressed: () => ProfileDrawer.show(context),
               onNotificationPressed: () {
                 showToast(
                   context: context,
