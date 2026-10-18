@@ -107,11 +107,10 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify initial Home (Overview) screen is displayed
-    expect(find.text('Total balance'), findsOneWidget);
-    expect(find.text('\$ 163,750'), findsOneWidget);
-    expect(find.text('Spending'), findsOneWidget);
+    expect(find.text('Total Balance'), findsOneWidget);
+    expect(find.text('\$163,750.00'), findsOneWidget);
     expect(find.text('Transactions'), findsOneWidget);
-    expect(find.text('Apple'), findsAtLeastNWidgets(1));
+    expect(find.text('ยังไม่มีรายการธุรกรรม'), findsOneWidget);
 
     // Verify 3 navigation tabs are present
     expect(find.byKey(const ValueKey(0)), findsOneWidget);
@@ -132,15 +131,26 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Services screen is displayed with category/service items
-    expect(find.text('Recipients'), findsOneWidget);
+    expect(find.text('Recipients'), findsAtLeastNWidgets(1));
 
     // Tap on Tab 1 (Home)
     await tester.tap(find.byKey(const ValueKey(1)));
     await tester.pumpAndSettle();
-    expect(find.text('Total balance'), findsOneWidget);
+    expect(find.text('Total Balance'), findsOneWidget);
 
-    // Tap on 'Send' button on Home
-    await tester.tap(find.text('Send'));
+    // Swipe to next wallet card (wallet-card-1: Visa 7642)
+    await tester.drag(
+      find.byKey(const ValueKey('wallet_cards_pageview')),
+      const Offset(-300, 0),
+    );
+    await tester.pumpAndSettle();
+
+    // Verify transaction list dynamically updated to show Apple transaction for wallet-card-1!
+    expect(find.text('Apple'), findsOneWidget);
+    expect(find.text('-\$60.00'), findsOneWidget);
+
+    // Tap on transaction to trigger SendRequestModal
+    await tester.tap(find.text('Apple'));
     await tester.pumpAndSettle();
 
     // Verify SendRequestModal is opened with keypad
