@@ -45,14 +45,6 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
     super.dispose();
   }
 
-  void _onOpenSendModal() {
-    SendRequestModal.show(context, mode: TransferMode.send);
-  }
-
-  void _onOpenAddTransaction() {
-    SendRequestModal.show(context, mode: TransferMode.send);
-  }
-
   void _goToPage(int index) {
     setState(() {
       _selected = ValueKey(index);
@@ -75,46 +67,61 @@ class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      child: Stack(
-        children: [
-          // Screen Content with Swipeable PageView
-          Positioned.fill(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: _onPageChanged,
-              children: [
-                const ServicesScreen(key: PageStorageKey('services_screen')),
-                OverviewScreen(
-                  key: const PageStorageKey('overview_screen'),
-                  onNavigateToWallets: () => _goToPage(2),
-                  onNavigateToServices: () => _goToPage(0),
-                  onAddTransaction: _onOpenAddTransaction,
+      child: Builder(
+        builder: (scaffoldContext) {
+          return Stack(
+            children: [
+              // Screen Content with Swipeable PageView
+              Positioned.fill(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: _onPageChanged,
+                  children: [
+                    const ServicesScreen(
+                      key: PageStorageKey('services_screen'),
+                    ),
+                    OverviewScreen(
+                      key: const PageStorageKey('overview_screen'),
+                      onNavigateToWallets: () => _goToPage(2),
+                      onNavigateToServices: () => _goToPage(0),
+                      onAddTransaction: () => SendRequestModal.show(
+                        scaffoldContext,
+                        mode: TransferMode.send,
+                      ),
+                    ),
+                    WalletsScreen(
+                      key: const PageStorageKey('wallets_screen'),
+                      onAddTransaction: () => SendRequestModal.show(
+                        scaffoldContext,
+                        mode: TransferMode.send,
+                      ),
+                      isActive: _selected == const ValueKey(2),
+                    ),
+                  ],
                 ),
-                WalletsScreen(
-                  key: const PageStorageKey('wallets_screen'),
-                  onAddTransaction: _onOpenAddTransaction,
-                  isActive: _selected == const ValueKey(2),
-                ),
-              ],
-            ),
-          ),
+              ),
 
-          // Floating Bottom Navigation Bar
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: PunNavigationBar(
-              selectedKey: _selected,
-              onSelected: (key) {
-                if (key is ValueKey<int>) {
-                  _goToPage(key.value);
-                }
-              },
-              onAddPressed: _onOpenSendModal,
-            ),
-          ),
-        ],
+              // Floating Bottom Navigation Bar
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: PunNavigationBar(
+                  selectedKey: _selected,
+                  onSelected: (key) {
+                    if (key is ValueKey<int>) {
+                      _goToPage(key.value);
+                    }
+                  },
+                  onAddPressed: () => SendRequestModal.show(
+                    scaffoldContext,
+                    mode: TransferMode.send,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

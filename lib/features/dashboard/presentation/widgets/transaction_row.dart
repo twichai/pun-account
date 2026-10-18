@@ -5,11 +5,7 @@ import '../../../transactions/domain/models/transaction.dart';
 
 /// Single transaction item row displaying service icon/image, name, date, and amount.
 class TransactionRow extends StatelessWidget {
-  const TransactionRow({
-    super.key,
-    required this.item,
-    this.onTap,
-  });
+  const TransactionRow({super.key, required this.item, this.onTap});
 
   final TransactionModel item;
   final VoidCallback? onTap;

@@ -44,9 +44,7 @@ class OverviewTransactionsSheet extends ConsumerWidget {
         return Container(
           decoration: BoxDecoration(
             color: isDark ? const Color(0xFF18181B) : Colors.white,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(32),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.15),
@@ -56,7 +54,8 @@ class OverviewTransactionsSheet extends ConsumerWidget {
             ],
           ),
           child: ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            behavior: ScrollConfiguration.of(context)
+                .copyWith(scrollbars: false),
             child: ListView(
               controller: scrollController,
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 100),

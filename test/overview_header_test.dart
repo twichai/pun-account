@@ -19,11 +19,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       const ProviderScope(
-        child: ShadcnApp(
-          home: Scaffold(
-            child: OverviewHeader(),
-          ),
-        ),
+        child: ShadcnApp(home: Scaffold(child: OverviewHeader())),
       ),
     );
     await tester.pump();
@@ -53,11 +49,7 @@ void main() {
             ),
           ),
         ],
-        child: const ShadcnApp(
-          home: Scaffold(
-            child: OverviewHeader(),
-          ),
-        ),
+        child: const ShadcnApp(home: Scaffold(child: OverviewHeader())),
       ),
     );
     await tester.pump();

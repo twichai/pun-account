@@ -10,18 +10,11 @@ class TransactionsEmptyView extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 40,
-        horizontal: 20,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
       alignment: Alignment.center,
       child: Column(
         children: [
-          const Icon(
-            LucideIcons.receipt,
-            size: 40,
-            color: Color(0xFF71717A),
-          ),
+          const Icon(LucideIcons.receipt, size: 40, color: Color(0xFF71717A)),
           const SizedBox(height: 12),
           Text(
             'ยังไม่มีรายการธุรกรรม',
@@ -34,10 +27,7 @@ class TransactionsEmptyView extends StatelessWidget {
           const SizedBox(height: 4),
           const Text(
             'เริ่มทำรายการได้โดยกดปุ่ม Send หรือ Request ด้านบน',
-            style: TextStyle(
-              fontSize: 13,
-              color: Color(0xFF71717A),
-            ),
+            style: TextStyle(fontSize: 13, color: Color(0xFF71717A)),
           ),
         ],
       ),

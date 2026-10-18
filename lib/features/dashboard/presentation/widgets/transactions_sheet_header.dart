@@ -17,35 +17,25 @@ class TransactionsSheetHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final iconColor =
-        isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A);
+    final iconColor = isDark
+        ? const Color(0xFFA1A1AA)
+        : const Color(0xFF71717A);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton.ghost(
           density: ButtonDensity.icon,
-          icon: Icon(
-            LucideIcons.slidersHorizontal,
-            size: 18,
-            color: iconColor,
-          ),
+          icon: Icon(LucideIcons.slidersHorizontal, size: 18, color: iconColor),
           onPressed: onFilterPressed ?? () {},
         ),
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
         IconButton.ghost(
           density: ButtonDensity.icon,
-          icon: Icon(
-            LucideIcons.search,
-            size: 18,
-            color: iconColor,
-          ),
+          icon: Icon(LucideIcons.search, size: 18, color: iconColor),
           onPressed: onSearchPressed ?? () {},
         ),
       ],

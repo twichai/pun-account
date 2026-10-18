@@ -17,12 +17,14 @@ class DarkObsidianWalletCard extends StatelessWidget {
     this.onTap,
     this.onShowDetails,
     this.showActions = true,
+    this.height = 230.0,
   });
 
   final Wallet wallet;
   final VoidCallback? onTap;
   final VoidCallback? onShowDetails;
   final bool showActions;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class DarkObsidianWalletCard extends StatelessWidget {
         onTap: onTap,
         onShowDetails: onShowDetails,
         showActions: showActions,
+        height: height,
       );
     }
 
@@ -44,7 +47,7 @@ class DarkObsidianWalletCard extends StatelessWidget {
           // The Card itself with Aurora Mesh Background
           AuroraMeshBackground(
             wallet: wallet,
-            height: 235,
+            height: height,
             borderRadius: 24,
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),

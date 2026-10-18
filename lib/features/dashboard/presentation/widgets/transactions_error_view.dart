@@ -34,18 +34,12 @@ class TransactionsErrorView extends StatelessWidget {
           Expanded(
             child: Text(
               'ไม่สามารถโหลดรายการได้: $errorMessage',
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFFEF4444),
-              ),
+              style: const TextStyle(fontSize: 13, color: Color(0xFFEF4444)),
             ),
           ),
           IconButton.ghost(
             density: ButtonDensity.compact,
-            icon: const Icon(
-              LucideIcons.refreshCw,
-              size: 16,
-            ),
+            icon: const Icon(LucideIcons.refreshCw, size: 16),
             onPressed: onRetry,
           ),
         ],

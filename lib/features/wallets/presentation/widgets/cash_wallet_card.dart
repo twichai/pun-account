@@ -11,12 +11,14 @@ class CashWalletCard extends StatelessWidget {
     this.onTap,
     this.onShowDetails,
     this.showActions = true,
+    this.height = 230.0,
   });
 
   final Wallet wallet;
   final VoidCallback? onTap;
   final VoidCallback? onShowDetails;
   final bool showActions;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +29,10 @@ class CashWalletCard extends StatelessWidget {
         children: [
           AuroraMeshBackground(
             wallet: wallet,
-            height: 225,
+            height: height,
             borderRadius: 24,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
