@@ -11,11 +11,13 @@ class OverviewHeader extends ConsumerWidget {
     this.avatarUrl,
     this.onNotificationPressed,
     this.onProfilePressed,
+    this.onReloadPressed,
   });
 
   final String? avatarUrl;
   final VoidCallback? onNotificationPressed;
   final VoidCallback? onProfilePressed;
+  final VoidCallback? onReloadPressed;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,35 +94,40 @@ class OverviewHeader extends ConsumerWidget {
             ),
           ),
 
-          // Notification Bell Button with Red Dot Badge
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              IconButton.ghost(
-                density: ButtonDensity.icon,
-                icon: Icon(
-                  LucideIcons.bell,
-                  size: 20,
-                  color: isDark
-                      ? const Color(0xFFA1A1AA)
-                      : const Color(0xFF64748B),
-                ),
-                onPressed: onNotificationPressed ?? () {},
-              ),
-              Positioned(
-                top: 6,
-                right: 6,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFEF4444),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          // Actions: Optional Reload Button + Notification Bell with Red Dot Badge
+          // Row(
+          //   mainAxisSize: MainAxisSize.min,
+          //   children: [
+          //     Stack(
+          //       clipBehavior: Clip.none,
+          //       children: [
+          //         IconButton.ghost(
+          //           density: ButtonDensity.icon,
+          //           icon: Icon(
+          //             LucideIcons.bell,
+          //             size: 20,
+          //             color: isDark
+          //                 ? const Color(0xFFA1A1AA)
+          //                 : const Color(0xFF64748B),
+          //           ),
+          //           onPressed: onNotificationPressed ?? () {},
+          //         ),
+          //         Positioned(
+          //           top: 6,
+          //           right: 6,
+          //           child: Container(
+          //             width: 8,
+          //             height: 8,
+          //             decoration: const BoxDecoration(
+          //               color: Color(0xFFEF4444),
+          //               shape: BoxShape.circle,
+          //             ),
+          //           ),
+          //         ),
+          //       ],
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
