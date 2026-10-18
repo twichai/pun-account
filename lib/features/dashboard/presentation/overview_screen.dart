@@ -143,285 +143,285 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
       child: RefreshTrigger(
         key: _refreshTriggerKey,
         onRefresh: _reloadEverything,
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(
-            parent: BouncingScrollPhysics(),
-          ),
-          slivers: [
-            SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Top Header: Profile Avatar, Reload Button & Notification Bell
-                  OverviewHeader(
-                    onReloadPressed: _triggerReload,
-                    onProfilePressed: () {
-                      // Could navigate to profile or account sheet
-                    },
-                    onNotificationPressed: () {
-                      showToast(
-                        context: context,
-                        builder: (context, overlay) {
-                          return const SurfaceCard(
-                            child: Basic(
-                              leading: Icon(LucideIcons.bell, size: 20),
-                              title: Text('Notifications'),
-                              subtitle: Text(
-                                'No unread notifications at this time.',
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Top Header: Profile Avatar & Actions
+            OverviewHeader(
+              onReloadPressed: _triggerReload,
+              onProfilePressed: () {
+                // Could navigate to profile or account sheet
+              },
+              onNotificationPressed: () {
+                showToast(
+                  context: context,
+                  builder: (context, overlay) {
+                    return const SurfaceCard(
+                      child: Basic(
+                        leading: Icon(LucideIcons.bell, size: 20),
+                        title: Text('Notifications'),
+                        subtitle: Text('No unread notifications at this time.'),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
 
-                  // Total Balance Summary Header (Fixed at top)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            // Total Balance Summary Header (Fixed at top)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Balance',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isDark
+                              ? const Color(0xFF94A3B8)
+                              : const Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _formatAmount(totalBalance),
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (widget.onNavigateToWallets != null)
+                    GestureDetector(
+                      onTap: widget.onNavigateToWallets,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? const Color(0xFF1E293B)
+                              : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: isDark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFE2E8F0),
+                            width: 0.8,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Total Balance',
+                              'Cards',
                               style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
                                 color: isDark
                                     ? const Color(0xFF94A3B8)
                                     : const Color(0xFF64748B),
                               ),
                             ),
-                            const SizedBox(height: 2),
-                            Text(
-                              _formatAmount(totalBalance),
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: -0.5,
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF0F172A),
-                              ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              LucideIcons.chevronRight,
+                              size: 14,
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
                             ),
                           ],
                         ),
-                        if (widget.onNavigateToWallets != null)
-                          GestureDetector(
-                            onTap: widget.onNavigateToWallets,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? const Color(0xFF1E293B)
-                                    : const Color(0xFFF1F5F9),
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: isDark
-                                      ? const Color(0xFF334155)
-                                      : const Color(0xFFE2E8F0),
-                                  width: 0.8,
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    'Cards',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: isDark
-                                          ? const Color(0xFF94A3B8)
-                                          : const Color(0xFF64748B),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Icon(
-                                    LucideIcons.chevronRight,
-                                    size: 14,
-                                    color: isDark
-                                        ? const Color(0xFF94A3B8)
-                                        : const Color(0xFF64748B),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // Wallet Cards Carousel: PageView of wallet cards (wallet แต่ละใบ)
-                  SizedBox(
-                    height: 236,
-                    child: PageView.builder(
-                      key: const ValueKey('wallet_cards_pageview'),
-                      controller: _pageController,
-                      itemCount: displayWallets.length,
-                      onPageChanged: (index) {
-                        setState(() {
-                          _index = index;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        final wallet = displayWallets[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          child: DarkObsidianWalletCard(
-                            wallet: wallet,
-                            onTap: widget.onNavigateToWallets,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Pager-like DotIndicator syncing with the current wallet card
-                  Center(
-                    child: DotIndicator(
-                      index: safeIndex,
-                      length: displayWallets.length,
-                      onChanged: (index) {
-                        setState(() {
-                          _index = index;
-                        });
-                        _pageController.animateToPage(
-                          index,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Transactions Section Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Transactions',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF0F172A),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.primary.withValues(
-                                  alpha: 0.15,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Text(
-                                activeWallet.name,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.onAddTransaction != null)
-                              IconButton.ghost(
-                                density: ButtonDensity.compact,
-                                icon: const Icon(LucideIcons.plus, size: 18),
-                                onPressed: widget.onAddTransaction,
-                              ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
                 ],
               ),
             ),
 
-            // Transactions List: capped at 10 items for active wallet
-            if (transactionsState.isLoading)
-              const SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 36),
-                    child: CircularProgressIndicator(),
-                  ),
-                ),
-              )
-            else if (transactionsState.errorMessage != null)
-              SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 36),
-                    child: TransactionsErrorView(
-                      errorMessage: transactionsState.errorMessage!,
-                      onRetry: _triggerReload,
+            const SizedBox(height: 12),
+
+            // Wallet Cards Carousel: PageView of wallet cards (wallet แต่ละใบ)
+            SizedBox(
+              height: 236,
+              child: PageView.builder(
+                key: const ValueKey('wallet_cards_pageview'),
+                controller: _pageController,
+                itemCount: displayWallets.length,
+                onPageChanged: (index) {
+                  setState(() {
+                    _index = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  final wallet = displayWallets[index];
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: DarkObsidianWalletCard(
+                      wallet: wallet,
+                      onTap: widget.onNavigateToWallets,
                     ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            // Pager-like DotIndicator syncing with the current wallet card
+            Center(
+              child: DotIndicator(
+                index: safeIndex,
+                length: displayWallets.length,
+                onChanged: (index) {
+                  setState(() {
+                    _index = index;
+                  });
+                  _pageController.animateToPage(
+                    index,
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Transactions Section Header
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Transactions',
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: isDark
+                              ? Colors.white
+                              : const Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.15,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          activeWallet.name,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              )
-            else if (walletTransactions.isEmpty)
-              const SliverToBoxAdapter(
-                child: Center(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 36),
-                    child: TransactionsEmptyView(),
-                  ),
-                ),
-              )
-            else
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
-                sliver: SliverList.separated(
-                  itemCount: walletTransactions.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 10),
-                  itemBuilder: (context, i) {
-                    return TransactionRow(
-                      item: walletTransactions[i],
-                      onTap: () {
-                        SendRequestModal.show(
-                          context,
-                          mode: TransferMode.send,
-                          recipientName: walletTransactions[i].serviceName,
+                  if (widget.onAddTransaction != null)
+                    IconButton.ghost(
+                      density: ButtonDensity.compact,
+                      icon: const Icon(LucideIcons.plus, size: 18),
+                      onPressed: widget.onAddTransaction,
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Transactions List: capped at 10 items for active wallet
+            Expanded(
+              child: transactionsState.isLoading
+                  ? const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : transactionsState.errorMessage != null
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                            parent: BouncingScrollPhysics(),
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: TransactionsErrorView(
+                                errorMessage: transactionsState.errorMessage!,
+                                onRetry: _triggerReload,
+                              ),
+                            ),
+                          ),
                         );
                       },
-                    );
-                  },
-                ),
-              ),
+                    )
+                  : walletTransactions.isEmpty
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(
+                            parent: BouncingScrollPhysics(),
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: const Center(child: TransactionsEmptyView()),
+                          ),
+                        );
+                      },
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 100),
+                      physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics(),
+                      ),
+                      itemCount: walletTransactions.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 10),
+                      itemBuilder: (context, i) {
+                        return TransactionRow(
+                          item: walletTransactions[i],
+                          onTap: () {
+                            SendRequestModal.show(
+                              context,
+                              mode: TransferMode.send,
+                              recipientName: walletTransactions[i].serviceName,
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
           ],
         ),
       ),

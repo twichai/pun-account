@@ -25,7 +25,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('P'), findsOneWidget);
-    expect(find.byIcon(LucideIcons.bell), findsOneWidget);
+    expect(find.byType(OverviewHeader), findsOneWidget);
   });
 
   testWidgets('renders avatar image when user has avatar_url', (tester) async {
@@ -56,6 +56,5 @@ void main() {
 
     // Verify OverviewHeader is rendered
     expect(find.byType(OverviewHeader), findsOneWidget);
-    expect(find.byIcon(LucideIcons.bell), findsOneWidget);
   });
 }

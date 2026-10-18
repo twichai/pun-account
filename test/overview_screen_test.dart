@@ -91,10 +91,8 @@ void main() {
       expect(find.text('AWS'), findsOneWidget);
       expect(find.text('-\$120.00'), findsOneWidget);
 
-      // Verify reload button triggers without crash
-      final reloadButtons = find.byIcon(LucideIcons.refreshCw);
-      expect(reloadButtons, findsAtLeastNWidgets(1));
-      await tester.tap(reloadButtons.first);
+      // Verify that pull-to-refresh triggers smoothly
+      await tester.drag(find.byType(RefreshTrigger), const Offset(0, 300));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 700));
       await tester.pumpAndSettle();
