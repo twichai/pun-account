@@ -91,6 +91,25 @@ void main() {
       expect(find.text('AWS'), findsOneWidget);
       expect(find.text('-\$120.00'), findsOneWidget);
 
+      // Verify View more button exists and tapping navigates to SpendingScreen
+      final viewMoreBtn = find.byKey(
+        const ValueKey('transactions_view_more_button'),
+      );
+      expect(viewMoreBtn, findsOneWidget);
+      expect(find.text('View more'), findsOneWidget);
+
+      await tester.tap(viewMoreBtn);
+      await tester.pumpAndSettle();
+
+      // TransactionDetailsPage is pushed to navigation stack
+      expect(find.text('Transaction Details'), findsOneWidget);
+      expect(find.text('October 2026'), findsOneWidget);
+      expect(find.text('Category Breakdown'), findsOneWidget);
+
+      // Pop back to overview
+      await tester.tap(find.byIcon(LucideIcons.arrowLeft));
+      await tester.pumpAndSettle();
+
       // Verify that pull-to-refresh triggers smoothly
       await tester.drag(find.byType(RefreshTrigger), const Offset(0, 300));
       await tester.pump();

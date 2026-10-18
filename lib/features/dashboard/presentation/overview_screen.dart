@@ -7,11 +7,14 @@ import '../../transactions/presentation/send_request_modal.dart';
 import '../../wallets/domain/models/wallet.dart';
 import '../../wallets/presentation/providers/wallets_provider.dart';
 import '../../wallets/presentation/widgets/dark_obsidian_wallet_card.dart';
+import '../../../core/router/app_router.dart';
+import '../../transaction_details/transaction_details.dart';
 import 'widgets/overview_header.dart';
 import 'widgets/transaction_row.dart';
 import 'widgets/transactions_empty_view.dart';
 import 'widgets/transactions_error_view.dart';
 
+export '../../transaction_details/transaction_details.dart';
 export 'widgets/overview_header.dart';
 export 'widgets/overview_transactions_sheet.dart';
 export 'widgets/quick_actions_row.dart';
@@ -31,11 +34,13 @@ class OverviewScreen extends ConsumerStatefulWidget {
     this.onNavigateToWallets,
     this.onNavigateToServices,
     this.onAddTransaction,
+    this.onViewMore,
   });
 
   final VoidCallback? onNavigateToWallets;
   final VoidCallback? onNavigateToServices;
   final VoidCallback? onAddTransaction;
+  final VoidCallback? onViewMore;
 
   @override
   ConsumerState<OverviewScreen> createState() => _OverviewScreenState();
@@ -306,48 +311,114 @@ class _OverviewScreenState extends ConsumerState<OverviewScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Transactions',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
-                          color: isDark
-                              ? Colors.white
-                              : const Color(0xFF0F172A),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.15,
-                          ),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          activeWallet.name,
+                  Expanded(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Transactions',
                           style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.primary,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF0F172A),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  if (widget.onAddTransaction != null)
-                    IconButton.ghost(
-                      density: ButtonDensity.compact,
-                      icon: const Icon(LucideIcons.plus, size: 18),
-                      onPressed: widget.onAddTransaction,
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.colorScheme.primary.withValues(
+                                alpha: 0.15,
+                              ),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              activeWallet.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    key: const ValueKey('transactions_view_more_button'),
+                    onTap: () {
+                      if (widget.onViewMore != null) {
+                        widget.onViewMore!();
+                      } else {
+                        final router = GoRouter.maybeOf(context);
+                        if (router != null) {
+                          router.push(
+                            AppRoutes.transactionDetailsWithId(activeWallet.id),
+                          );
+                        } else {
+                          Navigator.of(context).push(
+                            ShadcnPageRoute(
+                              builder: (context) => TransactionDetailsPage(
+                                walletId: activeWallet.id,
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? const Color(0xFF1E293B)
+                            : const Color(0xFFF1F5F9),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isDark
+                              ? const Color(0xFF334155)
+                              : const Color(0xFFE2E8F0),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'View more',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? const Color(0xFF94A3B8)
+                                  : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            LucideIcons.chevronRight,
+                            size: 14,
+                            color: isDark
+                                ? const Color(0xFF94A3B8)
+                                : const Color(0xFF64748B),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

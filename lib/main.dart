@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'core/config/env_config.dart';
+import 'core/router/app_router.dart';
 import 'features/auth/controllers/auth_controller.dart';
 import 'features/auth/presentation/screens/sign_in_screen.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
@@ -40,26 +41,37 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final thaiTypography = Typography.geist(sans: GoogleFonts.notoSansThai());
+    final themeData = ThemeData(
+      colorScheme: ColorSchemes.lightSlate.yellow,
+      radius: 0.75,
+      typography: thaiTypography,
+    );
+    final darkThemeData = ThemeData.dark(
+      colorScheme: ColorSchemes.darkSlate.yellow,
+      radius: 0.75,
+      typography: thaiTypography,
+    );
 
     return ProviderScope(
       overrides: widget.overrides,
-      child: ShadcnApp(
-        title: 'Pun Account',
-        theme: ThemeData(
-          colorScheme: ColorSchemes.lightSlate.yellow,
-          radius: 0.75,
-          typography: thaiTypography,
-        ),
-        darkTheme: ThemeData.dark(
-          colorScheme: ColorSchemes.darkSlate.yellow,
-          radius: 0.75,
-          typography: thaiTypography,
-        ),
-        themeMode: _themeMode,
-        home:
-            widget.home ??
-            AuthGate(themeMode: _themeMode, onToggleTheme: _toggleTheme),
-      ),
+      child: widget.home != null
+          ? ShadcnApp(
+              title: 'Pun Account',
+              theme: themeData,
+              darkTheme: darkThemeData,
+              themeMode: _themeMode,
+              home: widget.home,
+            )
+          : ShadcnApp.router(
+              title: 'Pun Account',
+              theme: themeData,
+              darkTheme: darkThemeData,
+              themeMode: _themeMode,
+              routerConfig: createAppRouter(
+                themeMode: _themeMode,
+                onToggleTheme: _toggleTheme,
+              ),
+            ),
     );
   }
 }
