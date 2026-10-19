@@ -1,10 +1,11 @@
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import 'core/config/env_config.dart';
 import 'core/router/app_router.dart';
+import 'core/theme/theme_provider.dart';
 import 'features/auth/controllers/auth_controller.dart';
 import 'features/auth/presentation/screens/sign_in_screen.dart';
 import 'features/navigation/presentation/screens/main_navigation_screen.dart';
@@ -15,31 +16,31 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key, this.home, this.overrides = const []});
 
   final Widget? home;
   final List<Override> overrides;
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return ProviderScope(
+      overrides: overrides,
+      child: PunApp(home: home),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
-  ThemeMode _themeMode = ThemeMode.dark;
+class PunApp extends ConsumerWidget {
+  const PunApp({super.key, this.home});
 
-  void _toggleTheme() {
-    setState(() {
-      if (_themeMode == ThemeMode.dark) {
-        _themeMode = ThemeMode.light;
-      } else {
-        _themeMode = ThemeMode.dark;
-      }
-    });
-  }
+  final Widget? home;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final router = ref.watch(appRouterProvider);
+
     final thaiTypography = Typography.geist(sans: GoogleFonts.notoSansThai());
     final themeData = ThemeData(
       colorScheme: ColorSchemes.lightSlate.yellow,
@@ -52,30 +53,27 @@ class _MyAppState extends State<MyApp> {
       typography: thaiTypography,
     );
 
-    return ProviderScope(
-      overrides: widget.overrides,
-      child: widget.home != null
-          ? ShadcnApp(
-              title: 'Pun Account',
-              theme: themeData,
-              darkTheme: darkThemeData,
-              themeMode: _themeMode,
-              home: widget.home,
-            )
-          : ShadcnApp.router(
-              title: 'Pun Account',
-              theme: themeData,
-              darkTheme: darkThemeData,
-              themeMode: _themeMode,
-              routerConfig: createAppRouter(
-                themeMode: _themeMode,
-                onToggleTheme: _toggleTheme,
-              ),
-            ),
+    if (home != null) {
+      return ShadcnApp(
+        title: 'Pun Account',
+        theme: themeData,
+        darkTheme: darkThemeData,
+        themeMode: themeMode,
+        home: home,
+      );
+    }
+
+    return ShadcnApp.router(
+      title: 'Pun Account',
+      theme: themeData,
+      darkTheme: darkThemeData,
+      themeMode: themeMode,
+      routerConfig: router,
     );
   }
 }
 
+/// Kept for backwards compatibility if referenced directly
 class AuthGate extends ConsumerWidget {
   const AuthGate({
     super.key,

@@ -5,6 +5,7 @@ import 'package:pun_account/features/wallets/domain/models/wallet.dart';
 import 'package:pun_account/features/wallets/presentation/providers/wallets_provider.dart';
 import 'package:pun_account/main.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FakeWalletsNotifier extends WalletsNotifier {
   final List<Wallet> initialWallets;
@@ -31,6 +32,8 @@ void main() {
       tester.view.resetPhysicalSize();
       tester.view.resetDevicePixelRatio();
     });
+
+    SharedPreferences.setMockInitialValues({});
 
     // Pump default MyApp
     await tester.pumpWidget(const MyApp());

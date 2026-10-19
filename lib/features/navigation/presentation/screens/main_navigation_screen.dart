@@ -15,11 +15,13 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
   const MainNavigationScreen({
     super.key,
     this.title = 'Pun Account',
+    this.initialTab = 1,
     this.themeMode,
     this.onToggleTheme,
   });
 
   final String title;
+  final int initialTab;
   final ThemeMode? themeMode;
   final VoidCallback? onToggleTheme;
 
@@ -29,14 +31,22 @@ class MainNavigationScreen extends ConsumerStatefulWidget {
 }
 
 class _MainNavigationScreenState extends ConsumerState<MainNavigationScreen> {
-  // Default to Tab 1 (Home)
   late final PageController _pageController;
-  Key? _selected = const ValueKey(1);
+  late Key? _selected;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1);
+    _pageController = PageController(initialPage: widget.initialTab);
+    _selected = ValueKey(widget.initialTab);
+  }
+
+  @override
+  void didUpdateWidget(MainNavigationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialTab != widget.initialTab) {
+      _goToPage(widget.initialTab);
+    }
   }
 
   @override

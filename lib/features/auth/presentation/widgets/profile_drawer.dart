@@ -67,7 +67,7 @@ class ProfileDrawer extends ConsumerWidget {
       // Ensure root navigation to home (AuthGate will show SignInScreen)
       if (context.mounted) {
         try {
-          context.go(AppRoutes.home);
+          context.go(AppRoutes.signIn);
         } catch (_) {}
 
         showToast(

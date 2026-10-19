@@ -8,7 +8,7 @@ import '../data/auth_repository.dart';
 import '../data/google_auth_service.dart';
 import '../models/user_model.dart';
 
-enum AuthStatus { unauthenticated, authenticating, authenticated, error }
+enum AuthStatus { initial, unauthenticated, authenticating, authenticated, error }
 
 class AuthState {
   const AuthState({required this.status, this.session, this.errorMessage});
@@ -17,6 +17,7 @@ class AuthState {
   final AuthSession? session;
   final String? errorMessage;
 
+  bool get isInitial => status == AuthStatus.initial;
   bool get isAuthenticated =>
       status == AuthStatus.authenticated && session != null;
   bool get isLoading => status == AuthStatus.authenticating;
@@ -44,27 +45,32 @@ class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
     Future.microtask(() => _restoreSession());
-    return const AuthState(status: AuthStatus.unauthenticated);
+    return const AuthState(status: AuthStatus.initial);
   }
 
   /// Restore saved session from persistent storage on startup
   Future<void> _restoreSession() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!ref.mounted) return;
       final sessionJson = prefs.getString(_sessionKey);
       if (sessionJson != null && sessionJson.isNotEmpty) {
-        final Map<String, dynamic> data = jsonDecode(sessionJson);
-        final session = AuthSession.fromJson(data);
-        if (session.token.isNotEmpty) {
-          ref.read(apiClientProvider).setAuthToken(session.token);
-          state = AuthState(status: AuthStatus.authenticated, session: session);
+        try {
+          final Map<String, dynamic> data = jsonDecode(sessionJson);
+          final session = AuthSession.fromJson(data);
+          if (session.token.isNotEmpty) {
+            ref.read(apiClientProvider).setAuthToken(session.token);
+            if (!ref.mounted) return;
+            state = AuthState(status: AuthStatus.authenticated, session: session);
+            return;
+          }
+        } catch (_) {
+          await prefs.remove(_sessionKey);
         }
       }
-    } catch (_) {
-      // If corrupted, clean up saved key
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_sessionKey);
-    }
+    } catch (_) {}
+    if (!ref.mounted) return;
+    state = const AuthState(status: AuthStatus.unauthenticated);
   }
 
   Future<void> _saveSession(AuthSession session) async {
