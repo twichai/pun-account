@@ -16,4 +16,3 @@ class GoogleLogo extends StatelessWidget {
     );
   }
 }
-
