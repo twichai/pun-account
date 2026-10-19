@@ -164,16 +164,21 @@ class ApiServicesRepository implements ServicesRepository {
       trackName = cat['name'] as String?;
     }
 
+    final rawIcon = map['icon'] as String? ?? '';
+    final iconProvider = map['icon_provider'] as String? ?? 'simple-icons';
+
     return ServiceCategoryItem(
       id: map['id'] as String? ?? '',
       name: map['name'] as String? ?? '',
       accountNumber: map['account_number'] as String? ?? '',
-      icon: _mapIcon(map['icon'] as String?),
+      icon: _mapIcon(rawIcon),
       color: _mapColor(map['color'] as String?),
       badge: map['badge'] as String?,
       imageUrl: map['image_url'] as String?,
       serviceCategoryId: trackKey,
       categoryTrack: trackName,
+      iconProvider: iconProvider,
+      rawIcon: rawIcon,
       isQuick: map['is_quick'] as bool? ?? false,
       isMyAccount: true,
     );
@@ -182,50 +187,116 @@ class ApiServicesRepository implements ServicesRepository {
   static IconData _mapIcon(String? iconName) {
     switch (iconName?.toLowerCase()) {
       case 'video':
+      case 'runway':
+      case 'kling':
+      case 'capcut':
+      case 'tiktok':
         return LucideIcons.video;
       case 'palette':
+      case 'figma':
+      case 'framer':
+      case 'freepik':
+      case 'icons8':
+      case 'canva':
         return LucideIcons.palette;
       case 'sparkles':
+      case 'openai':
+      case 'chatgpt':
+      case 'claude':
+      case 'anthropic':
+      case 'googlegemini':
+      case 'gemini':
+      case 'perplexity':
+      case 'midjourney':
+      case 'leonardo':
         return LucideIcons.sparkles;
       case 'music':
+      case 'spotify':
+      case 'applemusic':
+      case 'youtubemusic':
+      case 'epidemicsound':
+      case 'artlist':
+      case 'soundstripe':
+      case 'elevenlabs':
         return LucideIcons.music;
       case 'code':
+      case 'github':
+      case 'gitlab':
+      case 'npm':
+      case 'sentry':
         return LucideIcons.code;
       case 'cloud':
+      case 'googledrive':
+      case 'googlecloud':
+      case 'dropbox':
+      case 'onedrive':
+      case 'icloud':
+      case 'cloudflare':
+      case 'digitalocean':
+      case 'aws':
         return LucideIcons.cloud;
       case 'laptop':
+      case 'apple':
         return LucideIcons.laptop;
       case 'database':
+      case 'neon':
+      case 'supabase':
+      case 'firebase':
         return LucideIcons.database;
       case 'triangle':
+      case 'vercel':
         return LucideIcons.triangle;
       case 'layers':
+      case 'envato':
+      case 'docker':
         return LucideIcons.layers;
       case 'play':
       case 'play-circle':
+      case 'youtube':
+      case 'googleplay':
         return LucideIcons.play;
       case 'book-open':
+      case 'oreilly':
         return LucideIcons.bookOpen;
       case 'shopping-bag':
       case 'shopping-cart':
       case 'store':
+      case 'shopee':
+      case 'lazada':
+      case 'amazon':
+      case 'gumroad':
         return LucideIcons.shoppingBag;
       case 'share-2':
       case 'share':
+      case 'facebook':
+      case 'instagram':
+      case 'x':
+      case 'linktree':
+      case 'beacons':
         return LucideIcons.share2;
       case 'smartphone':
         return LucideIcons.smartphone;
       case 'graduation-cap':
+      case 'udemy':
+      case 'coursera':
+      case 'skillshare':
+      case 'pluralsight':
         return LucideIcons.graduationCap;
       case 'hard-drive':
+      case 'backblaze':
         return LucideIcons.hardDrive;
       case 'server':
+      case 'hostinger':
+      case 'railway':
+      case 'render':
         return LucideIcons.server;
       case 'camera':
         return LucideIcons.camera;
       case 'heart':
+      case 'kofi':
         return LucideIcons.heart;
       case 'users':
+      case 'patreon':
         return LucideIcons.users;
       case 'bot':
         return LucideIcons.bot;

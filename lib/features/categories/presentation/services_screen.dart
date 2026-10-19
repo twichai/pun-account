@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
 import '../../../core/animations/grid_wave_animation.dart';
@@ -377,7 +378,24 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                             ),
                           ),
                         )
-                      : Icon(service.icon, size: 28, color: Colors.white),
+                      : service.simpleIconUrl != null
+                          ? SvgPicture.network(
+                              service.simpleIconUrl!,
+                              width: 28,
+                              height: 28,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
+                              placeholderBuilder: (context) => Icon(
+                                service.icon,
+                                size: 28,
+                                color: Colors.white,
+                              ),
+                              errorBuilder: (context, error, stackTrace) =>
+                                  Icon(service.icon, size: 28, color: Colors.white),
+                            )
+                          : Icon(service.icon, size: 28, color: Colors.white),
                 ),
               ],
             ),
@@ -465,7 +483,21 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                             Icon(item.icon, size: 20, color: item.color),
                       ),
                     )
-                  : Icon(item.icon, size: 20, color: item.color),
+                  : item.simpleIconUrl != null
+                      ? SvgPicture.network(
+                          item.simpleIconUrl!,
+                          width: 20,
+                          height: 20,
+                          colorFilter: ColorFilter.mode(
+                            item.color,
+                            BlendMode.srcIn,
+                          ),
+                          placeholderBuilder: (context) =>
+                              Icon(item.icon, size: 20, color: item.color),
+                          errorBuilder: (context, error, stackTrace) =>
+                              Icon(item.icon, size: 20, color: item.color),
+                        )
+                      : Icon(item.icon, size: 20, color: item.color),
             ),
             const SizedBox(width: 14),
 

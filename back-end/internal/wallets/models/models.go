@@ -244,6 +244,7 @@ type Service struct {
 	Provider          *string          `gorm:"type:varchar(100)" json:"provider,omitempty"`
 	AccountNumber     *string          `gorm:"type:varchar(100)" json:"account_number,omitempty"`
 	Icon              *string          `gorm:"type:varchar(100)" json:"icon,omitempty"`
+	IconProvider      string           `gorm:"type:varchar(50);default:simple-icons;not null" json:"icon_provider"`
 	Color             *string          `gorm:"type:varchar(50)" json:"color,omitempty"`
 	ImageURL          *string          `gorm:"type:text" json:"image_url,omitempty"`
 	Badge             *string          `gorm:"type:varchar(50)" json:"badge,omitempty"`
