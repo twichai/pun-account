@@ -25,7 +25,9 @@ abstract class ServiceCategoryItem with _$ServiceCategoryItem {
 extension ServiceCategoryItemX on ServiceCategoryItem {
   /// Builds the Simple Icons CDN URL if iconProvider is 'simple-icons'
   String? get simpleIconUrl {
-    if (iconProvider == 'simple-icons' && rawIcon != null && rawIcon!.isNotEmpty) {
+    if (iconProvider == 'simple-icons' &&
+        rawIcon != null &&
+        rawIcon!.isNotEmpty) {
       return 'https://cdn.simpleicons.org/$rawIcon';
     }
     return null;

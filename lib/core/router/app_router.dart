@@ -30,10 +30,7 @@ abstract class AppRoutes {
 /// RouterNotifier handles reactive routing based on authentication state
 class RouterNotifier extends ChangeNotifier {
   RouterNotifier(this._ref) {
-    _ref.listen<AuthState>(
-      authProvider,
-      (previous, next) => notifyListeners(),
-    );
+    _ref.listen<AuthState>(authProvider, (previous, next) => notifyListeners());
   }
 
   final Ref _ref;
@@ -88,7 +85,8 @@ GoRouter createAppRouter({
         builder: (context, state) => Consumer(
           builder: (context, ref, child) {
             return SignInScreen(
-              onToggleTheme: onToggleTheme ??
+              onToggleTheme:
+                  onToggleTheme ??
                   () => ref.read(themeModeProvider.notifier).toggle(),
             );
           },
@@ -104,7 +102,8 @@ GoRouter createAppRouter({
                 title: 'Pun Account',
                 initialTab: 1,
                 themeMode: themeMode,
-                onToggleTheme: onToggleTheme ??
+                onToggleTheme:
+                    onToggleTheme ??
                     () => ref.read(themeModeProvider.notifier).toggle(),
               );
             },
@@ -119,7 +118,8 @@ GoRouter createAppRouter({
               title: 'Pun Account',
               initialTab: 0,
               themeMode: themeMode,
-              onToggleTheme: onToggleTheme ??
+              onToggleTheme:
+                  onToggleTheme ??
                   () => ref.read(themeModeProvider.notifier).toggle(),
             );
           },
@@ -133,7 +133,8 @@ GoRouter createAppRouter({
               title: 'Pun Account',
               initialTab: 2,
               themeMode: themeMode,
-              onToggleTheme: onToggleTheme ??
+              onToggleTheme:
+                  onToggleTheme ??
                   () => ref.read(themeModeProvider.notifier).toggle(),
             );
           },
@@ -144,7 +145,8 @@ GoRouter createAppRouter({
         builder: (context, state) => Consumer(
           builder: (context, ref, child) {
             return BusinessScreen(
-              onToggleTheme: onToggleTheme ??
+              onToggleTheme:
+                  onToggleTheme ??
                   () => ref.read(themeModeProvider.notifier).toggle(),
             );
           },

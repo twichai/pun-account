@@ -8,7 +8,13 @@ import '../data/auth_repository.dart';
 import '../data/google_auth_service.dart';
 import '../models/user_model.dart';
 
-enum AuthStatus { initial, unauthenticated, authenticating, authenticated, error }
+enum AuthStatus {
+  initial,
+  unauthenticated,
+  authenticating,
+  authenticated,
+  error,
+}
 
 class AuthState {
   const AuthState({required this.status, this.session, this.errorMessage});
@@ -61,7 +67,10 @@ class AuthNotifier extends Notifier<AuthState> {
           if (session.token.isNotEmpty) {
             ref.read(apiClientProvider).setAuthToken(session.token);
             if (!ref.mounted) return;
-            state = AuthState(status: AuthStatus.authenticated, session: session);
+            state = AuthState(
+              status: AuthStatus.authenticated,
+              session: session,
+            );
             return;
           }
         } catch (_) {

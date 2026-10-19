@@ -27,8 +27,9 @@ class OverviewHeader extends ConsumerWidget {
 
     final user = ref.watch(authProvider).session?.user;
     final effectiveAvatarUrl = avatarUrl ?? user?.avatarUrl;
-    final initialLetter =
-        (user?.name.isNotEmpty == true) ? user!.name[0].toUpperCase() : 'P';
+    final initialLetter = (user?.name.isNotEmpty == true)
+        ? user!.name[0].toUpperCase()
+        : 'P';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
@@ -45,59 +46,61 @@ class OverviewHeader extends ConsumerWidget {
                 child: Container(
                   width: 44,
                   height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isDark
-                    ? const Color(0xFF1E293B)
-                    : const Color(0xFFE2E8F0),
-                border: Border.all(
-                  color: isDark
-                      ? const Color(0xFF334155)
-                      : const Color(0xFFCBD5E1),
-                  width: 1.5,
-                ),
-              ),
-              alignment: Alignment.center,
-              child: effectiveAvatarUrl != null && effectiveAvatarUrl.isNotEmpty
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(22),
-                      child: CachedNetworkImage(
-                        imageUrl: effectiveAvatarUrl,
-                        width: 44,
-                        height: 44,
-                        fit: BoxFit.cover,
-                        errorWidget: (context, url, err) => Center(
-                          child: Text(
-                            initialLetter,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        placeholder: (context, url) => Center(
-                          child: Text(
-                            initialLetter,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  : Center(
-                      child: Text(
-                        initialLetter,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDark
+                        ? const Color(0xFF1E293B)
+                        : const Color(0xFFE2E8F0),
+                    border: Border.all(
+                      color: isDark
+                          ? const Color(0xFF334155)
+                          : const Color(0xFFCBD5E1),
+                      width: 1.5,
                     ),
+                  ),
+                  alignment: Alignment.center,
+                  child:
+                      effectiveAvatarUrl != null &&
+                          effectiveAvatarUrl.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(22),
+                          child: CachedNetworkImage(
+                            imageUrl: effectiveAvatarUrl,
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.cover,
+                            errorWidget: (context, url, err) => Center(
+                              child: Text(
+                                initialLetter,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            placeholder: (context, url) => Center(
+                              child: Text(
+                                initialLetter,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Text(
+                            initialLetter,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ),
               ),
             ),

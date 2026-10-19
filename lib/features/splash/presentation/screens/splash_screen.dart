@@ -68,8 +68,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     final bgColor = isDark ? const Color(0xFF090D16) : const Color(0xFFF8FAFC);
     final cardBg = isDark ? const Color(0xFF131B2E) : Colors.white;
-    final borderColor = isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0);
-    final textMuted = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final borderColor = isDark
+        ? const Color(0xFF1E293B)
+        : const Color(0xFFE2E8F0);
+    final textMuted = isDark
+        ? const Color(0xFF94A3B8)
+        : const Color(0xFF64748B);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -93,10 +97,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: cardBg,
-                            border: Border.all(
-                              color: borderColor,
-                              width: 2,
-                            ),
+                            border: Border.all(color: borderColor, width: 2),
                             boxShadow: [
                               BoxShadow(
                                 color: const Color(0xFFF59E0B)
@@ -151,7 +152,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         width: 48,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.2,
+                          ),
                           borderRadius: BorderRadius.circular(2),
                         ),
                         child: FractionallySizedBox(
