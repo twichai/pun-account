@@ -36,7 +36,17 @@ class WalletsNotifier extends Notifier<WalletsState> {
 
   @override
   WalletsState build() {
-    final authState = ref.watch(authProvider);
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.isAuthenticated &&
+          next.session?.user.businessId != null &&
+          next.session!.user.businessId!.isNotEmpty) {
+        fetchWallets(businessId: next.session!.user.businessId);
+      } else if (previous?.isAuthenticated == true && !next.isAuthenticated) {
+        state = const WalletsState();
+      }
+    });
+
+    final authState = ref.read(authProvider);
     final businessId = authState.session?.user.businessId;
 
     if (authState.isAuthenticated &&

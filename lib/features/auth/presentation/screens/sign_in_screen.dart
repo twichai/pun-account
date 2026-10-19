@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../controllers/auth_controller.dart';
 import '../widgets/google_logo.dart';
 
@@ -54,6 +55,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
       if (success && mounted) {
         widget.onSignInSuccess?.call();
+        context.go(AppRoutes.home);
       }
       return;
     }
@@ -64,6 +66,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         .signInWithGoogleAccount();
     if (success && mounted) {
       widget.onSignInSuccess?.call();
+      context.go(AppRoutes.home);
     }
   }
 
@@ -71,6 +74,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     final success = await ref.read(authProvider.notifier).signInDemo(preset);
     if (success && mounted) {
       widget.onSignInSuccess?.call();
+      context.go(AppRoutes.home);
     }
   }
 

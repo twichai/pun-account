@@ -19,9 +19,7 @@ class ProfileDrawer extends ConsumerWidget {
       DrawerConfiguration(
         position: OverlayPosition.bottom,
         showDragHandle: true,
-        constraints: BoxConstraints(
-          maxHeight: screenHeight * 0.85,
-        ),
+        constraints: BoxConstraints(maxHeight: screenHeight * 0.85),
       ),
       builder: (context) => const ProfileDrawer(),
     ).future;
@@ -67,7 +65,7 @@ class ProfileDrawer extends ConsumerWidget {
       // Ensure root navigation to home (AuthGate will show SignInScreen)
       if (context.mounted) {
         try {
-          context.go(AppRoutes.home);
+          context.go(AppRoutes.signIn);
         } catch (_) {}
 
         showToast(
@@ -94,13 +92,19 @@ class ProfileDrawer extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState.session?.user;
 
-    final displayName = user?.name.isNotEmpty == true ? user!.name : 'Solopreneur';
-    final email = user?.email.isNotEmpty == true ? user!.email : 'solopreneur@pun.app';
+    final displayName = user?.name.isNotEmpty == true
+        ? user!.name
+        : 'Solopreneur';
+    final email = user?.email.isNotEmpty == true
+        ? user!.email
+        : 'solopreneur@pun.app';
     final avatarUrl = user?.avatarUrl;
     final businessName = user?.businessName?.isNotEmpty == true
         ? user!.businessName!
         : 'One-Person Company';
-    final initialLetter = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'P';
+    final initialLetter = displayName.isNotEmpty
+        ? displayName[0].toUpperCase()
+        : 'P';
 
     return Center(
       heightFactor: 1.0,
@@ -151,14 +155,14 @@ class ProfileDrawer extends ConsumerWidget {
                               ? const Color(0xFF1E293B)
                               : const Color(0xFFE2E8F0),
                           border: Border.all(
-                            color: const Color(0xFFEAB308).withValues(alpha: 0.6),
+                            color: const Color(0xFFEAB308)
+                                .withValues(alpha: 0.6),
                             width: 2.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFFEAB308).withValues(
-                                alpha: isDark ? 0.2 : 0.1,
-                              ),
+                              color: const Color(0xFFEAB308)
+                                  .withValues(alpha: isDark ? 0.2 : 0.1),
                               blurRadius: 16,
                               spreadRadius: 2,
                             ),
@@ -231,10 +235,12 @@ class ProfileDrawer extends ConsumerWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEAB308).withValues(alpha: 0.15),
+                          color: const Color(0xFFEAB308)
+                              .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                            color: const Color(0xFFEAB308).withValues(alpha: 0.3),
+                            color: const Color(0xFFEAB308)
+                                .withValues(alpha: 0.3),
                           ),
                         ),
                         child: Row(
@@ -357,17 +363,16 @@ class ProfileDrawer extends ConsumerWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                color: isDark
+                    ? const Color(0xFF94A3B8)
+                    : const Color(0xFF64748B),
               ),
             ),
           ],
         ),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
         ),
       ],
     );
