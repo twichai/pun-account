@@ -40,10 +40,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify SignInScreen is rendered with branding and Google auth button
-    expect(find.text('Welcome to Pun (ปั้น)'), findsOneWidget);
-    expect(find.text('Sign in with Google'), findsOneWidget);
-    expect(find.text('Alex Maker'), findsOneWidget);
-    expect(find.text('Sarah Design'), findsOneWidget);
+    expect(find.text('Pun Account'), findsOneWidget);
+    expect(find.text('Continue with Google'), findsOneWidget);
   });
 
   testWidgets('MainNavigationScreen smoke and navigation test', (tester) async {
